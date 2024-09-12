@@ -1,0 +1,36 @@
+from typing import Union
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = ["http://localhost:5173", "localhost:5173"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/list_games")
+def list_games():
+    return [
+        {"id": 1, "name": "Game 1"},
+        {"id": 2, "name": "Game 2"},
+        {"id": 3, "name": "Game 3"},
+        {"id": 3, "name": "carade"},
+    ]
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Union[str, None] = None):
+    return {"item_id": item_id, "q": q}
