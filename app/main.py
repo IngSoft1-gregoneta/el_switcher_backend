@@ -1,7 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI, HTTPException, status
-from room import rooms, room_model
+from room import rooms
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
