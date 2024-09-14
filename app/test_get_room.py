@@ -69,6 +69,7 @@ def test_same_name():
     room_name2 = "Room 1"
     players_expected2 = 2
 
+    # rooms now have extra data
     new_room_data1 = {
         "room_name": room_name1,
         "players_expected": players_expected1
@@ -96,3 +97,10 @@ def test_same_name():
     assert rooms_data[-2]['players_expected'] == players_expected1
     assert rooms_data[-1]['room_name'] == room_name2
     assert rooms_data[-1]['players_expected'] == players_expected2
+
+def test_large_get():
+    response = client.get("rooms")
+    assert response.status_code == status.HTTP_200_OK
+
+    rooms_data = response.json()
+    assert rooms_data == rooms.ROOMS
