@@ -18,17 +18,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# endpoint for room join request 
+# endpoint for join room
 @app.put("/rooms/join/")
 def join_room_endpoint(room_id: int, player_name: str):
     try:
         room = rooms.get_room_by_id(room_id)
 
-        if room == None:
+        if room is None:
             return {"message": "Room not found"}
 
         if len(room["players"]) == room["players_expected"]:
             return {"message": "Room is full"}
+        
+        if player_name in room["players"]:
+            return {"message": "The name already exists, choose another"}
         
         room["players"].append(player_name)
         return {"message": f"The player {player_name} has joined the room {room_id}"}
