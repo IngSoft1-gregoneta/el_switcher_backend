@@ -26,6 +26,9 @@ app.add_middleware(
           response_model=room_model.RoomOut,
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
+    for room in rooms.ROOMS:
+        if room["room_name"] == new_room.room_name:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
     try:
         last_id = rooms.ROOMS[-1]['room_id'] if rooms.ROOMS else 0
         new_id = last_id + 1
@@ -49,4 +52,3 @@ async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
 curl -X POST "http://localhost:8000/rooms/" -H "accept: application/json" -H "Content-Type: application/json" -w "\n" -i -d "{\"room_name\":\"Room2\",\"players_expected\":2}"
 
 """
-
