@@ -1,7 +1,10 @@
-from typing import Union
-
-from fastapi import FastAPI
+# FastApi
+from fastapi import FastAPI, HTTPException, status
+# Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
+# data, methods and classes of a room
+from room import rooms
+from typing import Optional
 
 app = FastAPI()
 
@@ -15,22 +18,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# endpoint for room join request 
+@app.put("/rooms/randomize/")
+def sort_players_randomly_endpoint(room_id: int):
+    try:
+        
+        room = rooms.get_room_by_id(room_id)
+        
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+        if room == None:    
+            return {"message": "Room not found"}
+        
+        
+        rooms.sort_players(room)
+        return {"message": "Players sorted succesfuly"}
+        
 
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
-@app.get("/list_games")
-def list_games():
-    return [
-        {"id": 1, "name": "Game 1"},
-        {"id": 2, "name": "Game 2"},
-        {"id": 3, "name": "Game 3"},
-        {"id": 3, "name": "carade"},
-    ]
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
