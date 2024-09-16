@@ -3,7 +3,8 @@ from typing import List
 from tile_model import Tile
 
 class Board:
-    def __init__(self):
+    def __init__(self, game_id):
+        self.game_id: int = game_id
         self.tiles: List[Tile] = self._crear_fichas()
 
     def _crear_fichas(self) -> List[Tile]:
@@ -24,10 +25,12 @@ class Board:
          tiles.append(tile)
         return tiles
 
-    def print_tiles(self):
+    # for debug
+    def print_board(self):
+        print(f"board:\ngame id: {self.game_id}")
         for tile in self.tiles:
             print(tile)
 
 # Create a board instance and print files
-board = Board()
-board.print_tiles()
+# board = Board(game_id=1)
+# board.print_board()
