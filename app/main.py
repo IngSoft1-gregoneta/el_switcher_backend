@@ -78,3 +78,22 @@ def join_room_endpoint(room_id: int, player_name: str):
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+
+# endpoint for room join request 
+@app.put("/rooms/leave/")
+def leave_room_endpoint(room_id: int, player_name: str):
+    try:
+        room = rooms.get_room_by_id(room_id)
+
+        if room == None:
+            return {"message": "Room not found"}
+
+        if not(player_name in room["players"]):
+            return {"message": "There is not such a player"}
+        
+        room["players"].remove(player_name)
+        return {"message": f"The player {player_name} has left the room {room_id}"}
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")    
