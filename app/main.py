@@ -1,7 +1,13 @@
+# FastApi
 from fastapi import FastAPI, HTTPException, status
+# Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
-from mov_card import MovType, MovCard
-
+# data, methods and classes of a room
+from room import rooms, room_model
+# Date
+from datetime import datetime
+# Default query parameters
+from typing import Optional
 app = FastAPI()
 
 origins = ["http://localhost:5173", "localhost:5173"]
@@ -14,35 +20,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# lista de cartas de movimiento
-mov_cards = []
+# Define endline to create a new room
+@app.post("/rooms/",
+          response_model=room_model.RoomOut,
+          status_code=status.HTTP_201_CREATED)
+async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
+    for room in rooms.ROOMS:
+        if room["room_name"] == new_room.room_name:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
+    try:
+        last_id = rooms.ROOMS[-1]['room_id'] if rooms.ROOMS else 0
+        new_id = last_id + 1
 
-# endpoint for get movements
-@app.get("/matchs/{match_id}/mov_cards")
-# funcion para obtener las cartas de movimiento
-def get_mov_cards(match_id: int):
-    # devolver una lista de cartas de movimiento que esten en la partida x
-    cards = [card for card in mov_cards if card.game_id == match_id] 
-    
-    if not cards:
-        return {"message": "Cards not found"}
-      
-    return [card.print_mov_card() for card in cards]
+        # Create a new room dict
+        room_dict = {
+            "room_id": new_id,
+            "room_name": new_room.room_name,
+            "players_expected": new_room.players_expected,
+            "players": [],
+            "is_active": True,
+        }
 
+        rooms.ROOMS.append(room_dict)
 
-# funcion para agregar una carta de movimiento a la lista de cartas
-@app.post("/matchs/{match_id}/mov_cards")
-def add_mov_card(match_id: int, player_name: str, mov_type: MovType):
-    if not isinstance(mov_type, MovType):
-        raise HTTPException(status_code=400, detail="Invalid movement type")
-        
-    new_card = MovCard(match_id, player_name, mov_type)
-    mov_cards.append(new_card)
-    return {"message": "Card added successfully"}
+        return room_model.RoomOut(**room_dict)
+    except Exception as e:
+        print(f"Error: {e}")  # Debug error
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+"""
+curl -X POST "http://localhost:8000/rooms/" -H "accept: application/json" -H "Content-Type: application/json" -w "\n" -i -d "{\"room_name\":\"Room2\",\"players_expected\":2}"
 
-
-    
-    
-    
-    
-
+"""
