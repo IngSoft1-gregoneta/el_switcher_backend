@@ -1,10 +1,6 @@
-# FastApi
 from fastapi import FastAPI, HTTPException, status
-# Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
-# data, methods and classes of a room
-from room import rooms
-from typing import Optional
+from mov_card import MovType, MovCard
 
 app = FastAPI()
 
@@ -18,25 +14,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# endpoint for join room
-@app.put("/rooms/join/")
-def join_room_endpoint(room_id: int, player_name: str):
-    try:
-        room = rooms.get_room_by_id(room_id)
+# lista de cartas de movimiento
+mov_cards = []
 
-        if room is None:
-            return {"message": "Room not found"}
-
-        if len(room["players"]) == room["players_expected"]:
-            return {"message": "Room is full"}
-        
-        if player_name in room["players"]:
-            return {"message": "The name already exists, choose another"}
-        
-        room["players"].append(player_name)
-        return {"message": f"The player {player_name} has joined the room {room_id}"}
+# endpoint for get movements
+@app.get("/matchs/{match_id}/mov_cards")
+# funcion para obtener las cartas de movimiento
+def get_mov_cards(match_id: int):
+    # devolver una lista de cartas de movimiento que esten en la partida x
+    cards = [card for card in mov_cards if card.game_id == match_id] 
     
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    if not cards:
+        return {"message": "Cards not found"}
+      
+    return [card.print_mov_card() for card in cards]
+
+
+# funcion para agregar una carta de movimiento a la lista de cartas
+@app.post("/matchs/{match_id}/mov_cards")
+def add_mov_card(match_id: int, player_name: str, mov_type: MovType):
+    if not isinstance(mov_type, MovType):
+        raise HTTPException(status_code=400, detail="Invalid movement type")
+        
+    new_card = MovCard(match_id, player_name, mov_type)
+    mov_cards.append(new_card)
+    return {"message": "Card added successfully"}
+
+
+    
+    
+    
+    
 
