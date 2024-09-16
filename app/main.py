@@ -42,11 +42,15 @@ async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
         }
 
         rooms.ROOMS.append(room_dict)
+        
+        await manager.broadcast("Game created")
 
         return room_model.RoomOut(**room_dict)
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+
+
 """
 curl -X POST "http://localhost:8000/rooms/" -H "accept: application/json" -H "Content-Type: application/json" -w "\n" -i -d "{\"room_name\":\"Room2\",\"players_expected\":2}"
 
