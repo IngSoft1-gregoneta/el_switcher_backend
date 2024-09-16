@@ -1,14 +1,15 @@
 import random
 from typing import List
-from tile_model import Tile
+from tile import Tile, TileColor
 
 class Board:
-    def __init__(self):
-        self.tiles: List[Tile] = self._crear_fichas()
+    def __init__(self, game_id):
+        self.game_id: int = game_id
+        self.tiles: List[Tile] = self._create_tiles()
 
-    def _crear_fichas(self) -> List[Tile]:
+    def _create_tiles(self) -> List[Tile]:
         # Define colorsand create list of 9 tiles for each color
-        colors = ['red', 'yellow', 'green', 'blue']
+        colors = [TileColor.RED, TileColor.YELLOW, TileColor.GREEN, TileColor.BLUE]
         color_list = colors * 9
                 
         # Create tiles in random pos
@@ -24,10 +25,16 @@ class Board:
          tiles.append(tile)
         return tiles
 
-    def print_tiles(self):
+    # for debug
+    def print_board(self):
+        print(f"board:\ngame id: {self.game_id}")
         for tile in self.tiles:
-            print(tile)
-
+            tile.print_tile()
 # Create a board instance and print files
-board = Board()
-board.print_tiles()
+"""
+try:
+    board = Board(game_id=1)
+    board.print_board()
+except ValueError as e:
+    print(f"Error: {e}")
+"""
