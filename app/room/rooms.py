@@ -1,5 +1,4 @@
-# rooms.py
+# Module dedicated to storing models
 
-# Rooms list
-ROOMS = [
-]
+# List that stores rooms
+ROOMS = []
