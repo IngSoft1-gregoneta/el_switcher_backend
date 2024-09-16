@@ -39,12 +39,12 @@ try:
     )
     for i in range(3):
         player.mov_cards.append(MovCard(game_id=1, player_name="Player1", mov_type=random.choice(list(MovType))))
+    white_figs = list(FigType)[:7]
+    blue_figs = list(FigType)[7:]
+
     for i in range(12):
-        player.fig_cards.append(FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=FigType.QUAD))
-    print(f"game id: {player.game_id}\n") 
-    print(f"player name: {player.player_name}\n")
-    print(f"mov cards:\n{player.mov_cards}\n")
-    print(f"fig cards:\n{player.fig_cards}\n")
+        player.fig_cards.append(FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs)))
+    player.print_player()
 except ValueError as e:
     print(f"Error: {e}")
 """

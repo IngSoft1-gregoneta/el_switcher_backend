@@ -22,20 +22,21 @@ class MovCard():
             raise ValueError(f"Invalid mov type, {self.mov_type} is not a MovType")
     
     def print_mov_card(self):
-        print(f"id game: {self.game_id}\nplayer name: {self.player_name}\nmov type: {self.mov_type  }\n")
+        print(f"id game: {self.game_id}\nplayer name: {self.player_name}\nmov type: {self.mov_type.value}\n")
 
 # Example usage:
 """
 try:
     # OK
     card = MovCard(game_id=1, player_name="Player1", mov_type=MovType.SIDE)
-    print(f"id game: {card.game_id}\nplayer name: {card.player_name}\nmov type: {card.mov_type.value}\n")
+    card.print_mov_card()
 except ValueError as e:
     print(f"Error: {e}")
 try:
     # str mov type 
     card = MovCard(game_id=1, player_name="Player1", mov_type="Side")
-    print(f"id game: {card.game_id}\nplayer name: {card.player_name}\nmov type: {card.mov_type.value}")
+    card.print_mov_card()
+
 except ValueError as e:
     print(f"Error: {e}")
 """

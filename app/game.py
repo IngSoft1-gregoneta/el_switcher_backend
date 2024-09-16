@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from typing import List
 from board import Board
-from fig_card import FigCard, CardColor, FigType, FigTypeWhite, FigTypeBlue
+from fig_card import FigCard, CardColor, FigType
 from mov_card import MovCard, MovType
 from player import Player
-"""import random"""
+import random
 
 # Define the Pydantic model
 class Game():
@@ -23,12 +23,14 @@ board = Board(game_id)
 fig_cards: List[FigCard] = []
 
 # Use integer division for range to avoid float error
+white_figs = list(FigType)[:7]
+blue_figs = list(FigType)[7:]
 for i in range(50 // len(players)):
     player = players[i % len(players)]
     new_fig_card = FigCard(game_id=game_id, 
                            player_name=player.player_name,
                            card_color=CardColor.WHITE, 
-                           fig_type=random.choice(list(FigTypeWhite)))
+                           fig_type=random.choice(white_figs))
     player.fig_cards.append(new_fig_card)  # The card has a player and the player has cards
 
 for i in range(len(3*players)):
