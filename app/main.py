@@ -10,7 +10,7 @@ from datetime import datetime
 # Default query parameters
 from typing import Annotated, Optional
 # Data from manager.py
-from app import manager
+from manager import manager
 
 app = FastAPI()
 
