@@ -76,9 +76,7 @@ async def websocket_endpoint(
 ):
     logger.debug(user_id)
     await manager.connect(websocket)
-    # TOOD: Get userId from cookie response
     user_socket[user_id] = websocket
-    # await websocket.send_text(str(ixSocket))
     try:
         while True:
             data = await websocket.receive_text()
