@@ -47,6 +47,7 @@ async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    
 # Define endpoint to create a new room
 @app.get("/rooms/")
 async def get_rooms():
@@ -56,3 +57,24 @@ async def get_rooms():
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
+# endpoint for join room
+@app.put("/rooms/join/")
+def join_room_endpoint(room_id: int, player_name: str):
+    try:
+        room = rooms.get_room_by_id(room_id)
+
+        if room is None:
+            return {"message": "Room not found"}
+
+        if len(room["players"]) == room["players_expected"]:
+            return {"message": "Room is full"}
+        
+        if player_name in room["players"]:
+            return {"message": "The name already exists, choose another"}
+        
+        room["players"].append(player_name)
+        return {"message": f"The player {player_name} has joined the room {room_id}"}
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
