@@ -1,5 +1,6 @@
 # FastApi
-from fastapi import FastAPI, HTTPException, status
+from uuid import uuid4
+from fastapi import Cookie, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, logger, status
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
@@ -7,7 +8,10 @@ from room import rooms, room_model
 # Date
 from datetime import datetime
 # Default query parameters
-from typing import Optional
+from typing import Annotated, Optional
+# Data from manager.py
+from app import manager
+
 app = FastAPI()
 
 origins = ["http://localhost:5173", "localhost:5173"]
@@ -19,6 +23,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+manager = manager.ConnectionManager()
+# Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
+user_socket = {}
+
+@app.websocket("/ws")
+async def websocket_endpoint(
+    websocket: WebSocket, user_id: Annotated[str | None, Cookie()] = None
+):
+    logger.debug(user_id)
+    await manager.connect(websocket)
+    user_socket[user_id] = websocket
+    try:
+        while True:
+            data = await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        
+@app.get("/get_id")
+def get_id():
+    return uuid4()
 
 # Define endline to create a new room
 @app.post("/rooms/",
@@ -42,6 +67,8 @@ async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
         }
 
         rooms.ROOMS.append(room_dict)
+        
+        await manager.broadcast("Game created")
         
         return room_model.RoomOut(**room_dict)
     except Exception as e:
