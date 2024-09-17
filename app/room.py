@@ -12,7 +12,7 @@ class RoomOut(BaseModel):
     players_expected: int
     players_names: List[str] = []
     owner_name: str
-
+    is_active: bool = True
 # Rooms list
 ROOMS = [
 ]

@@ -62,11 +62,12 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         roomOut = RoomOut(room_id=new_id,
                           room_name=new_room.room_name,
                           players_expected=new_room.players_expected,
-                          owner_name=new_room.owner_name)
+                          players_names=[new_room.owner_name],
+                          owner_name=new_room.owner_name,
+                          is_active=True)
     
         ROOMS.append(roomOut.model_dump())
-        
-        await manager.broadcast("Game created")        
+       
         return roomOut.model_dump()
     
     except Exception as e:
