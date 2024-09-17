@@ -13,7 +13,14 @@ class Game:
         # out
         self.board: Board = self.create_board()
         self.players: List[Player] = self.create_players()
-    
+        self.validate_game()
+
+    def validate_game(self):
+        if not len(self.players_names) in range (2,5):
+            raise ValueError("There are not between 2 and 4 players")   
+        if len(self.players_names) != len(set(self.players_names)):
+          raise ValueError("Player names must be unique")           
+
     def create_board(self):
         return Board(self.game_id)
         
