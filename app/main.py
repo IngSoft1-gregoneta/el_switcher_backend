@@ -8,6 +8,8 @@ from room import rooms, room_model
 from datetime import datetime
 # Default query parameters
 from typing import Optional
+from typing import List
+
 app = FastAPI()
 
 origins = ["http://localhost:5173", "localhost:5173"]
@@ -56,3 +58,19 @@ async def get_rooms():
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
+# Define endpoint to update match state with finished turn
+@app.post("/match/lobby-id/endturn",
+          response_model=room_model.RoomOut)
+async def end_turn(room: room_model.RoomOut) -> room_model.RoomOut:
+    try:
+        # Get players list
+        order: List[str] = room.players
+        # Send to tail of list
+        curr_player = order.pop(0)
+        order.append(curr_player)
+        room.players = order
+
+        return room
+    except Exception as e:
+        print(f"Error: {e}")  # Debug error
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
