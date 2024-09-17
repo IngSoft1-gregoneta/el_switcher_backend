@@ -25,16 +25,7 @@ class Board:
          tiles.append(tile)
         return tiles
 
-    # for debug
     def print_board(self):
         print(f"board:\ngame id: {self.game_id}")
         for tile in self.tiles:
             tile.print_tile()
-# Create a board instance and print files
-"""
-try:
-    board = Board(game_id=1)
-    board.print_board()
-except ValueError as e:
-    print(f"Error: {e}")
-"""

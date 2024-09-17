@@ -27,24 +27,3 @@ class Player():
         print("fig cards:\n")
         for fig_card in self.fig_cards:
             fig_card.print_fig_card()
-# Example usage:
-"""
-try:
-    # Valid player
-    player = Player(
-        game_id=1,
-        player_name="Player1",
-        mov_cards=[],
-        fig_cards=[]
-    )
-    for i in range(3):
-        player.mov_cards.append(MovCard(game_id=1, player_name="Player1", mov_type=random.choice(list(MovType))))
-    white_figs = list(FigType)[:7]
-    blue_figs = list(FigType)[7:]
-
-    for i in range(12):
-        player.fig_cards.append(FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs)))
-    player.print_player()
-except ValueError as e:
-    print(f"Error: {e}")
-"""

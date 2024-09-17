@@ -22,24 +22,3 @@ class Tile():
         
     def print_tile(self):
         print(f"color: {self.tile_color.value}, pos_x: {self.tile_pos_x}, pos_y: {self.tile_pos_y}")
-
-# Example usage:
-"""
-try:
-    tile = Tile(tile_color=TileColor.RED, tile_pos_x=0, tile_pos_y=5)
-    tile.print_tile()
-except ValueError as e:
-    print(f"Error: {e}")
-
-try:
-    tile = Tile(tile_color=TileColor.RED, tile_pos_x=0, tile_pos_y=6)
-    tile.print_tile()
-except ValueError as e:
-    print(f"Error: {e}")
-
-try:
-    tile = Tile(tile_color='Red', tile_pos_x=0, tile_pos_y=5)
-    tile.print_tile()
-except ValueError as e:
-    print(f"Error: {e}")
-"""

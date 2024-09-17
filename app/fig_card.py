@@ -57,34 +57,3 @@ class FigCard:
         
     def print_fig_card(self):
         print(f"id game: {self.game_id}\nplayer name: {self.player_name}\ncard color: {self.card_color.value}\ncard type: {self.fig_type.value}\nvisible card: {self.is_visible}\n")
-
-# Example usage:
-"""
-try:
-    # Valid card, white color and valid figure type for white cards
-    card1 = FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=FigType.T)
-    card1.print_fig_card()
-except ValueError as e:
-    print(f"Error: {e}")
-
-try:
-    # Invalid card, blue color but with a figure type from white cards
-    card2 = FigCard(game_id=2, player_name="Player2", card_color=CardColor.BLUE, fig_type=FigType.L)
-    card2.print_fig_card()
-except ValueError as e:
-    print(f"Error: {e}")
-
-try:
-    # Invalid fog type
-    card3 = FigCard(game_id=2, player_name="Player2", card_color=CardColor.BLUE, fig_type='y')
-    card3.print_fig_card()
-except ValueError as e:
-    print(f"Error: {e}")
-
-try:
-    # Invalid card color
-    card4 = FigCard(game_id=3, player_name="Player3", card_color='Red', fig_type=FigType.T)
-    card4.print_fig_card()
-except ValueError as e:
-    print(f"Error: {e}")
-"""
