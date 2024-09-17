@@ -22,6 +22,6 @@ uvicorn main:app --reload
 ```
 Correr tests desde `el_switcher_backend/app`
 ```sh
-pytest -s tests/{test_name}.py --disable-warnings
+pytest -s test_name.py --disable-warnings
 
 ```

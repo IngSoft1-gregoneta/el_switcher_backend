@@ -1,12 +1,10 @@
 # FastApi
 from uuid import uuid4
-from fastapi import Cookie, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, logger, status
+from fastapi import Cookie, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
-from room import rooms, room_model
-# Date
-from datetime import datetime
+from room import *
 # Default query parameters
 from typing import Annotated, Optional
 # Data from manager.py
@@ -32,7 +30,7 @@ user_socket = {}
 async def websocket_endpoint(
     websocket: WebSocket, user_id: Annotated[str | None, Cookie()] = None
 ):
-    logger.debug(user_id)
+   # logger.debug(user_id)
     await manager.connect(websocket)
     user_socket[user_id] = websocket
     try:
@@ -46,31 +44,31 @@ def get_id():
     return uuid4()
 
 # Define endline to create a new room
-@app.post("/rooms/",
-          response_model=room_model.RoomOut,
+@app.post("/rooms/create_room",
+          response_model=RoomOut,
           status_code=status.HTTP_201_CREATED)
-async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
-    for room in rooms.ROOMS:
+async def create_room(new_room: RoomIn) -> RoomOut:
+    for room in ROOMS:
         if room["room_name"] == new_room.room_name:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
+        if new_room.players_expected < 2 or new_room.players_expected > 4:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
+
     try:
-        last_id = rooms.ROOMS[-1]['room_id'] if rooms.ROOMS else 0
+        last_id = ROOMS[-1]['room_id'] if ROOMS else 0
         new_id = last_id + 1
 
         # Create a new room dict
-        room_dict = {
-            "room_id": new_id,
-            "room_name": new_room.room_name,
-            "players_expected": new_room.players_expected,
-            "players": [],
-            "is_active": True,
-        }
-
-        rooms.ROOMS.append(room_dict)
+        roomOut = RoomOut(room_id=new_id,
+                          room_name=new_room.room_name,
+                          players_expected=new_room.players_expected,
+                          owner_name=new_room.owner_name)
+    
+        ROOMS.append(roomOut.model_dump())
         
-        await manager.broadcast("Game created")
-        
-        return room_model.RoomOut(**room_dict)
+        await manager.broadcast("Game created")        
+        return roomOut.model_dump()
+    
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
@@ -79,7 +77,7 @@ async def create_room(new_room: room_model.RoomIn) -> room_model.RoomOut:
 @app.get("/rooms/")
 async def get_rooms():
     try:
-        return rooms.ROOMS
+        return ROOMS
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
@@ -88,7 +86,7 @@ async def get_rooms():
 @app.put("/rooms/join/")
 def join_room_endpoint(room_id: int, player_name: str):
     try:
-        room = rooms.get_room_by_id(room_id)
+        room = get_room_by_id(room_id)
 
         if room is None:
             return {"message": "Room not found"}
@@ -110,7 +108,7 @@ def join_room_endpoint(room_id: int, player_name: str):
 @app.put("/rooms/leave/")
 def leave_room_endpoint(room_id: int, player_name: str):
     try:
-        room = rooms.get_room_by_id(room_id)
+        room = get_room_by_id(room_id)
 
         if room == None:
             return {"message": "Room not found"}
