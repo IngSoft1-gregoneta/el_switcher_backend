@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# endpoint for room join request 
+# endpoint for testing only
 @app.put("/rooms/randomize/")
 def sort_players_randomly_endpoint(room_id: int):
     try:
