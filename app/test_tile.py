@@ -36,7 +36,7 @@ def test_bad_color_str():
     tile_pos_y = 5
     try:
         tile = Tile(tile_color=tile_color, tile_pos_x=tile_pos_x, tile_pos_y=tile_pos_y)
-        assert False, f"({tile.tile_pos_x},{tile.tile_pos_x}) is not a valid position"
+        assert False, f"{tile.tile_color} is not a valid color"
     except ValueError as e:
         assert tile == None
         

@@ -25,6 +25,7 @@ def test_match_3_players():
             assert fig_deck_len == 16, f"expected 50 fig cards between 3 players (16), got {fig_deck_len}"
             assert mov_deck_len == 3, f"expected 3 mov fig cards, got {mov_deck_len}"
         assert has_turn_count == 1, f"more than a player can not have the turn"
+        print(match.model_dump())
     except ValueError as e:
         assert False, f"Error: {e}"
 

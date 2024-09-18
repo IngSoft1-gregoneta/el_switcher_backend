@@ -23,8 +23,7 @@ def test_valid_player():
         )
         
     except ValueError as e:
-        print(f"Error: {e}")
-        assert False
+        assert False, f"Error: {e}"
 
 def test_invalid_mov_cards():
     try:

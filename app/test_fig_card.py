@@ -6,11 +6,11 @@ blue_figs = list(FigType)[7:]
 
 def test_valid_fig_card():
     try:
-        print(FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs)))
+        FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs))
         FigCard(match_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(blue_figs))
     except ValueError as e:
         print(f"Error: {e}")
-        assert False
+        assert False, f"Error: {e}"
 
 def test_valid_fig_card_str():
     try:
