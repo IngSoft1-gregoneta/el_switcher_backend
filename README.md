@@ -12,8 +12,16 @@ Instalar dependencias
 pip install -r requirements.txt
 ```
 
-Levantar servidor en `backend/app`
+Levantar servidor en `el_switcher_backend/app`
 ```zsh
 fastapi dev main.py
 ```
+Levantar servidor recargable
+```sh
+uvicorn main:app --reload
+```
+Correr tests desde `el_switcher_backend/app`
+```sh
+pytest -s tests/{test_name}.py --disable-warnings
 
+```

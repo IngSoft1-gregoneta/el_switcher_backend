@@ -1,7 +1,9 @@
-from typing import Union
-
+# FastApi
 from fastapi import FastAPI
+# Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
+# data, methods and classes of a room
+from room import *
 
 app = FastAPI()
 
@@ -14,23 +16,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/list_games")
-def list_games():
-    return [
-        {"id": 1, "name": "Game 1"},
-        {"id": 2, "name": "Game 2"},
-        {"id": 3, "name": "Game 3"},
-        {"id": 3, "name": "carade"},
-    ]
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
