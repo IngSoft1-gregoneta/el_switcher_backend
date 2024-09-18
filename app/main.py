@@ -101,3 +101,26 @@ async def get_rooms():
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+# Define endpoint to update match state with finished turn
+@app.put("/match/{room_id}/endturn/",
+          response_model=room_model.RoomOut)
+async def end_turn(room_id: int) -> room_model.RoomOut:
+    try:
+        exists = False
+        # Get players list
+        for room in rooms.ROOMS:
+            if room["room_id"] == room_id:
+                exists = True
+                order: List[str] = room["players"]
+                # Send to tail of list
+                curr_player = order.pop(0)
+                order.append(curr_player)
+                room["players"] = order
+    
+        if not exists:
+            raise HTTPException(status_code=404, detail="Room not found")
+
+        return room
+    except Exception as e:
+        print(f"Error: {e}")  # Debug error
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
