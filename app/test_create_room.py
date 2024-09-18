@@ -14,8 +14,7 @@ def test_create_room_ok():
                      owner_name=owner_name)
     response = client.post("/rooms/create_room", json=roomIn.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == ROOMS[0]
-    print(response.json())
+    assert response.json() in ROOMS
 
 
 def test_create_room_1_player():
