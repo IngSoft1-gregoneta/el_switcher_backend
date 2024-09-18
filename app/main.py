@@ -3,8 +3,8 @@ from fastapi import FastAPI, HTTPException, status
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
-from room import rooms
-from typing import Optional
+from room import *
+
 
 app = FastAPI()
 
@@ -22,15 +22,14 @@ app.add_middleware(
 @app.put("/rooms/leave/")
 def leave_room_endpoint(room_id: int, player_name: str):
     try:
-        room = rooms.get_room_by_id(room_id)
+        room = get_room_by_id(room_id)
 
         if room == None:
             return {"message": "Room not found"}
-
-        if not(player_name in room["players"]):
+        if not(player_name in room["players_names"]):
             return {"message": "There is not such a player"}
         
-        room["players"].remove(player_name)
+        room["players_names"].remove(player_name)
         return {"message": f"The player {player_name} has left the room {room_id}"}
     
     except Exception as e:
