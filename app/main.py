@@ -3,8 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
-from room import rooms
-from typing import Optional
+from rooms import *
 
 app = FastAPI()
 
@@ -22,18 +21,18 @@ app.add_middleware(
 @app.put("/rooms/join/")
 def join_room_endpoint(room_id: int, player_name: str):
     try:
-        room = rooms.get_room_by_id(room_id)
+        room = get_room_by_id(room_id)
 
         if room is None:
             return {"message": "Room not found"}
 
-        if len(room["players"]) == room["players_expected"]:
+        if len(room["players_names"]) == room["players_expected"]:
             return {"message": "Room is full"}
         
-        if player_name in room["players"]:
+        if player_name in room["players_names"]:
             return {"message": "The name already exists, choose another"}
         
-        room["players"].append(player_name)
+        room["players_names"].append(player_name)
         return {"message": f"The player {player_name} has joined the room {room_id}"}
     
     except Exception as e:
