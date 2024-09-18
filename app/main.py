@@ -49,12 +49,12 @@ def get_id():
           response_model=RoomOut,
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: RoomIn) -> RoomOut:
+    if new_room.players_expected < 2 or new_room.players_expected > 4:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
     for room in ROOMS:
         if room["room_name"] == new_room.room_name:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
-        if new_room.players_expected < 2 or new_room.players_expected > 4:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-
+    
     try:
         last_id = ROOMS[-1]['room_id'] if ROOMS else 0
         new_id = last_id + 1
@@ -74,3 +74,4 @@ async def create_room(new_room: RoomIn) -> RoomOut:
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    

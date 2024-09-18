@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field 
 from typing import List
 
 class RoomIn(BaseModel):
@@ -13,7 +13,6 @@ class RoomOut(BaseModel):
     players_names: List[str] = []
     owner_name: str
     is_active: bool = True
-    
 # Rooms list
 ROOMS = [
 ]
