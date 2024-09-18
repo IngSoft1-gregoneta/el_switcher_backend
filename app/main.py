@@ -74,7 +74,6 @@ async def create_room(new_room: RoomIn) -> RoomOut:
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-     HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 # Define endpoint to get rooms list
 @app.get("/rooms/")
