@@ -1,14 +1,15 @@
 # FastApi
-from uuid import uuid4
 from fastapi import Cookie, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
-# Middleware to allow methods from react
-from fastapi.middleware.cors import CORSMiddleware
-# data, methods and classes of a room
-from room import *
+# Unique id
+from uuid import uuid4
 # Default query parameters
 from typing import Annotated, Optional
 # Data from manager.py
 from manager import manager
+# Middleware to allow methods from react
+from fastapi.middleware.cors import CORSMiddleware
+# data, methods and classes of a room
+from room import *
 
 app = FastAPI()
 
@@ -81,44 +82,3 @@ async def get_rooms():
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-    
-# endpoint for join room
-@app.put("/rooms/join/")
-def join_room_endpoint(room_id: int, player_name: str):
-    try:
-        room = get_room_by_id(room_id)
-
-        if room is None:
-            return {"message": "Room not found"}
-
-        if len(room["players"]) == room["players_expected"]:
-            return {"message": "Room is full"}
-        
-        if player_name in room["players"]:
-            return {"message": "The name already exists, choose another"}
-        
-        room["players"].append(player_name)
-        return {"message": f"The player {player_name} has joined the room {room_id}"}
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-
-# endpoint for room join request 
-@app.put("/rooms/leave/")
-def leave_room_endpoint(room_id: int, player_name: str):
-    try:
-        room = get_room_by_id(room_id)
-
-        if room == None:
-            return {"message": "Room not found"}
-
-        if not(player_name in room["players"]):
-            return {"message": "There is not such a player"}
-        
-        room["players"].remove(player_name)
-        return {"message": f"The player {player_name} has left the room {room_id}"}
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error") 
