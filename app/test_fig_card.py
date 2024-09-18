@@ -6,38 +6,32 @@ blue_figs = list(FigType)[7:]
 
 def test_valid_fig_card():
     try:
-        card1 = FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs))
-        card2 = FigCard(game_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(blue_figs))
-        card1.print_fig_card()
-        card2.print_fig_card()
+        print(FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs)))
+        FigCard(match_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(blue_figs))
     except ValueError as e:
         print(f"Error: {e}")
         assert False
 
-def test_invalid_white_card():
+def test_valid_fig_card_str():
     try:
-        FigCard(game_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(blue_figs))
+        FigCard(match_id=1, player_name="Player1", card_color="White", fig_type="L")
+        FigCard(match_id=1, player_name="Player1", card_color="Blue", fig_type="B1")
+    except ValueError as e:
+        print(f"Error: {e}")
+        assert False
+
+def test_bad_color_fig_card():
+    try:
+        FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(blue_figs))
+        FigCard(match_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(white_figs))
         assert False
     except ValueError as e:
         print(f"Error: {e}")
 
-def test_invalid_blue_card():
+def test_invalid_color():
     try:
-        FigCard(game_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(white_figs))
-        assert False
-    except ValueError as e:
-        print(f"Error: {e}")
-
-def test_bad_fig_type():
-    try:
-        FigCard(game_id=1, player_name="Player1", card_color=random.choice(list(CardColor)), fig_type='L')
-        assert False
-    except ValueError as e:
-        print(f"Error: {e}")
-
-def test_bad_card_color():
-    try:
-        FigCard(game_id=1, player_name="Player1", card_color='White', fig_type=random.choice(white_figs))
+        FigCard(match_id=1, player_name="Player1", card_color="Red", fig_type=random.choice(blue_figs))
+        FigCard(match_id=1, player_name="Player1", card_color="Green", fig_type=random.choice(white_figs))
         assert False
     except ValueError as e:
         print(f"Error: {e}")

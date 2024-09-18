@@ -3,15 +3,15 @@ from board import Board
 from tile import TileColor 
 
 try:
-    game_id = 1
-    board = Board(game_id=game_id)
+    match_id = 1
+    board = Board(match_id=match_id)
 except ValueError as e:
     print(f"Error: {e}")
 
 def test_board_id():
     # Verify correct game id
-    assert board.game_id == game_id, f"game id {board.game_id} must be {game_id}"
-    
+    assert board.match_id == match_id, f"game id {board.match_id} must be {match_id}"
+
 def test_board_size():
     # Verify there are 36 tiles
     assert len(board.tiles) == 36, f"Expected 36 tiles, found {len(board.tiles)}"

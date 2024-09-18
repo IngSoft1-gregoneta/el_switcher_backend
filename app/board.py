@@ -6,12 +6,12 @@ from tile import Tile, TileColor
 AMOUNT_OF_TILES = 36
 
 class Board(BaseModel):
-    game_id: int
+    match_id: int
     tiles: List[Tile]
 
-    def __init__(self, game_id: int):
+    def __init__(self, match_id: int):
         tiles = self._create_tiles()
-        super().__init__(game_id=game_id, tiles=tiles)
+        super().__init__(match_id=match_id, tiles=tiles)
 
     def _create_tiles(self) -> List[Tile]:
         # Define colors and create list of 9 tiles for each color
