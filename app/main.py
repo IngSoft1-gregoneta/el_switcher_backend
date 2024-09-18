@@ -7,8 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from room import *
 # Default query parameters
 from typing import Annotated, Optional
-# Data from manager.py
-from manager import manager
 
 app = FastAPI()
 
@@ -22,23 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-manager = manager.ConnectionManager()
-# Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
-user_socket = {}
-
-@app.websocket("/ws")
-async def websocket_endpoint(
-    websocket: WebSocket, user_id: Annotated[str | None, Cookie()] = None
-):
-   # logger.debug(user_id)
-    await manager.connect(websocket)
-    user_socket[user_id] = websocket
-    try:
-        while True:
-            data = await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        
 @app.get("/get_id")
 def get_id():
     return uuid4()
