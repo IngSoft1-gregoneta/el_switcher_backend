@@ -76,7 +76,7 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
 # endpoint for room leave request 
-@app.put("/rooms/leave/")
+@app.put("/rooms/leave")
 def leave_room_endpoint(room_id: int, player_name: str):
     try:
         room = get_room_by_id(room_id)
@@ -94,33 +94,33 @@ def leave_room_endpoint(room_id: int, player_name: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 # Define endpoint to get rooms list
-@app.get("/rooms/")
+@app.get("/rooms")
 async def get_rooms():
     try:
         return ROOMS
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-# Define endpoint to update match state with finished turn
-@app.put("/match/{room_id}/endturn/",
-          response_model=room_model.RoomOut)
-async def end_turn(room_id: int) -> room_model.RoomOut:
-    try:
-        exists = False
-        # Get players list
-        for room in rooms.ROOMS:
-            if room["room_id"] == room_id:
-                exists = True
-                order: List[str] = room["players"]
-                # Send to tail of list
-                curr_player = order.pop(0)
-                order.append(curr_player)
-                room["players"] = order
-    
-        if not exists:
-            raise HTTPException(status_code=404, detail="Room not found")
 
-        return room
+# Define endpoint to update match state with finished turn
+
+# ToDo: 
+# add import structs
+
+@app.put("/match/{match_id}")
+async def end_turn(match_id: int):
+    try:
+        match: Match = get_match_by_id(match_id)
+        # Get players list
+        if match is None:
+            return {"message": "Cannot end a turn from a non existing match"}
+        else:
+            order: List[Player] = match.players
+            curr_player = order.pop(0)
+            order.append(curr_player)
+            match.players = order
+        return match
+    
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")

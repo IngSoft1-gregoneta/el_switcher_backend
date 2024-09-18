@@ -17,9 +17,18 @@ class RoomOut(BaseModel):
 ROOMS = [
 ]
 
+# Temp Match storage list
+MATCH = []
+
 # Fetch room by id or return None if the room was not found
 def get_room_by_id(room_id: int):
     for room in ROOMS:
         if room["room_id"] == room_id:
             return room
+    return None
+
+def get_match_by_id(match_id: int) -> Match:
+    for match in MATCH:
+        if match.match_id == match_id:
+            return match
     return None
