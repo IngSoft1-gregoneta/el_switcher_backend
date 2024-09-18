@@ -23,55 +23,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-manager = manager.ConnectionManager()
-# Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
-user_socket = {}
 
-@app.websocket("/ws")
-async def websocket_endpoint(
-    websocket: WebSocket, user_id: Annotated[str | None, Cookie()] = None
-):
-   # logger.debug(user_id)
-    await manager.connect(websocket)
-    user_socket[user_id] = websocket
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/list_games")
+def list_games():
+    return [
+        {"id": 1, "name": "Game 1"},
+        {"id": 2, "name": "Game 2"},
+        {"id": 3, "name": "Game 3"},
+        {"id": 3, "name": "carade"},
+    ]
+
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Union[str, None] = None):
+    return {"item_id": item_id, "q": q}
+
+# endpoint for room join request 
+@app.put("/rooms/leave/")
+def leave_room_endpoint(room_id: int, player_name: str):
     try:
-        while True:
-            data = await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        room = get_room_by_id(room_id)
+
+        if room == None:
+            return {"message": "Room not found"}
+        if not(player_name in room["players_names"]):
+            return {"message": "There is not such a player"}
         
-@app.get("/get_id")
-def get_id():
-    return uuid4()
-
-# Define endline to create a new room
-@app.post("/rooms/create_room",
-          response_model=RoomOut,
-          status_code=status.HTTP_201_CREATED)
-async def create_room(new_room: RoomIn) -> RoomOut:
-    if new_room.players_expected < 2 or new_room.players_expected > 4:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-    for room in ROOMS:
-        if room["room_name"] == new_room.room_name:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
-    
-    try:
-        last_id = ROOMS[-1]['room_id'] if ROOMS else 0
-        new_id = last_id + 1
-
-        # Create a new room dict
-        roomOut = RoomOut(room_id=new_id,
-                          room_name=new_room.room_name,
-                          players_expected=new_room.players_expected,
-                          players_names=[new_room.owner_name],
-                          owner_name=new_room.owner_name,
-                          is_active=True)
-    
-        ROOMS.append(roomOut.model_dump())
-       
-        return roomOut.model_dump()
+        room["players_names"].remove(player_name)
+        return {"message": f"The player {player_name} has left the room {room_id}"}
     
     except Exception as e:
-        print(f"Error: {e}")  # Debug error
+        print(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-    
