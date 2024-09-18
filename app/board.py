@@ -1,31 +1,32 @@
 import random
 from typing import List
+from pydantic import BaseModel
 from tile import Tile, TileColor
 
-class Board:
-    def __init__(self, game_id):
-        self.game_id: int = game_id
-        self.tiles: List[Tile] = self._create_tiles()
+AMOUNT_OF_TILES = 36
+
+class Board(BaseModel):
+    game_id: int
+    tiles: List[Tile]
+
+    def __init__(self, game_id: int):
+        tiles = self._create_tiles()
+        super().__init__(game_id=game_id, tiles=tiles)
 
     def _create_tiles(self) -> List[Tile]:
-        # Define colorsand create list of 9 tiles for each color
+        # Define colors and create list of 9 tiles for each color
         colors = [TileColor.RED, TileColor.YELLOW, TileColor.GREEN, TileColor.BLUE]
-        color_list = colors * 9
+        color_list = colors * (AMOUNT_OF_TILES // len(colors))
                 
-        # Create tiles in random pos
+        # Create tiles in random positions
         random.shuffle(color_list)
         tiles = []
-        for i in range(36):
-         color = color_list[i]
-         tile = Tile(
-             tile_color=color,
-             tile_pos_x = i % 6,   
-             tile_pos_y = i // 6
-         )
-         tiles.append(tile)
+        for i in range(AMOUNT_OF_TILES):
+            color = color_list[i]
+            tile = Tile(
+                tile_color=color,
+                tile_pos_x=i % AMOUNT_OF_TILES ** 0.5,
+                tile_pos_y=i // AMOUNT_OF_TILES ** 0.5
+            )
+            tiles.append(tile)
         return tiles
-
-    def print_board(self):
-        print(f"board:\ngame id: {self.game_id}")
-        for tile in self.tiles:
-            tile.print_tile()

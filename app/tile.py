@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel
 
 class TileColor(Enum):
     RED = 'Red'
@@ -6,19 +7,18 @@ class TileColor(Enum):
     GREEN = 'Green'
     BLUE = 'Blue'
 
-class Tile():
+class Tile(BaseModel):
 
-    def __init__(self, tile_color, tile_pos_x, tile_pos_y):
-        self.tile_color: TileColor = tile_color
-        self.tile_pos_x: int = tile_pos_x  
-        self.tile_pos_y: int = tile_pos_y
+    tile_color: TileColor
+    tile_pos_x: int
+    tile_pos_y: int
+
+    def __init__(self, tile_color: TileColor, tile_pos_x: int, tile_pos_y: int):
+        super().__init__(tile_color=tile_color, tile_pos_x=tile_pos_x, tile_pos_y=tile_pos_y)
         self.valid_tile()
 
     def valid_tile(self):
-        if self.tile_color not in TileColor.__members__.values():
-            raise ValueError(f"{self.tile_color} is not a TileColor")
-        if self.tile_pos_x not in range(0,6) or self.tile_pos_y not in range(0,6):
-            raise ValueError(f"({self.tile_pos_x},{self.tile_pos_y}) is not a valid pos in board")
-        
-    def print_tile(self):
-        print(f"color: {self.tile_color.value}, pos_x: {self.tile_pos_x}, pos_y: {self.tile_pos_y}")
+        if self.tile_color not in TileColor:
+            raise ValueError(f"{self.tile_color} is not a valid TileColor")
+        if self.tile_pos_x not in range(0, 6) or self.tile_pos_y not in range(0, 6):
+            raise ValueError(f"({self.tile_pos_x}, {self.tile_pos_y}) is not a valid position on the board")

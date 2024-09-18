@@ -1,4 +1,6 @@
+from pydantic import BaseModel, validator
 from enum import Enum
+import random
 
 # Define the Enum for movement card types
 class MovType(Enum):
@@ -9,17 +11,21 @@ class MovType(Enum):
     LEFT_CHESS_HORSE = "Left chess horse"
 
 # Define the Pydantic model
-class MovCard():
-    def is_valid_mov_type(self):
-        return self.mov_type in MovType.__members__.values()
-    
-    def __init__(self,game_id,player_name,mov_type):
-        self.game_id: int = game_id
-        self.player_name: str = player_name
-        self.mov_type: MovType = mov_type
-        
-        if not self.is_valid_mov_type():
+class MovCard(BaseModel):
+    game_id: int
+    player_name: str
+    mov_type: MovType
+
+    def __init__(self, *, game_id: int, player_name: str, mov_type: MovType = None):
+        if mov_type is None:
+            mov_type = self.create_random_mov()
+        # Initialize the BaseModel with the given parameters
+        super().__init__(game_id=game_id, player_name=player_name, mov_type=mov_type)
+        self.validate_mov_type()
+
+    def validate_mov_type(self):
+        if self.mov_type not in MovType:
             raise ValueError(f"Invalid mov type, {self.mov_type} is not a MovType")
-    
-    def print_mov_card(self):
-        print(f"id game: {self.game_id}\nplayer name: {self.player_name}\nmov type: {self.mov_type.value}\n")
+
+    def create_random_mov(self) -> MovType:
+        return random.choice(list(MovType))
