@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 # endpoint for join room
-@app.put("/rooms/join/")
+@app.put("/rooms/join")
 def join_room_endpoint(room_id: int, player_name: str):
     try:
         room = get_room_by_id(room_id)

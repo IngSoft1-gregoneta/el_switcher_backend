@@ -25,7 +25,7 @@ def test_join_room1():
     player_name = "Yamil"
     
     expected_response = {"message": f"The player {player_name} has joined the room {room_id}"}
-    response = client.put(f"/rooms/join/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
     
     assert ROOMS[0]["players_names"] == ["Yamil"]
     assert ROOMS[0]["room_id"] == 1
@@ -38,7 +38,7 @@ def test_join_room2():
     player_name = "Tadeo"
     
     expected_response = {"message": f"The player {player_name} has joined the room {room_id}"}
-    response = client.put(f"/rooms/join/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
     
     assert ROOMS[0]["players_names"] == ["Yamil", "Tadeo"]
     assert ROOMS[0]["room_id"] == 1
@@ -52,7 +52,7 @@ def test_join_full_room():
     
     expected_response = {"message": "Room is full"}
     
-    response = client.put(f"/rooms/join/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
     
     assert ROOMS[0]["players_names"] == ["Yamil", "Tadeo"] # deberia seguir siendo esta la lista
     assert ROOMS[0]["room_id"] == 1
@@ -67,7 +67,7 @@ def test_same_name():
     
     player_name = "Yamil"
     expected_response = {"message": "The name already exists, choose another"}
-    response = client.put(f"/rooms/join/?room_id={room_id}&player_name={player_name}")  
+    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")  
     
     assert ROOMS[0]["players_names"] == ["Yamil"] # no deberia dejar unir a otro jugador con el mismo nombre
     assert ROOMS[0]["room_id"] == 1
