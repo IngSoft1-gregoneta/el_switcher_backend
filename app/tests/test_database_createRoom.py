@@ -5,6 +5,7 @@ from main import app
 
 client = TestClient(app)
 repo = RoomRepository()
+
 def reset():
     if repo.get_room_by_id(1):
         repo.delete(1)
@@ -58,5 +59,6 @@ def test_create_dup_room():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert repo.get_room_by_id(2) == None
     reset()
+reset()
     
     

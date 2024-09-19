@@ -3,7 +3,7 @@ from fastapi import Cookie, FastAPI, HTTPException, WebSocket, WebSocketDisconne
 # Unique id
 from uuid import uuid4
 # Default query parameters
-from typing import Annotated
+from typing import Annotated, Union
 # Data from manager.py
 from manager import manager
 # Middleware to allow methods from react
@@ -52,15 +52,12 @@ def get_id():
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: RoomIn) -> RoomOut:
     repo = RoomRepository()
-    print("here")
     if new_room.players_expected < 2 or new_room.players_expected > 4:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-    print("here2")
     # Verificar si el nombre de la sala ya existe en la base de datos
     existing_room = repo.check_for_names(new_room.room_name)
     if existing_room:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
-    print("here3")
     
     try:
         
@@ -73,26 +70,27 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
 # endpoint for room leave request 
-@app.put("/rooms/leave")
+@app.put("/rooms/leave",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
 async def leave_room_endpoint(room_id: int, player_name: str):
     repo = RoomRepository()
     try:
-        print("here")
         room = repo.get_room_by_id(room_id)
-        print("here2")
         if room == None:
             return {"message": "Room not found"}
         if not(player_name in room.players_names):
             return {"message": "There is not such a player"}
-        print("here2")
         repo.update_players(room.players_names,player_name,room_id,"remove")
-        return {"message": f"The player {player_name} has left the room {room_id}"}
+        return repo.get_room_by_id(room_id)
     
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
-@app.put("/rooms/join")
+@app.put("/rooms/join",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
 async def join_room_endpoint(room_id: int, player_name: str):
     repo = RoomRepository()
     try:
@@ -108,7 +106,7 @@ async def join_room_endpoint(room_id: int, player_name: str):
             return {"message": "The name already exists, choose another"}
         
         repo.update_players(room.players_names,player_name,room_id,"add")
-        return {"message": f"The player {player_name} has joined the room {room_id}"}
+        return repo.get_room_by_id(room_id)
     
     except Exception as e:
         print(f"Error: {e}")

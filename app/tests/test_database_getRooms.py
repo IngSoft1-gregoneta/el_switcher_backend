@@ -55,3 +55,4 @@ def test_basic_get():
     assert response.json() == repo.get_rooms()
     print(response.json())
     reset()
+reset()

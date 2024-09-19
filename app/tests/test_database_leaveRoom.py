@@ -45,10 +45,16 @@ def test_leave_room1():
     generate_test_room()
     room_id = 1
     player_name = "Braian"
-    expected_response = {"message": f"The player {player_name} has left the room {room_id}"}
+    expected_response = {"room_id": 1,
+                         "room_name": "Room 1",
+                         "players_expected": 2,
+                         "players_names": [],
+                         "owner_name": "Braian",
+                         "is_active": True
+                         }
     
     response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_202_ACCEPTED
     assert player_name not in repo.get_room_by_id(room_id).players_names
     assert response.json() == expected_response
     reset()
@@ -64,7 +70,7 @@ def test_leave_room2():
     response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
     
     assert player_name not in repo.get_room_by_id(room_id).players_names
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response
     reset()   
 # test: sala inexistente, devuelve HTTP200Ok y mensaje advirtiendo
@@ -78,6 +84,7 @@ def test_leave_noroom():
     
     response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
     assert repo.get_room_by_id(room_id) == None
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response
     reset()
+reset()
