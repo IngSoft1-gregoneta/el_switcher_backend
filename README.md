@@ -20,8 +20,8 @@ Levantar servidor recargable
 ```sh
 uvicorn main:app --reload
 ```
-Correr tests desde `el_switcher_backend/app`
+Correr tests en `el_switcher_backend` 
+(asegurarse de estar "parado" en dicha carpeta)
 ```sh
-pytest -s tests/{test_name}.py --disable-warnings
-
+./run_tests.sh
 ```

@@ -75,12 +75,13 @@ def test_join_full_room():
 def test_same_name():
     test_room()
     room_id = 1
+    ROOMS[0]["players_names"] = ["Tito"]  # simular que el jugador ya está en la sala
     
-    player_name = "Yamil"
+    player_name = "Tito"
     expected_response = {"message": "The name already exists, choose another"}
     response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")  
     
-    assert ROOMS[0]["players_names"] == ["Yamil"] # no deberia dejar unir a otro jugador con el mismo nombre
+    assert ROOMS[0]["players_names"] == ["Tito"] # no deberia dejar unir a otro jugador con el mismo nombre
     assert ROOMS[0]["room_id"] == 1
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response
