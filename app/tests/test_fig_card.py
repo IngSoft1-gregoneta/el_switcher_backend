@@ -24,7 +24,7 @@ def test_bad_color_fig_card():
         FigCard(match_id=1, player_name="Player1", card_color=CardColor.BLUE, fig_type=random.choice(white_figs))
         assert False
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True
 
 def test_invalid_color():
     try:
@@ -32,4 +32,4 @@ def test_invalid_color():
         FigCard(match_id=1, player_name="Player1", card_color="Green", fig_type=random.choice(white_figs))
         assert False
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True

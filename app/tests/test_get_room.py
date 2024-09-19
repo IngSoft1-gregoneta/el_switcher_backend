@@ -8,14 +8,13 @@ from main import app
 client = TestClient(app)
 
 def test_empty_rooms():
-    
+    ROOMS.clear()
     response = client.get("/rooms/")    
     assert response.status_code == status.HTTP_200_OK
 
     assert response.json() == []
 
 def test_basic_get():
-
     room_name = "Room 1"
     players_expected = 2
     owner = "carlitos"

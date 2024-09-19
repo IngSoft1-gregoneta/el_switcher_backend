@@ -10,7 +10,7 @@ def test_random_mov_card():
         assert card.player_name == player_name, f"player name {card.player_name} must be {player_name}"
         assert card.mov_type in list(MovType), f"{card.mov_type} is not a valid mov card"
     except ValueError as e:
-        print(f"Error: {e}")
+        assert False, f"Error: {e}"
 
 def test_valid_mov_card():
     match_id = 1
@@ -22,7 +22,7 @@ def test_valid_mov_card():
         assert card.player_name == player_name, f"player name {card.player_name} must be {player_name}"
         assert card.mov_type == mov_type, f"mov type {card.mov_type} must be {mov_type}"
     except ValueError as e:
-        print(f"Error: {e}")
+        assert False, f"Error: {e}"
 
 def test_valid_mov_card_str():
     match_id = 1
@@ -34,7 +34,7 @@ def test_valid_mov_card_str():
         assert card.player_name == player_name, f"player name {card.player_name} must be {player_name}"
         assert card.mov_type == MovType.SIDE, f"mov type {card.mov_type} must be {mov_type}"
     except ValueError as e:
-        print(f"Error: {e}")
+        assert False, f"Error: {e}"
     
 def test_invalid_mov_card_str():
     match_id = 1
@@ -44,4 +44,4 @@ def test_invalid_mov_card_str():
         card = MovCard(match_id=match_id, player_name=player_name, mov_type=mov_type)
         assert False, f"{card.mov_type} is not a mov type"
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True
