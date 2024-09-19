@@ -20,7 +20,8 @@ Levantar servidor recargable
 ```sh
 uvicorn main:app --reload
 ```
-Correr tests en `el_switcher_backend`
+Correr tests en `el_switcher_backend` 
+(asegurarse de estar "parado" en dicha carpeta)
 ```sh
 ./run_tests.sh
 ```
