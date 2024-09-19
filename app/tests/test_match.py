@@ -47,18 +47,20 @@ def test_match_a_player():
         match = Match(match_id=1,players_names=['Yamil'])
         assert False
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True
 
 def test_match_5_players():
     try:
         match = Match(match_id=1,players_names=['Yamil','Tadeo','Grego','Facu','Braian'])
         assert False
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True
+
 
 def test_match_dup_players():
     try:
         match = Match(match_id=1,players_names=['Yamil','Yamil','Grego','Facu'])
         assert False
     except ValueError as e:
-        print(f"Error: {e}")
+        assert True
+

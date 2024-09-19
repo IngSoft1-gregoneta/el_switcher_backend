@@ -19,6 +19,9 @@ fastapi dev main.py
 Levantar servidor recargable
 ```sh
 uvicorn main:app --reload
+```
+Correr tests en `el_switcher_backend` 
+(asegurarse de estar "parado" en dicha carpeta)
 ```sh
-pytest -s test_name.py --disable-warnings
+./run_tests.sh
 ```
