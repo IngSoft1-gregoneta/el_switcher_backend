@@ -52,13 +52,15 @@ def get_id():
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: RoomIn) -> RoomOut:
     repo = RoomRepository()
+    print("here")
     if new_room.players_expected < 2 or new_room.players_expected > 4:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-    
+    print("here2")
     # Verificar si el nombre de la sala ya existe en la base de datos
     existing_room = repo.check_for_names(new_room.room_name)
     if existing_room:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
+    print("here3")
     
     try:
         

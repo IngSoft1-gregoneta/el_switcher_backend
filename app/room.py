@@ -33,7 +33,7 @@ class RoomOut(BaseModel):
 
 class RoomRepository:
     def create_room(self, new_room: RoomIn):
-        db = Session()  # Crear la sesión aquí
+        db = Session()
         try:
             last_room = db.query(Room).order_by(Room.room_id.desc()).first()
             new_id = (last_room.room_id if last_room else 0) + 1
@@ -52,7 +52,7 @@ class RoomRepository:
                 room_id=new_id,
                 players_expected=new_room.players_expected,
                 owner_name=new_room.owner_name,
-                players_names=json.dumps(roomOut.players_names),  # Convertir a JSON
+                players_names=json.dumps(roomOut.players_names),
                 is_active=True
             )
             db.add(roombd)
@@ -65,7 +65,7 @@ class RoomRepository:
     def get_room_by_id(self, room_id: int):
         db = Session()
         try:
-            result = db.query(Room).filter(Room.room_id == room_id).one_or_none()  # Cambiar Room.id por Room.room_id
+            result = db.query(Room).filter(Room.room_id == room_id).one_or_none() 
             if result:
                 room = RoomOut(
                     room_id=result.room_id,
@@ -113,9 +113,20 @@ class RoomRepository:
             ]
         finally:
             db.close()
+            
     def check_for_names(self, room_name: str):
         db = Session()
         try:
             return db.query(Room).filter(Room.room_name == room_name).first()
+        finally:
+            db.close()
+            
+    def delete(self,id):
+        db = Session()
+        
+        try:
+            todelete = db.query(Room).filter(Room.room_id == id).one_or_none()
+            db.delete(todelete)
+            db.commit()
         finally:
             db.close()
