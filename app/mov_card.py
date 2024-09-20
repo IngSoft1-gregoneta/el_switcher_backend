@@ -10,6 +10,7 @@ class MovType(Enum):
     RIGHT_CHESS_HORSE = "Right chess horse"
     LEFT_CHESS_HORSE = "Left chess horse"
 
+    
 # Define the Pydantic model
 class MovCard(BaseModel):
     match_id: int

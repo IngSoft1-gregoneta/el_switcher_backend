@@ -10,6 +10,8 @@ from manager import manager
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
 from room import *
+from match import *
+from typing import Union
 
 app = FastAPI()
 
@@ -49,67 +51,62 @@ def get_id():
           response_model=RoomOut,
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: RoomIn) -> RoomOut:
+    repo = RoomRepository()
     if new_room.players_expected < 2 or new_room.players_expected > 4:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-    for room in ROOMS:
-        if room["room_name"] == new_room.room_name:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
+    # Verificar si el nombre de la sala ya existe en la base de datos
+    existing_room = repo.check_for_names(new_room.room_name)
+    if existing_room:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
     
     try:
-        last_id = ROOMS[-1]['room_id'] if ROOMS else 0
-        new_id = last_id + 1
-
-        # Create a new room dict
-        roomOut = RoomOut(room_id=new_id,
-                          room_name=new_room.room_name,
-                          players_expected=new_room.players_expected,
-                          players_names=[new_room.owner_name],
-                          owner_name=new_room.owner_name,
-                          is_active=True)
-    
-        ROOMS.append(roomOut.model_dump())
+        
+        result = repo.create_room(new_room)
        
-        return roomOut.model_dump()
+        return result
 
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
 # endpoint for room leave request 
-@app.put("/rooms/leave")
-def leave_room_endpoint(room_id: int, player_name: str):
+@app.put("/rooms/leave",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
+async def leave_room_endpoint(room_id: int, player_name: str):
+    repo = RoomRepository()
     try:
-        room = get_room_by_id(room_id)
-
+        room = repo.get_room_by_id(room_id)
         if room == None:
             return {"message": "Room not found"}
-        if not(player_name in room["players_names"]):
+        if not(player_name in room.players_names):
             return {"message": "There is not such a player"}
-        
-        room["players_names"].remove(player_name)
-        return {"message": f"The player {player_name} has left the room {room_id}"}
+        repo.update_players(room.players_names,player_name,room_id,"remove")
+        return repo.get_room_by_id(room_id)
     
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-
-# endpoint for join room
-@app.put("/rooms/join")
-def join_room_endpoint(room_id: int, player_name: str):
+    
+@app.put("/rooms/join",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
+async def join_room_endpoint(room_id: int, player_name: str):
+    repo = RoomRepository()
     try:
-        room = get_room_by_id(room_id)
+        room = repo.get_room_by_id(room_id)
 
         if room is None:
             return {"message": "Room not found"}
 
-        if len(room["players_names"]) == room["players_expected"]:
+        if len(room.players_names) == room.players_expected:
             return {"message": "Room is full"}
         
-        if player_name in room["players_names"]:
+        if player_name in room.players_names:
             return {"message": "The name already exists, choose another"}
         
-        room["players_names"].append(player_name)
-        return {"message": f"The player {player_name} has joined the room {room_id}"}
+        repo.update_players(room.players_names,player_name,room_id,"add")
+        return repo.get_room_by_id(room_id)
     
     except Exception as e:
         print(f"Error: {e}")
@@ -118,31 +115,20 @@ def join_room_endpoint(room_id: int, player_name: str):
 # Define endpoint to get rooms list
 @app.get("/rooms")
 async def get_rooms():
+    repo = RoomRepository()
     try:
-        return ROOMS
+        return repo.get_rooms()
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
-# Define endpoint to update match state with finished turn
-
-# ToDo: 
-# add import structs
-
-@app.put("/match/{match_id}")
-async def end_turn(match_id: int):
+# Define endpoint to create a room
+@app.post("/matchs/create_match",
+          status_code=status.HTTP_201_CREATED)
+async def create_match(matchIn: MatchIn):
     try:
-        match: Match = get_match_by_id(match_id)
-        # Get players list
-        if match is None:
-            return {"message": "Cannot end a turn from a non existing match"}
-        else:
-            order: List[Player] = match.players
-            curr_player = order.pop(0)
-            order.append(curr_player)
-            match.players = order
-        return match
-    
+        match = Match(matchIn.room_id)
+        MATCHS.append(match.model_dump(mode="json"))    
+        return match.model_dump(mode="json")
     except Exception as e:
-        print(f"Error: {e}")  # Debug error
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")

@@ -4,25 +4,41 @@ from board import Board
 from fig_card import FigCard, CardColor, FigType
 from mov_card import MovCard, MovType
 from player import Player
+from room import ROOMS
 import random
+
+class MatchIn(BaseModel):
+    room_id: int
 
 class Match(BaseModel):
     match_id: int
-    players_names: List[str]
     board: Board
     players: List[Player]
 
-    def __init__(self, match_id: int, players_names: List[str]):
+    def __init__(self, match_id: int):
         board = self.create_board(match_id)
-        players = self.create_players(match_id, players_names)
-        super().__init__(match_id=match_id, players_names=players_names, board=board, players=players)
+        players = self.create_players(match_id)
+        super().__init__(match_id=match_id, board=board, players=players)
         self.validate_match()
 
+    def validate_room(self, match_id: int) -> List[str]:
+        rooms_whit_match_id = 0   
+        for room in ROOMS:
+            if room["room_id"] == match_id:
+                 room_of_match = room
+                 rooms_whit_match_id = rooms_whit_match_id + 1
+        if rooms_whit_match_id != 1:
+            raise ValueError("There must be exactly one room per match")  
+        for match in MATCHS:
+            if match["match_id"] == match_id:
+                raise ValueError("Can not be more than a match with same id")  
+        if not len(room_of_match["players_names"]) in range(2, 5):
+            raise ValueError("There are not between 2 and 4 players") 
+        if room_of_match["players_expected"] != len(room_of_match["players_names"]):
+            raise ValueError("There must be exactly players expected amount of players")  
+        return room_of_match["players_names"]
+ 
     def validate_match(self):
-        if not len(self.players_names) in range(2, 5):
-            raise ValueError("There are not between 2 and 4 players")   
-        if len(self.players_names) != len(set(self.players_names)):
-            raise ValueError("Player names must be unique")     
         turns_count = sum(player.has_turn for player in self.players)
         if turns_count != 1:
             raise ValueError("There must be exactly one player with the turn")      
@@ -30,7 +46,8 @@ class Match(BaseModel):
     def create_board(self, match_id: int) -> Board:
         return Board(match_id)
 
-    def create_players(self, match_id: int, players_names: List[str]) -> List[Player]:
+    def create_players(self, match_id: int) -> List[Player]:
+        players_names = self.validate_room(match_id)
         players = []
         index = 0
         for player_name in players_names:
@@ -58,3 +75,6 @@ class Match(BaseModel):
             new_mov_card = MovCard(match_id=match_id, player_name=player_name, mov_type=random.choice(list(MovType)))
             mov_cards.append(new_mov_card)
         return mov_cards
+
+MATCHS = [
+]
