@@ -70,20 +70,7 @@ def test_match_4_players():
     assert response.json() in MATCHS
 
 def test_dup_match():
-    room_id = 1
-    room_name = "Room 1"
-    players_expected = 4
-    players_names = ['Yamil','Tadeo', 'Facu', 'Braian']
-    owner_name = 'Yamil'
-    is_active = True
-    room = RoomOut(room_id=room_id,
-                   room_name=room_name,
-                   players_expected=players_expected,
-                   players_names=players_names,
-                   owner_name=owner_name,
-                   is_active=is_active)
-    ROOMS.append(room.model_dump())
-    matchIn = MatchIn(room_id=room_id)
+    matchIn = MatchIn(room_id=3)
     response = client.post("/matchs/create_match", json=matchIn.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() not in MATCHS

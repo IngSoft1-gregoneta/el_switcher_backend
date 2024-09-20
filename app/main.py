@@ -130,7 +130,7 @@ async def get_rooms():
 async def create_match(matchIn: MatchIn):
     try:
         match = Match(matchIn.room_id)
-        MATCHS.append(match.json())    
-        return match.json()
+        MATCHS.append(match.model_dump(mode="json"))    
+        return match.model_dump(mode="json")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
