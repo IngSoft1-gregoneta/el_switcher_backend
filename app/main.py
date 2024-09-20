@@ -125,7 +125,7 @@ def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: 
             is_active=room["is_active"]
         )
 
-        return roomOut 
+        return roomOut.model_dump()
     
     except Exception as e:
         print(f"Error: {e}")
