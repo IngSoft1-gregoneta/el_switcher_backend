@@ -21,22 +21,25 @@ class Match(BaseModel):
         super().__init__(match_id=match_id, board=board, players=players)
         self.validate_match()
 
-    def validate_match(self):
+    def validate_room(self, match_id: int) -> List[str]:
         rooms_whit_match_id = 0   
         for room in ROOMS:
-            if room["room_id"] == self.match_id:
+            if room["room_id"] == match_id:
                  room_of_match = room
                  rooms_whit_match_id = rooms_whit_match_id + 1
         if rooms_whit_match_id != 1:
             raise ValueError("There must be exactly one room per match")  
         for match in MATCHS:
-            if match["match_id"] == self.match_id:
+            if match["match_id"] == match_id:
                 raise ValueError("Can not be more than a match with same id")  
-        if not len(self.players) in range(2, 5):
-            raise ValueError("There are not between 2 and 4 players")   
-        turns_count = sum(player.has_turn for player in self.players)
+        if not len(room_of_match["players_names"]) in range(2, 5):
+            raise ValueError("There are not between 2 and 4 players") 
         if room_of_match["players_expected"] != len(room_of_match["players_names"]):
-            raise ValueError("There must be exactly players expected amount of players")      
+            raise ValueError("There must be exactly players expected amount of players")  
+        return room_of_match["players_names"]
+ 
+    def validate_match(self):
+        turns_count = sum(player.has_turn for player in self.players)
         if turns_count != 1:
             raise ValueError("There must be exactly one player with the turn")      
 
@@ -44,10 +47,7 @@ class Match(BaseModel):
         return Board(match_id)
 
     def create_players(self, match_id: int) -> List[Player]:
-        players_names = []
-        for room in ROOMS:
-            if room["room_id"] == match_id:
-                players_names = room["players_names"]
+        players_names = self.validate_room(match_id)
         players = []
         index = 0
         for player_name in players_names:
