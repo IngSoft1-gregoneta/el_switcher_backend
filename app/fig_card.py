@@ -6,6 +6,7 @@ class CardColor(Enum):
     WHITE = "White"
     BLUE = "Blue"
 
+    
 class FigType(Enum):
     # White figs (Tetris figs)
     T = "T"

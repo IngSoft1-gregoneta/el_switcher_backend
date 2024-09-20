@@ -1,9 +1,26 @@
-from match import Match
+from match import *
+from room import * 
+
 
 def test_match_2_players():
+    room_id = 1
+    room_name = "Room 1"
+    players_expected = 2
+    players_names = ['Yamil','Tadeo']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     has_turn_count = 0
     try:
-        match = Match(match_id=1,players_names=['Yamil','Tadeo'])
+        match = Match(match_id=room_id)
+        MATCHS.append(match.model_dump())
+        assert match.match_id == room_id
         for player in match.players:
             fig_deck_len = len(player.fig_cards)
             mov_deck_len = len(player.mov_cards)
@@ -15,9 +32,24 @@ def test_match_2_players():
         assert False, f"Error: {e}"
 
 def test_match_3_players():
+    room_id = 2
+    room_name = "Room 2"
+    players_expected = 3
+    players_names = ['Yamil','Tadeo', 'Brian']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     has_turn_count = 0
     try:
-        match = Match(match_id=1,players_names=['Yamil','Tadeo', 'Braian'])
+        match = Match(match_id=room_id)
+        MATCHS.append(match.model_dump())
+        assert match.match_id == room_id
         for player in match.players:
             fig_deck_len = len(player.fig_cards)
             mov_deck_len = len(player.mov_cards)
@@ -29,9 +61,24 @@ def test_match_3_players():
         assert False, f"Error: {e}"
 
 def test_match_4_players():
+    room_id = 3
+    room_name = "Room 3"
+    players_expected = 4
+    players_names = ['Yamil','Tadeo', 'Brian', 'Facu']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     has_turn_count = 0
     try:
-        match = Match(match_id=1,players_names=['Yamil','Tadeo', 'Braian', 'Facu'])
+        match = Match(match_id=room_id)
+        MATCHS.append(match.model_dump())
+        assert match.match_id == room_id
         for player in match.players:
             fig_deck_len = len(player.fig_cards)
             mov_deck_len = len(player.mov_cards)
@@ -43,24 +90,91 @@ def test_match_4_players():
         assert False, f"Error: {e}"
 
 def test_match_a_player():
+    room_id = 4
+    room_name = "Room 4"
+    players_expected = 1
+    players_names = ['Yamil']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     try:
-        match = Match(match_id=1,players_names=['Yamil'])
+        match = Match(match_id=room_id)
         assert False
     except ValueError as e:
         assert True
 
 def test_match_5_players():
+    room_id = 5
+    room_name = "Room 1"
+    players_expected = 5
+    players_names = ['Yamil','Tadeo','Grego','Facu','Braian']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     try:
-        match = Match(match_id=1,players_names=['Yamil','Tadeo','Grego','Facu','Braian'])
+        match = Match(match_id=room_id)
+        assert False
+    except ValueError as e:
+        assert True
+
+def test_match_without_room():
+    room_id = 7
+    room_name = "Room 7"
+    players_expected = 4
+    players_names = ['Yamil','Tadeo','Grego','Facu']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
+    try:
+        match = Match(match_id=8)
+        assert False
+    except ValueError as e:
+        assert True
+
+def test_dup_match():
+    try:
+        Match(match_id=1) # theese already added in MATCHS
+        Match(match_id=2)
+        Match(match_id=3)
         assert False
     except ValueError as e:
         assert True
 
 
-def test_match_dup_players():
+def test_no_full_room():
+    room_id = 10
+    room_name = "Room 7"
+    players_expected = 4
+    players_names = ['Yamil','Tadeo','Grego']
+    owner_name = 'Yamil'
+    is_active = True
+    room = RoomOut(room_id=room_id,
+                   room_name=room_name,
+                   players_expected=players_expected,
+                   players_names=players_names,
+                   owner_name=owner_name,
+                   is_active=is_active)
+    ROOMS.append(room.model_dump())
     try:
-        match = Match(match_id=1,players_names=['Yamil','Yamil','Grego','Facu'])
+        match = Match(match_id=10)
         assert False
     except ValueError as e:
         assert True
-

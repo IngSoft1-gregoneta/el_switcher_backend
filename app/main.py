@@ -10,6 +10,7 @@ from manager import manager
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
 from room import *
+from match import *
 from typing import Union
 
 app = FastAPI()
@@ -139,3 +140,14 @@ async def get_rooms():
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+
+# Define endpoint to create a room
+@app.post("/matchs/create_match",
+          status_code=status.HTTP_201_CREATED)
+async def create_match(matchIn: MatchIn):
+    try:
+        match = Match(matchIn.room_id)
+        MATCHS.append(match.model_dump(mode="json"))    
+        return match.model_dump(mode="json")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
