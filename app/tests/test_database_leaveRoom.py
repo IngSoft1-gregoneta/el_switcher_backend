@@ -53,7 +53,7 @@ def test_leave_room1():
                          "is_active": True
                          }
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert player_name not in repo.get_room_by_id(room_id).players_names
     assert response.json() == expected_response
@@ -67,7 +67,7 @@ def test_leave_room2():
     
     expected_response = {"message": "There is not such a player"}
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     
     assert player_name not in repo.get_room_by_id(room_id).players_names
     assert response.status_code == status.HTTP_202_ACCEPTED
@@ -82,7 +82,7 @@ def test_leave_noroom():
     
     expected_response = {"message": "Room not found"}
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     assert repo.get_room_by_id(room_id) == None
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response

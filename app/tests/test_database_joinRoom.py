@@ -43,7 +43,7 @@ def test_join_room1():
     room_id = 1
     player_name = "Tito"
     
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     expected_response = {"room_id": 1,
                          "room_name": "Room 1",
                          "players_expected": 3,
@@ -62,7 +62,7 @@ def test_same_name():
     room_id = 1
     
     player_name = "Yamil"
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     expected_response = {"message": "The name already exists, choose another"} 
     
     assert player_name in repo.get_room_by_id(room_id).players_names
@@ -75,7 +75,7 @@ def test_join_room2():
     room_id = 1 
     player_name = "Tadeo"
     
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     expected_response =     expected_response = {"room_id": 1,
                          "room_name": "Room 1",
                          "players_expected": 3,
@@ -95,7 +95,7 @@ def test_join_full_room():
     player_name = "Mou"
     
     expected_response = {"message": "Room is full"}
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     
     assert repo.get_room_by_id(room_id).players_names == ["Yamil","Tito","Tadeo"]
     assert repo.get_room_by_id(room_id).room_id == 1

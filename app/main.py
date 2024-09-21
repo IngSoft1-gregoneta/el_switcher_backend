@@ -28,6 +28,7 @@ app.add_middleware(
 manager = manager.ConnectionManager()
 # Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
 user_socket = {}
+rooms_socket = {}
 
 @app.websocket("/ws")
 async def websocket_endpoint(
@@ -41,7 +42,20 @@ async def websocket_endpoint(
             data = await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        
+
+
+@app.websocket("/ws/join_room/{room_id}")
+async def websocket_for_room(websocket: WebSocket, room_id: int):
+    # logger.debug(user_id)
+    await manager.connect(websocket)
+    rooms_socket[room_id] = websocket
+    try:
+        while True:
+            data = await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
 @app.get("/get_id")
 def get_id():
     return uuid4()
@@ -62,7 +76,7 @@ async def create_room(new_room: RoomIn) -> RoomOut:
     try:
         
         result = repo.create_room(new_room)
-       
+        await manager.broadcast("Game created")
         return result
 
     except Exception as e:
@@ -70,7 +84,7 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
 # endpoint for room leave request 
-@app.put("/rooms/leave",
+@app.put("/rooms/leave/{room_id}/{player_name}",
         response_model=Union[RoomOut,dict],
         status_code=status.HTTP_202_ACCEPTED)
 async def leave_room_endpoint(room_id: int, player_name: str):
@@ -81,6 +95,10 @@ async def leave_room_endpoint(room_id: int, player_name: str):
             return {"message": "Room not found"}
         if not(player_name in room.players_names):
             return {"message": "There is not such a player"}
+        try:
+            await manager.send_personal_message("player leave room", rooms_socket[room_id])
+        except Exception as e:
+            print(f"Error: {e}")
         repo.update_players(room.players_names,player_name,room_id,"remove")
         return repo.get_room_by_id(room_id)
     
@@ -88,7 +106,7 @@ async def leave_room_endpoint(room_id: int, player_name: str):
         print(f"Error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
-@app.put("/rooms/join",
+@app.put("/rooms/join/{room_id}/{player_name}",
         response_model=Union[RoomOut,dict],
         status_code=status.HTTP_202_ACCEPTED)
 async def join_room_endpoint(room_id: int, player_name: str):
@@ -106,6 +124,15 @@ async def join_room_endpoint(room_id: int, player_name: str):
             return {"message": "The name already exists, choose another"}
         
         repo.update_players(room.players_names,player_name,room_id,"add")
+        
+        try:
+            await manager.broadcast("a room change")
+            await manager.send_personal_message(
+                "player join room", rooms_socket[room_id]
+            )
+        except Exception as e:
+            print(f"Error: {e}")
+        
         return repo.get_room_by_id(room_id)
     
     except Exception as e:
@@ -133,3 +160,23 @@ async def create_match(matchIn: MatchIn):
         return repo.get_match_by_id(matchIn.room_id).model_dump(mode="json")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
+    
+@app.get("/room/{room_id}")
+async def get_room_data(
+    room_id: int,
+) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
+    try:
+        repo = RoomRepository()
+        room = repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return room
+    except Exception as e:
+        print(f"Error: {e}")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
