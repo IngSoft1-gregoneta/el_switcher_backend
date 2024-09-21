@@ -127,10 +127,8 @@ class MatchRepository:
                 return None
 
             # Deserializar el tablero
-            print("\n\nhere\n\n")
             board_data = matchdb.board
             tiles_db = board_data[0]
-            print("\n\nhere2\n\n")
             tileslist = []
             for tile in tiles_db:
                 tileslist.append(Tile(TileColor(tile["tile_color"]), 
@@ -139,12 +137,10 @@ class MatchRepository:
                                   )
                             )
             board_db = Board.model_construct(match_id = board_data[1], tiles = tileslist)
-            print("\n\nhere3\n\n")
         
             # Deserializar jugadores
             players_db = []
             players_data = matchdb.players
-            print("\n\nhere4\n\n")
             for player_data in players_data:    
                 player_data_id = player_data["match_id"]
                 player_data_name = player_data["player_name"]
