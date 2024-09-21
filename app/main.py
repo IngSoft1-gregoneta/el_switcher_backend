@@ -9,8 +9,8 @@ from manager import manager
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
-from room import *
-from match import *
+from models.room import *
+from models.match import *
 from typing import Union
 
 app = FastAPI()
@@ -126,9 +126,10 @@ async def get_rooms():
 @app.post("/matchs/create_match",
           status_code=status.HTTP_201_CREATED)
 async def create_match(matchIn: MatchIn):
+    repo = MatchRepository()
     try:
-        match = Match(matchIn.room_id)
-        MATCHS.append(match.model_dump(mode="json"))    
-        return match.model_dump(mode="json")
+        match = MatchOut(matchIn.room_id)
+        repo.create_match(match)
+        return repo.get_match_by_id(matchIn.room_id).model_dump(mode="json")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")

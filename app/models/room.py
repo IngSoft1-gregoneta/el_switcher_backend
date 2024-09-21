@@ -1,21 +1,7 @@
 import json
 from pydantic import BaseModel, Field 
 from typing import List
-from sqlalchemy import Column
-from sqlalchemy.sql.sqltypes import Integer,String,Boolean,JSON
-from querymanager import *
-
-
-class Room(Base):
-    __tablename__ = "Rooms"
-    room_id = Column(Integer, primary_key = True)
-    room_name = Column(String(255))
-    players_expected = Column(Integer)
-    owner_name =  Column(String(255))
-    players_names = Column(JSON)
-    is_active = Column(Boolean)
-
-Base.metadata.create_all(bind=engine)
+from config.repositorymanager import Session,Room
 
 
 class RoomIn(BaseModel):

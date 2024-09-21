@@ -1,4 +1,4 @@
-from tile import Tile, TileColor
+from models.tile import Tile, TileColor
 
 def test_valid_tile_color_enum():
     # Verify tile created in a normal case
