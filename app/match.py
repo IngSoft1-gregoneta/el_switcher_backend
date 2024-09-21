@@ -83,7 +83,7 @@ def get_match_by_id(input: id):
     for match in MATCHS:
         if match["match_id"] == input:
             return match
-    raise ValueError("There is no match with id: {input}")
+    raise ValueError(f"There is no match with id: {input}")
 
 def check_turn(match: Match) -> Player:
     for player in match.players:
