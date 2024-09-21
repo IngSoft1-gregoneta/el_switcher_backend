@@ -78,3 +78,27 @@ class Match(BaseModel):
 
 MATCHS = [
 ]
+
+def get_match_by_id(input: id):
+    for match in MATCHS:
+        if match["match_id"] == input:
+            return match
+    raise ValueError("There is no match with id: {input}")
+
+def check_turn(match: Match) -> Player:
+    for player in match.players:
+        if player.has_turn == True:
+            return player
+    raise ValueError("No player has the turn")
+
+def next_turn(match: Match):
+    done = False
+    for i, player in match.players:
+        if player.has_turn:
+            player.has_turn = False
+            next_player_index: int = (i + 1) % len(match.players)
+            match.players[next_player_index].has_turn = True
+            done = True
+            break
+    if not done:
+        raise ValueError("An error occured when trying to pass to the next turn")
