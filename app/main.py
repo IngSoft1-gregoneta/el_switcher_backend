@@ -235,7 +235,12 @@ async def leave_room_endpoint(room_id: int, player_name: str):
         if not (player_name in room["players_names"]):
             return {"message": "There is not such a player"}
 
-        await manager.send_personal_message("player leave room", rooms_socket[room_id])
+        try:
+            await manager.send_personal_message(
+                "player leave room", rooms_socket[room_id]
+            )
+        except Exception as e:
+            print(e)
 
         room["players_names"].remove(player_name)
         return {"message": f"The player {player_name} has left the room {room_id}"}
