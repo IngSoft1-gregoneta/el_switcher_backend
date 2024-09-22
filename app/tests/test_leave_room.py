@@ -22,28 +22,30 @@ def TestRoom():
 
 # room 1
 
-# test: para asegurarse que un jugador puede unirse a una partida, devuelve HTTP200OK y mensaje advirtiendo
+# test: para asegurarse que un jugador puede abandonar una sala, devuelve HTTP200OK y mensaje advirtiendo
 def test_leave_room1():
     TestRoom()
     room_id = 0
     player_name = "Braian"
     expected_response = {"message": f"The player {player_name} has left the room {room_id}"}
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert player_name not in ROOMS[room_id]["players_names"]
     assert response.json() == expected_response
     
-# test: El jugador no existe en la partida, devuelve http200OK pero mensaje advirtiendo
+# test: El jugador no existe en la sala, devuelve http200OK pero mensaje advirtiendo
 def test_leave_room2():
     TestRoom()
     room_id = 0
     player_name = "Tadeo"
     
-    expected_response = {"message": "There is not such a player"}
+    expected_response = {"detail": "There is not such a player"}
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
-    assert response.status_code == status.HTTP_200_OK
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
+
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
        
 # test: sala inexistente, devuelve HTTP200Ok y mensaje advirtiendo
@@ -52,9 +54,10 @@ def test_leave_noroom():
     room_id = 2
     player_name = "Yamil"
     
-    expected_response = {"message": "Room not found"}
+    expected_response = {"detail": "Room not found"}
     
-    response = client.put(f"/rooms/leave/?room_id={room_id}&player_name={player_name}")
-    assert response.status_code == status.HTTP_200_OK
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
+
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
     

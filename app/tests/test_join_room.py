@@ -31,7 +31,8 @@ def test_join_room1():
                          "owner_name": "Yamil",
                          "is_active": True
                          }
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     
     assert ROOMS[0]["players_names"] == ["Yamil", "Tito"]
     assert ROOMS[0]["room_id"] == 1
@@ -50,8 +51,9 @@ def test_join_room2():
                          "owner_name": "Yamil",
                          "is_active": True
                          }
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
     
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
+
     assert ROOMS[0]["players_names"] == ["Yamil","Tito","Tadeo"]
     assert ROOMS[0]["room_id"] == 1
     assert response.status_code == status.HTTP_202_ACCEPTED
@@ -62,13 +64,13 @@ def test_join_full_room():
     room_id = 1    
     player_name = "Mou"
     
-    expected_response = {"message": "Room is full"}
+    expected_response = {"detail": "Room is full"}
     
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}")
     
     assert ROOMS[0]["players_names"] == ["Yamil", "Tito", "Tadeo"] # deberia seguir siendo esta la lista
     assert ROOMS[0]["room_id"] == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
 
 # test para asegurarse de que no haya duplicados de nombres de jugadores
@@ -78,10 +80,11 @@ def test_same_name():
     ROOMS[0]["players_names"] = ["Tito"]  # simular que el jugador ya está en la sala
     
     player_name = "Tito"
-    expected_response = {"message": "The name already exists, choose another"}
-    response = client.put(f"/rooms/join?room_id={room_id}&player_name={player_name}")  
+    expected_response = {"detail":"Player name is already on the room, choose another name"}
+    
+    response = client.put(f"/rooms/join/{room_id}/{player_name}") 
     
     assert ROOMS[0]["players_names"] == ["Tito"] # no deberia dejar unir a otro jugador con el mismo nombre
     assert ROOMS[0]["room_id"] == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response

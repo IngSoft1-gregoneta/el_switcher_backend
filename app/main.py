@@ -175,21 +175,18 @@ async def join_room_endpoint(
         room = get_room_by_id(room_id)
 
         if room is None:
-            print(1)
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
         if len(room["players_names"]) >= room["players_expected"]:
-            print(2)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT, detail="Room is full"
             )
 
         # verificar si el jugador ya está en la sala
         if player_name in room["players_names"]:
-            print(3)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Player name is already on the room",
+                detail="Player name is already on the room, choose another name"
             )
 
         # añadir el jugador a la sala
@@ -224,25 +221,44 @@ async def join_room_endpoint(
         )
 
 
+from fastapi import HTTPException
+
 # endpoint for room leave request
 @app.put("/rooms/leave/{room_id}/{player_name}")
 async def leave_room_endpoint(room_id: int, player_name: str):
     try:
         room = get_room_by_id(room_id)
 
-        if room == None:
-            return {"message": "Room not found"}
-        if not (player_name in room["players_names"]):
-            return {"message": "There is not such a player"}
+        if room is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room not found"
+            )
 
-        await manager.send_personal_message("player leave room", rooms_socket[room_id])
+        if player_name not in room["players_names"]:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="There is not such a player"
+            )
+
+        # verificar si existe el socket para la sala antes de enviar un mensaje
+        if room_id in rooms_socket:
+            try:
+                await manager.send_personal_message("player leave room", rooms_socket[room_id])
+            except Exception as e:
+                print(f"Error al enviar el mensaje al socket: {e}")
 
         room["players_names"].remove(player_name)
         return {"message": f"The player {player_name} has left the room {room_id}"}
 
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+
     except Exception as e:
+        # si ocurre cualquier otro error, lanzamos un error 500
         print(f"Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+
+
