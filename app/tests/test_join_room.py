@@ -1,22 +1,26 @@
-from fastapi.testclient import TestClient
 from fastapi import status
-from room import *
+from fastapi.testclient import TestClient
 from main import app
+from room import *
 
 client = TestClient(app)
+
 
 def test_room():
     ROOMS.clear()
     room_name = "Room 1"
     players_expected = 3
     owner_name = "Yamil"
-    roomOut = RoomOut(room_id=1,
-                          room_name=room_name,
-                          players_expected=players_expected,
-                          players_names=[owner_name],
-                          owner_name=owner_name,
-                          is_active=True)
+    roomOut = RoomOut(
+        room_id=1,
+        room_name=room_name,
+        players_expected=players_expected,
+        players_names=[owner_name],
+        owner_name=owner_name,
+        is_active=True,
+    )
     ROOMS.append(roomOut.model_dump())
+
 
 # test para asegurarse que un jugador puede unirse a una partida
 def test_join_room1():
@@ -39,9 +43,10 @@ def test_join_room1():
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response
 
+
 # test para que otro jugador se una a la misma partida
 def test_join_room2():
-    room_id = 1 
+    room_id = 1
     player_name = "Tadeo"
     
     expected_response = {"room_id": 1,
@@ -59,9 +64,10 @@ def test_join_room2():
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert response.json() == expected_response
 
+
 # test para evitar que otro jugador se una a una sala llena
 def test_join_full_room():
-    room_id = 1    
+    room_id = 1
     player_name = "Mou"
     
     expected_response = {"detail": "Room is full"}
@@ -78,7 +84,7 @@ def test_same_name():
     test_room()
     room_id = 1
     ROOMS[0]["players_names"] = ["Tito"]  # simular que el jugador ya está en la sala
-    
+
     player_name = "Tito"
     expected_response = {"detail":"Player name is already on the room, choose another name"}
     

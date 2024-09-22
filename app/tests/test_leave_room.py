@@ -1,10 +1,10 @@
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 from room import *
 
-from main import app
-
 client = TestClient(app)
+
 
 # primero creamos una sala para testear la funcionalidad de salirse a una
 def TestRoom():
@@ -12,13 +12,16 @@ def TestRoom():
     room_name = "Room 1"
     players_expected = 1
     owner_name = "Braian"
-    roomOut = RoomOut(room_id=0,
-                          room_name=room_name,
-                          players_expected=players_expected,
-                          players_names=[owner_name],
-                          owner_name=owner_name,
-                          is_active=True)
+    roomOut = RoomOut(
+        room_id=0,
+        room_name=room_name,
+        players_expected=players_expected,
+        players_names=[owner_name],
+        owner_name=owner_name,
+        is_active=True,
+    )
     ROOMS.append(roomOut.model_dump())
+
 
 # room 1
 
@@ -47,7 +50,8 @@ def test_leave_room2():
 
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
-       
+
+
 # test: sala inexistente, devuelve HTTP200Ok y mensaje advirtiendo
 def test_leave_noroom():
     TestRoom()
@@ -60,4 +64,4 @@ def test_leave_noroom():
 
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
-    
+
