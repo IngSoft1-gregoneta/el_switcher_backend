@@ -3,7 +3,7 @@
 from typing import Annotated, Optional, Union
 
 # Unique id
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import (
     Cookie,
@@ -37,35 +37,17 @@ app.add_middleware(
 )
 
 manager = ConnectionManager()
-# Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
-user_socket = {}
-rooms_socket = {}
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(
-    websocket: WebSocket, user_id: Annotated[str | None, Cookie()] = None
-):
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
     # logger.debug(user_id)
-    await manager.connect(websocket)
-    user_socket[user_id] = websocket
+    await manager.connect(user_id, websocket)
     try:
         while True:
             data = await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-
-@app.websocket("/ws/join_room/{room_id}")
-async def websocket_for_room(websocket: WebSocket, room_id: int):
-    # logger.debug(user_id)
-    await manager.connect(websocket)
-    rooms_socket[room_id] = websocket
-    try:
-        while True:
-            data = await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(user_id)
 
 
 # Define endpoint to get rooms list
@@ -137,7 +119,8 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         )
 
         ROOMS.append(roomOut.model_dump())
-        await manager.broadcast("Game created")
+
+        await manager.broadcast_not_playing("Game created")
 
         return roomOut.model_dump()
 
@@ -164,12 +147,12 @@ async def create_match(matchIn: MatchIn):
 
 # endpoint for join room
 @app.put(
-    "/rooms/join/{room_id}/{player_name}",
+    "/rooms/join/{room_id}/{player_name}/{user_id}",
     response_model=Union[RoomOut, dict],
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def join_room_endpoint(
-    room_id: int, player_name: str
+    room_id: int, player_name: str, user_id: UUID
 ) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
     try:
         room = get_room_by_id(room_id)
@@ -206,12 +189,13 @@ async def join_room_endpoint(
         )
 
         try:
-            await manager.broadcast("a room change")
-            await manager.send_personal_message(
-                "player join room", rooms_socket[room_id]
-            )
+            # TODO: BUG ACA CON BIND ROOM
+            print(user_id)
+            manager.bind_room(room_id, user_id)
+            await manager.broadcast_not_playing("a room change (join)")
+            await manager.broadcast_by_room(room_id, "player join room")
         except Exception as e:
-            print(e)
+            print("ERROR JOIN ", e)
 
         return roomOut.model_dump()
 
@@ -225,8 +209,8 @@ async def join_room_endpoint(
 
 
 # endpoint for room leave request
-@app.put("/rooms/leave/{room_id}/{player_name}")
-async def leave_room_endpoint(room_id: int, player_name: str):
+@app.put("/rooms/leave/{room_id}/{player_name}/{user_id}")
+async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         room = get_room_by_id(room_id)
 
@@ -235,14 +219,14 @@ async def leave_room_endpoint(room_id: int, player_name: str):
         if not (player_name in room["players_names"]):
             return {"message": "There is not such a player"}
 
-        try:
-            await manager.send_personal_message(
-                "player leave room", rooms_socket[room_id]
-            )
-        except Exception as e:
-            print(e)
-
         room["players_names"].remove(player_name)
+
+        manager.bind_room(room_id, user_id)
+        try:
+            await manager.broadcast_not_playing("a room change (leave)")
+            await manager.broadcast_by_room(room_id, "player leave room")
+        except Exception as e:
+            print("ERROR LEAVE ", e)
         return {"message": f"The player {player_name} has left the room {room_id}"}
 
     except Exception as e:
