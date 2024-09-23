@@ -28,6 +28,8 @@ app.add_middleware(
 manager = manager.ConnectionManager()
 # Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
 user_socket = {}
+rooms_socket = {}
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(
@@ -77,26 +79,17 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
-# endpoint for room leave request 
-@app.put("/rooms/leave/")
-def leave_room_endpoint(room_id: int, player_name: str):
+# Define endpoint to get rooms list
+@app.get("/rooms/")
+async def get_rooms():
     try:
-        room = get_room_by_id(room_id)
-
-        if room == None:
-            return {"message": "Room not found"}
-        if not(player_name in room["players_names"]):
-            return {"message": "There is not such a player"}
-        
-        room["players_names"].remove(player_name)
-        return {"message": f"The player {player_name} has left the room {room_id}"}
-    
+        return ROOMS
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 # endpoint for join room
-@app.put("/rooms/join",
+@app.put("/rooms/join/{room_id}/{player_name}",
          response_model=Union[RoomOut,dict],
          status_code=status.HTTP_202_ACCEPTED)
 def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: # union para que pueda devolver tanto RoomOut como un dict
@@ -104,14 +97,19 @@ def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: 
         room = get_room_by_id(room_id)
 
         if room is None:
-            return {"message": "Room not found"}
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
         if len(room["players_names"]) >= room["players_expected"]:
-            return {"message": "Room is full"}
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+            )
 
         # verificar si el jugador ya está en la sala
         if player_name in room["players_names"]:
-            return {"message": "The name already exists, choose another"}
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player name is already on the room, choose another name"
+            )
 
         # añadir el jugador a la sala
         room["players_names"].append(player_name)
@@ -127,19 +125,56 @@ def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: 
         )
 
         return roomOut.model_dump()
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
-# Define endpoint to get rooms list
-@app.get("/rooms/")
-async def get_rooms():
-    try:
-        return ROOMS
     except Exception as e:
-        print(f"Error: {e}")  # Debug error
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+from fastapi import HTTPException
+
+# endpoint for room leave request
+@app.put("/rooms/leave/{room_id}/{player_name}")
+async def leave_room_endpoint(room_id: int, player_name: str):
+    try:
+        room = get_room_by_id(room_id)
+
+        if room is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room not found"
+            )
+
+        if player_name not in room["players_names"]:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="There is not such a player"
+            )
+
+        # verificar si existe el socket para la sala antes de enviar un mensaje
+        if room_id in rooms_socket:
+            try:
+                await manager.send_personal_message("player leave room", rooms_socket[room_id])
+            except Exception as e:
+                print(f"Error al enviar el mensaje al socket: {e}")
+
+        room["players_names"].remove(player_name)
+        return {"message": f"The player {player_name} has left the room {room_id}"}
+
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+
+    except Exception as e:
+        # si ocurre cualquier otro error, lanzamos un error 500
+        print(f"Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
 
 # Define endpoint to create a room
 @app.post("/matchs/create_match",
@@ -151,3 +186,4 @@ async def create_match(matchIn: MatchIn):
         return match.model_dump(mode="json")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
+
