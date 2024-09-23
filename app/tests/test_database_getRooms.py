@@ -53,6 +53,5 @@ def test_basic_get():
     assert response.status_code == status.HTTP_200_OK
     # Check if room is correctly 
     assert response.json() == repo.get_rooms()
-    print(response.json())
     reset()
 reset()
