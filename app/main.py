@@ -79,26 +79,17 @@ async def create_room(new_room: RoomIn) -> RoomOut:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
-# endpoint for room leave request 
-@app.put("/rooms/leave/")
-def leave_room_endpoint(room_id: int, player_name: str):
+# Define endpoint to get rooms list
+@app.get("/rooms/")
+async def get_rooms():
     try:
-        room = get_room_by_id(room_id)
-
-        if room == None:
-            return {"message": "Room not found"}
-        if not(player_name in room["players_names"]):
-            return {"message": "There is not such a player"}
-        
-        room["players_names"].remove(player_name)
-        return {"message": f"The player {player_name} has left the room {room_id}"}
-    
+        return ROOMS
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 # endpoint for join room
-@app.put("/rooms/join",
+@app.put("/rooms/join/{room_id}/{player_name}",
          response_model=Union[RoomOut,dict],
          status_code=status.HTTP_202_ACCEPTED)
 def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: # union para que pueda devolver tanto RoomOut como un dict
@@ -184,4 +175,15 @@ async def leave_room_endpoint(room_id: int, player_name: str):
             detail="Internal Server Error",
         )
 
+
+# Define endpoint to create a room
+@app.post("/matchs/create_match",
+          status_code=status.HTTP_201_CREATED)
+async def create_match(matchIn: MatchIn):
+    try:
+        match = Match(matchIn.room_id)
+        MATCHS.append(match.model_dump(mode="json"))    
+        return match.model_dump(mode="json")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
 
