@@ -9,8 +9,8 @@ from manager import manager
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
 # data, methods and classes of a room
-from room import *
-from match import *
+from models.room import *
+from models.match import *
 from typing import Union
 
 app = FastAPI()
@@ -29,7 +29,6 @@ manager = manager.ConnectionManager()
 # Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
 user_socket = {}
 rooms_socket = {}
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(
@@ -53,137 +52,111 @@ def get_id():
           response_model=RoomOut,
           status_code=status.HTTP_201_CREATED)
 async def create_room(new_room: RoomIn) -> RoomOut:
+    repo = RoomRepository()
     if new_room.players_expected < 2 or new_room.players_expected > 4:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
-    for room in ROOMS:
-        if room["room_name"] == new_room.room_name:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players")
+    # Verificar si el nombre de la sala ya existe en la base de datos
+    existing_room = repo.check_for_names(new_room.room_name)
+    if existing_room:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room name already exists")
     
     try:
-        last_id = ROOMS[-1]['room_id'] if ROOMS else 0
-        new_id = last_id + 1
-
-        # Create a new room dict
-        roomOut = RoomOut(room_id=new_id,
-                          room_name=new_room.room_name,
-                          players_expected=new_room.players_expected,
-                          players_names=[new_room.owner_name],
-                          owner_name=new_room.owner_name,
-                          is_active=True)
-    
-        ROOMS.append(roomOut.model_dump())
-       
-        return roomOut.model_dump()
+        
+        result = repo.create_room(new_room)
+        await manager.broadcast("Game created")
+        return result
 
     except Exception as e:
         print(f"Error: {e}")  # Debug error
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
-# Define endpoint to get rooms list
-@app.get("/rooms/")
-async def get_rooms():
-    try:
-        return ROOMS
-    except Exception as e:
-        print(f"Error: {e}")  # Debug error
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-
-# endpoint for join room
-@app.put("/rooms/join/{room_id}/{player_name}",
-         response_model=Union[RoomOut,dict],
-         status_code=status.HTTP_202_ACCEPTED)
-def join_room_endpoint(player_name: str, room_id: int) -> Union[RoomOut, dict]: # union para que pueda devolver tanto RoomOut como un dict
-    try:
-        room = get_room_by_id(room_id)
-
-        if room is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-        if len(room["players_names"]) >= room["players_expected"]:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
-            )
-
-        # verificar si el jugador ya está en la sala
-        if player_name in room["players_names"]:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Player name is already on the room, choose another name"
-            )
-
-        # añadir el jugador a la sala
-        room["players_names"].append(player_name)
-
-        # crear una instancia de RoomOut con los datos actualizados
-        roomOut = RoomOut(
-            room_id=room["room_id"],
-            room_name=room["room_name"],
-            players_expected=room["players_expected"],
-            players_names=room["players_names"],  # todos los jugadores actuales
-            owner_name=room["owner_name"],
-            is_active=room["is_active"]
-        )
-
-        return roomOut.model_dump()
-
-    except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
-
-
-from fastapi import HTTPException
-
-# endpoint for room leave request
-@app.put("/rooms/leave/{room_id}/{player_name}")
+# endpoint for room leave request 
+@app.put("/rooms/leave/{room_id}/{player_name}",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
 async def leave_room_endpoint(room_id: int, player_name: str):
+    repo = RoomRepository()
     try:
-        room = get_room_by_id(room_id)
-
-        if room is None:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Room not found"
-            )
-
-        if player_name not in room["players_names"]:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="There is not such a player"
-            )
-
-        # verificar si existe el socket para la sala antes de enviar un mensaje
+        room = repo.get_room_by_id(room_id)
+        if room == None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not(player_name in room.players_names):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         if room_id in rooms_socket:
             try:
                 await manager.send_personal_message("player leave room", rooms_socket[room_id])
             except Exception as e:
                 print(f"Error al enviar el mensaje al socket: {e}")
-
-        room["players_names"].remove(player_name)
-        return {"message": f"The player {player_name} has left the room {room_id}"}
-
+                
+        repo.update_players(room.players_names,player_name,room_id,"remove")
+        return repo.get_room_by_id(room_id)
+    
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
         raise http_exc
+    
+@app.put("/rooms/join/{room_id}/{player_name}",
+        response_model=Union[RoomOut,dict],
+        status_code=status.HTTP_202_ACCEPTED)
+async def join_room_endpoint(room_id: int, player_name: str):
+    repo = RoomRepository()
+    try:
+        room = repo.get_room_by_id(room_id)
 
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+        if len(room.players_names) == room.players_expected:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+            )
+        
+        if player_name in room.players_names:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player name is already on the room, choose another name"
+            )
+        
+        repo.update_players(room.players_names,player_name,room_id,"add")
+        
+        return repo.get_room_by_id(room_id)
+    
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+    
+# Define endpoint to get rooms list
+@app.get("/rooms/")
+async def get_rooms():
+    repo = RoomRepository()
+    try:
+        return repo.get_rooms()
     except Exception as e:
-        # si ocurre cualquier otro error, lanzamos un error 500
-        print(f"Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
-
+        print(f"Error: {e}")  # Debug error
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 # Define endpoint to create a room
 @app.post("/matchs/create_match",
           status_code=status.HTTP_201_CREATED)
 async def create_match(matchIn: MatchIn):
+    repo = MatchRepository()
     try:
-        match = Match(matchIn.room_id)
-        MATCHS.append(match.model_dump(mode="json"))    
-        return match.model_dump(mode="json")
+        match = MatchOut(matchIn.room_id)
+        repo.create_match(match)
+        return repo.get_match_by_id(matchIn.room_id).model_dump(mode="json")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
-
+    
+@app.get("/room/{room_id}")
+async def get_room_data(
+    room_id: int,
+) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
+    try:
+        repo = RoomRepository()
+        room = repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return room
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+            raise http_exc

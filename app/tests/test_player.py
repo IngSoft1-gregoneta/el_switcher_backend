@@ -1,6 +1,6 @@
-from player import Player
-from mov_card import MovCard, MovType
-from fig_card import FigCard, CardColor, FigType
+from models.player import Player
+from models.mov_card import MovCard, MovType
+from models.fig_card import FigCard, CardColor, FigType
 import random
 
 white_figs = list(FigType)[:7]
