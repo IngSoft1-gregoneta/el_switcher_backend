@@ -26,6 +26,7 @@ app.add_middleware(
 )
 
 manager = manager.ConnectionManager()
+
 # Aca podriamos asignar el mismo socket para el grupo de jugadores en la misma partida?
 user_socket = {}
 rooms_socket = {}
@@ -83,10 +84,12 @@ async def leave_room_endpoint(room_id: int, player_name: str):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         if not(player_name in room.players_names):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        try:
-            await manager.send_personal_message("player leave room", rooms_socket[room_id])
-        except Exception as e:
-            print(f"Error: {e}")
+        if room_id in rooms_socket:
+            try:
+                await manager.send_personal_message("player leave room", rooms_socket[room_id])
+            except Exception as e:
+                print(f"Error al enviar el mensaje al socket: {e}")
+                
         repo.update_players(room.players_names,player_name,room_id,"remove")
         return repo.get_room_by_id(room_id)
     
@@ -103,6 +106,7 @@ async def join_room_endpoint(room_id: int, player_name: str):
         room = repo.get_room_by_id(room_id)
 
         if room is None:
+            print(1)
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
         if len(room.players_names) == room.players_expected:
@@ -117,14 +121,6 @@ async def join_room_endpoint(room_id: int, player_name: str):
             )
         
         repo.update_players(room.players_names,player_name,room_id,"add")
-        
-        try:
-            await manager.broadcast("a room change")
-            await manager.send_personal_message(
-                "player join room", rooms_socket[room_id]
-            )
-        except Exception as e:
-            print(f"Error: {e}")
         
         return repo.get_room_by_id(room_id)
     

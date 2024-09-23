@@ -78,7 +78,6 @@ def test_leave_noroom():
     room_id = 2
     player_name = "Yamil"
     
-    expected_response = {"message": "Room not found"}
     
     response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     assert repo.get_room_by_id(room_id) == None
