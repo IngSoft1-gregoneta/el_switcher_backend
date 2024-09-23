@@ -58,22 +58,20 @@ def test_leave_room1():
     assert player_name not in repo.get_room_by_id(room_id).players_names
     assert response.json() == expected_response
     reset()
-# test: El jugador no existe en la partida, devuelve http200OK pero mensaje advirtiendo
+# test: El jugador no existe en la partida
 def test_leave_room2():
     reset()
     generate_test_room()
     room_id = 1
     player_name = "Tadeo"
     
-    expected_response = {"message": "There is not such a player"}
     
     response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     
     assert player_name not in repo.get_room_by_id(room_id).players_names
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()   
-# test: sala inexistente, devuelve HTTP200Ok y mensaje advirtiendo
+# test: sala inexistente
 def test_leave_noroom():
     reset()
     generate_test_room()
@@ -84,7 +82,6 @@ def test_leave_noroom():
     
     response = client.put(f"/rooms/leave/{room_id}/{player_name}")
     assert repo.get_room_by_id(room_id) == None
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()
 reset()

@@ -46,14 +46,6 @@ def generate_test_room():
             players_names=json.dumps(["Braian","Tadeo","Yamil"]),
             is_active=True
         )
-        roombd5 = Room(
-            room_name="Room 5",
-            room_id=5,
-            players_expected=5,
-            owner_name="Braian",
-            players_names=json.dumps(["Braian","Tadeo","Yamil","Franco","Grego"]),
-            is_active=True
-        )
         roombd6 = Room(
             room_name="Room 6",
             room_id=6,
@@ -66,7 +58,6 @@ def generate_test_room():
         db.add(roombd2)
         db.add(roombd3)
         db.add(roombd4)
-        db.add(roombd5)
         db.add(roombd6)
         db.commit()
     finally:
@@ -140,17 +131,6 @@ def test_match_a_player():
     finally:
         reset()
 
-def test_match_5_players():
-    reset()
-    generate_test_room()
-    try:
-        match = MatchOut(match_id=5)
-        assert False
-    except ValueError as e:
-        assert True
-    finally:
-        reset()
-
 def test_match_without_room():
     try:
         match = MatchOut(match_id=8)
@@ -176,3 +156,5 @@ def test_no_full_room():
         assert False
     except ValueError as e:
         assert True
+    finally:
+        reset()

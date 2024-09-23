@@ -44,18 +44,6 @@ async def websocket_endpoint(
         manager.disconnect(websocket)
 
 
-@app.websocket("/ws/join_room/{room_id}")
-async def websocket_for_room(websocket: WebSocket, room_id: int):
-    # logger.debug(user_id)
-    await manager.connect(websocket)
-    rooms_socket[room_id] = websocket
-    try:
-        while True:
-            data = await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-
 @app.get("/get_id")
 def get_id():
     return uuid4()
@@ -92,9 +80,9 @@ async def leave_room_endpoint(room_id: int, player_name: str):
     try:
         room = repo.get_room_by_id(room_id)
         if room == None:
-            return {"message": "Room not found"}
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         if not(player_name in room.players_names):
-            return {"message": "There is not such a player"}
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         try:
             await manager.send_personal_message("player leave room", rooms_socket[room_id])
         except Exception as e:
@@ -102,9 +90,9 @@ async def leave_room_endpoint(room_id: int, player_name: str):
         repo.update_players(room.players_names,player_name,room_id,"remove")
         return repo.get_room_by_id(room_id)
     
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
     
 @app.put("/rooms/join/{room_id}/{player_name}",
         response_model=Union[RoomOut,dict],
@@ -115,13 +103,18 @@ async def join_room_endpoint(room_id: int, player_name: str):
         room = repo.get_room_by_id(room_id)
 
         if room is None:
-            return {"message": "Room not found"}
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
         if len(room.players_names) == room.players_expected:
-            return {"message": "Room is full"}
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+            )
         
         if player_name in room.players_names:
-            return {"message": "The name already exists, choose another"}
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player name is already on the room, choose another name"
+            )
         
         repo.update_players(room.players_names,player_name,room_id,"add")
         
@@ -135,10 +128,10 @@ async def join_room_endpoint(room_id: int, player_name: str):
         
         return repo.get_room_by_id(room_id)
     
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+    
 # Define endpoint to get rooms list
 @app.get("/rooms/")
 async def get_rooms():
@@ -171,12 +164,6 @@ async def get_room_data(
         if room is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         return room
-    except Exception as e:
-        print(f"Error: {e}")
-        if isinstance(e, HTTPException):
-            raise e
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
-
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+            raise http_exc

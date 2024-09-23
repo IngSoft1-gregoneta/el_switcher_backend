@@ -63,11 +63,11 @@ def test_same_name():
     
     player_name = "Yamil"
     response = client.put(f"/rooms/join/{room_id}/{player_name}")
-    expected_response = {"message": "The name already exists, choose another"} 
+    expected_response = {'detail': 'Player name is already on the room, choose another name'}
     
     assert player_name in repo.get_room_by_id(room_id).players_names
     assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
 
 # test para que otro jugador se una a la misma partida
@@ -94,12 +94,12 @@ def test_join_full_room():
     room_id = 1    
     player_name = "Mou"
     
-    expected_response = {"message": "Room is full"}
+    expected_response = {'detail': 'Room is full'}
     response = client.put(f"/rooms/join/{room_id}/{player_name}")
     
     assert repo.get_room_by_id(room_id).players_names == ["Yamil","Tito","Tadeo"]
     assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
     reset()
 reset()
