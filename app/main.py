@@ -18,7 +18,7 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
-from app.manager.manager import ConnectionManager
+from manager.manager import ConnectionManager
 from models.match import *
 from models.room import *
 
@@ -89,10 +89,12 @@ async def get_rooms():
 
 # Define endline to create a new room
 @app.post(
-    "/rooms/create_room", response_model=RoomOut, status_code=status.HTTP_201_CREATED
+    "/rooms/create_room/{user_id}",
+    response_model=RoomOut,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_room(
-    new_room: RoomIn,
+    new_room: RoomIn, user_id: UUID
 ) -> RoomOut | dict[str, Any]:  # TODO: Porq no volver RoomOut directamente?? Se puede ?
     repo = RoomRepository()
     if new_room.players_expected < 2 or new_room.players_expected > 4:
@@ -108,7 +110,12 @@ async def create_room(
 
     try:
         result = repo.create_room(new_room)
-        await manager.broadcast_not_playing("LIST")
+        # TODO: Hacer un mock de WS para los test, asi no dejamos este try horrible
+        try:
+            manager.bind_room(result["room_id"], user_id)
+            await manager.broadcast_not_playing("LISTA")
+        except Exception as e:
+            print("ERROR JOIN ", e)
         return result
     except Exception as e:
         print(f"Error: {e}")  # Debug error
@@ -116,36 +123,6 @@ async def create_room(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
-
-# endpoint for room leave request
-@app.put(
-    "/rooms/leave/{room_id}/{player_name}/{user_id}",
-    response_model=Union[RoomOut, dict],
-    status_code=status.HTTP_202_ACCEPTED,
-)
-async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
-    repo = RoomRepository()
-    try:
-        room = repo.get_room_by_id(room_id)
-        if room == None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        if not (player_name in room.players_names):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-        try:
-            manager.unbind_room(room_id, user_id)
-            await manager.broadcast_not_playing("LIST")
-            await manager.broadcast_by_room(room_id, "ROOM")
-        except Exception as e:
-            print(f"Error al enviar el mensaje al socket: {e}")
-
-        repo.update_players(room.players_names, player_name, room_id, "remove")
-        return repo.get_room_by_id(room_id)
-
-    except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
-        raise http_exc
 
 
 # TODO: This url change so i gess test must change
@@ -182,6 +159,36 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
         except Exception as e:
             print("ERROR JOIN ", e)
 
+        return repo.get_room_by_id(room_id)
+
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+
+
+# endpoint for room leave request
+@app.put(
+    "/rooms/leave/{room_id}/{player_name}/{user_id}",
+    response_model=Union[RoomOut, dict],
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+    repo = RoomRepository()
+    try:
+        room = repo.get_room_by_id(room_id)
+        if room == None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not (player_name in room.players_names):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+        try:
+            manager.unbind_room(room_id, user_id)
+            await manager.broadcast_not_playing("LISTA")
+            await manager.broadcast_by_room(room_id, "ROOM")
+        except Exception as e:
+            print(f"Error al enviar el mensaje al socket: {e}")
+
+        repo.update_players(room.players_names, player_name, room_id, "remove")
         return repo.get_room_by_id(room_id)
 
     except HTTPException as http_exc:
