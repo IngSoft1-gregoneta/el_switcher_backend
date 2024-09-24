@@ -90,9 +90,11 @@ def get_id():
 
 # Define endline to create a new room
 @app.post(
-    "/rooms/create_room", response_model=RoomOut, status_code=status.HTTP_201_CREATED
+    "/rooms/create_room/{user_id}",
+    response_model=RoomOut,
+    status_code=status.HTTP_201_CREATED,
 )
-async def create_room(new_room: RoomIn) -> RoomOut:
+async def create_room(new_room: RoomIn, user_id: UUID) -> RoomOut:
     if new_room.players_expected < 2 or new_room.players_expected > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong amount of players"
@@ -120,7 +122,8 @@ async def create_room(new_room: RoomIn) -> RoomOut:
 
         ROOMS.append(roomOut.model_dump())
 
-        await manager.broadcast_not_playing("Game created")
+        manager.bind_room(room_id=new_id, user_id=user_id)
+        await manager.broadcast_not_playing("LISTA")
 
         return roomOut.model_dump()
 
@@ -189,11 +192,10 @@ async def join_room_endpoint(
         )
 
         try:
-            # TODO: BUG ACA CON BIND ROOM
-            print(user_id)
+            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
             manager.bind_room(room_id, user_id)
-            await manager.broadcast_not_playing("a room change (join)")
-            await manager.broadcast_by_room(room_id, "player join room")
+            await manager.broadcast_not_playing("LISTA")
+            await manager.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
             print("ERROR JOIN ", e)
 
@@ -221,10 +223,10 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 
         room["players_names"].remove(player_name)
 
-        manager.bind_room(room_id, user_id)
         try:
-            await manager.broadcast_not_playing("a room change (leave)")
-            await manager.broadcast_by_room(room_id, "player leave room")
+            manager.unbind_room(room_id, user_id)
+            await manager.broadcast_not_playing("LISTA")
+            await manager.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
             print("ERROR LEAVE ", e)
         return {"message": f"The player {player_name} has left the room {room_id}"}

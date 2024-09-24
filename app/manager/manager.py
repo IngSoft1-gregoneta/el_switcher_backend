@@ -22,21 +22,27 @@ class ConnectionManager:
         # USER_ID
         self.active_connections: Dict[UUID | int, Connection] = {}
         # ROOM_ID USER_ID
-        self.rooms: Dict[UUID | int, list[UUID | int]] = {}
+        self.rooms: Dict[UUID | int, list[UUID]] = {}
 
     async def connect(self, user_id: UUID | int, websocket: WebSocket):
         conn = Connection(user_id, websocket)
         await websocket.accept()
         self.active_connections[user_id] = conn
+        print("CONN ", self.active_connections)
 
     def disconnect(self, user_id: UUID | int):
+        # TODO: think another way  this should be sooo slow
+        for room, list_uuid in self.rooms.items():
+            if user_id in list_uuid:
+                list_uuid.remove(user_id)
         del self.active_connections[user_id]
 
-    def bind_room(self, room_id: UUID | int, user_id: UUID | int):
+    def bind_room(self, room_id: UUID | int, user_id: UUID):
+        self.rooms.setdefault(room_id, [])
         self.rooms[room_id].append(user_id)
         self.active_connections[user_id].set_playing(True)
 
-    def unbind_room(self, room_id: UUID | int, user_id: UUID | int):
+    def unbind_room(self, room_id: UUID | int, user_id: UUID):
         self.rooms[room_id].remove(user_id)
         self.active_connections[user_id].set_playing(False)
 
@@ -48,6 +54,7 @@ class ConnectionManager:
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:
+            print(user_id, " ", message)
             await self.send_personal_message_id(user_id, message)
 
     async def broadcast_not_playing(self, message: str):
