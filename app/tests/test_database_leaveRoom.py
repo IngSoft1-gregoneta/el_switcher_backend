@@ -21,7 +21,7 @@ def generate_test_room():
         roomOut = RoomOut(room_id=1,
                             room_name=room_name,
                             players_expected=players_expected,
-                            players_names=["Braian"],
+                            players_names=["Braian", "Yamil"],
                             owner_name=owner_name,
                             is_active=True)
         roombd = Room(
@@ -44,11 +44,11 @@ def test_leave_room1():
     reset()
     generate_test_room()
     room_id = 1
-    player_name = "Braian"
+    player_name = "Yamil"
     expected_response = {"room_id": 1,
                          "room_name": "Room 1",
                          "players_expected": 2,
-                         "players_names": [],
+                         "players_names": ["Braian"],
                          "owner_name": "Braian",
                          "is_active": True
                          }
@@ -84,3 +84,21 @@ def test_leave_noroom():
     assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()
 reset()
+
+# test: cuando el owner abandona la sala, la sala debe eliminarse
+def test_owner_leaves_room():
+    reset()
+    generate_test_room()
+    room_id = 1
+    player_name = "Braian"
+    
+    expected_response = {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
+    
+    # enviar peticion para que el propietario abandone la sala
+    response = client.put(f"/rooms/leave/{room_id}/{player_name}")
+    
+    # verificar que la sala se ha eliminado correctamente
+    assert repo.get_room_by_id(room_id) is None
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.json() == expected_response
+    reset()

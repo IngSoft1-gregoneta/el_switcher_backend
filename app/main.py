@@ -82,6 +82,11 @@ async def leave_room_endpoint(room_id: int, player_name: str):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         if not(player_name in room.players_names):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if player_name == room.owner_name: # si el owner abandona la sala, eliminar la sala
+            repo.delete(room_id)
+            if room_id in rooms_socket:
+                del rooms_socket[room_id]
+            return {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
         if room_id in rooms_socket:
             try:
                 await manager.send_personal_message("player leave room", rooms_socket[room_id])
