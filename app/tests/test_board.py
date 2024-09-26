@@ -1,6 +1,6 @@
 from collections import Counter
-from board import Board
-from tile import TileColor 
+from models.board import Board
+from models.tile import TileColor 
 
 try:
     match_id = 1

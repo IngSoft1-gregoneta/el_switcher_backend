@@ -1,4 +1,4 @@
-from fig_card import FigCard, CardColor, FigType
+from models.fig_card import FigCard, CardColor, FigType
 import random
 
 white_figs = list(FigType)[:7]
