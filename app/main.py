@@ -149,7 +149,6 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Player name is already on the room, choose another name",
             )
-
         repo.update_players(room.players_names, player_name, room_id, "add")
         try:
             # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
@@ -180,7 +179,9 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         if not (player_name in room.players_names):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
+        if player_name == room.owner_name: # si el owner abandona la sala, eliminar la sala
+            repo.delete(room_id)
+            return {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
         try:
             manager.unbind_room(room_id, user_id)
             await manager.broadcast_not_playing("LISTA")
