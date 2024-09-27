@@ -44,6 +44,7 @@ def generate_test_room():
 
 # test para asegurarse que un jugador puede unirse a una partida
 def test_join_room1():
+    reset()
     generate_test_room()
     room_id = 1
     player_name = "Tito"

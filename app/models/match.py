@@ -30,7 +30,7 @@ class MatchOut(BaseModel):
 
     def validate_room(self, match_id: int) -> List[str]:
         repo = RoomRepository()
-        rooms_whit_match_id = 0   
+        rooms_whit_match_id = 0
         for room in repo.get_rooms():
             if room["room_id"] == match_id:
                  room_of_match = room
@@ -131,11 +131,12 @@ class MatchRepository:
             tiles_db = board_data[0]
             tileslist = []
             for tile in tiles_db:
-                tileslist.append(Tile(TileColor(tile["tile_color"]), 
-                                  tile["tile_pos_x"], 
-                                  tile["tile_pos_y"]
-                                  )
-                            )
+                tileslist.append(Tile.model_construct(
+                    tile_color=TileColor(tile["tile_color"]).value,  
+                    tile_pos_x=tile["tile_pos_x"], 
+                    tile_pos_y=tile["tile_pos_y"]
+                ))
+
             board_db = Board.model_construct(match_id = board_data[1], tiles = tileslist)
         
             # Deserializar jugadores
@@ -149,10 +150,10 @@ class MatchRepository:
                 player_data_has_turn = player_data["has_turn"]
                 fig_cards_db = []
                 for fig_card in player_data_fig_cards:
-                    fig_cards_db.append(FigCard.model_construct(match_id = fig_card["match_id"],player_name= fig_card["player_name"],card_color= CardColor(fig_card["card_color"]),fig_type = FigType(fig_card["fig_type"]),is_visible = fig_card["is_visible"]))
+                    fig_cards_db.append(FigCard.model_construct(match_id = fig_card["match_id"],player_name= fig_card["player_name"],card_color= CardColor(fig_card["card_color"]).value,fig_type = FigType(fig_card["fig_type"]).value,is_visible = fig_card["is_visible"]))
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
-                    mov_cards_db.append(MovCard.model_construct(match_id=mov_card["match_id"],player_name = mov_card["player_name"],mov_type = MovType(mov_card["mov_type"])))
+                    mov_cards_db.append(MovCard.model_construct(match_id=mov_card["match_id"],player_name = mov_card["player_name"],mov_type = MovType(mov_card["mov_type"]).value))
                 players_db.append(Player.model_construct(match_id= player_data_id,player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
             match = MatchOut.model_construct(match_id = match_id_selected, board=board_db, players = players_db)
@@ -168,27 +169,23 @@ class MatchRepository:
             db.commit()
         finally:
             db.close()
+            
+    def delete_matchs(self):
+     db = Session()
+     try:
+         db.query(Match).delete()
+         db.commit()
+     finally:
+         db.close()
 
-def check_turn(input: MatchOut) -> Player:
-    db = Session()
-    try:
-        # Request match info
-        matchdb = db.query(Match).filter(Match.match_id == input.match_id).one_or_none()
-        if matchdb is None:
-            raise ValueError("No match found")
-        
-        #Deserialize turn data
-        players_data = matchdb.players
-        done = False
-        for player in players_data:
-            curr_turn = player["has_turn"]
-            if curr_turn == True:
-                done = True
-                return player
-        if not done:
-            raise ValueError("Player with turn not found")
-    finally:
-        db.close()
+def check_turn(input: MatchOut) -> Player:   
+    done = False
+    for player in input.players:
+        if player.has_turn == True:
+            done = True
+            return player
+    if not done:
+        raise ValueError("Player with turn not found")
 
 def next_turn(input: MatchOut):
     db = Session()
@@ -197,24 +194,48 @@ def next_turn(input: MatchOut):
         matchdb = db.query(Match).filter(Match.match_id == input.match_id).one_or_none()
         if not matchdb:
             raise ValueError("No match found")
-        
-        players_data = matchdb.players
-        done = False
-        i = 0
 
-        for player in players_data:
-            if player["has_turn"] == True:
-                player["has_turn"] = False
-                next_player_index: int = (i + 1) % len(players_data)
-                players_data[next_player_index]["has_turn"] = True
-                # Update match with new turns
-                matchdb.players = players_data
-                db.commit()
+        i = 0
+        players_db = []
+        tiles_db = []
+        for player in input.players:
+            for card in player.mov:
+                card.mov_type = card.mov_type.value
+            for card in player.fig_cards:
+                card.card_color = card.card_color
+                card.fig_type = card.fig_type
+            player.mov_cards = [Movcard.model_dump() for Movcard in player.mov_cards]
+            player.fig_cards = [figcard.model_dump() for figcard in player.fig_cards]
+
+            # Turn switch handler
+            if player.has_turn:
+                player.has_turn = False
+                next_player = (i + 1) % len(input.players)
+                input.players[next_player].has_turn = True
                 done = True
-                break
-            i += 1
+
+            player = player.model_dump()
+            players_db.append(player)
+
+        for tile in input.board.tiles:
+            tile.tile_color = tile.tile_color
+            tiles_db.append(tile.model_dump())
+
+        board_db = (tiles_db, input.match_id)
+
+        new_match = Match(
+            match_id = input.match_id,
+            room_id = input.match_id,
+            board = board_db,
+            players = players_db
+            )
+        matchdb = new_match
+        db.commit()
+        done = True
 
         if not done:
             raise ValueError("An error occured when trying to pass to the next turn")
     finally:
         db.close()
+
+
