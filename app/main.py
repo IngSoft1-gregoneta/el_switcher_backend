@@ -64,7 +64,7 @@ def get_id():
 @app.get("/room/{room_id}")
 async def get_room_data(room_id: int) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
     try:
-        return room_handler.get_data_from_a_room(room_id)
+        return await room_handler.get_data_from_a_room(room_id)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
