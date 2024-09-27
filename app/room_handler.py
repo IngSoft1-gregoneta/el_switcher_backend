@@ -30,17 +30,8 @@ class RoomHandler:
          return room
      except Exception:
          raise("Error getting room")
-    
-    
-    async def create_bind_and_broadcast(self, room_id: UUID, user_id: UUID): 
-        try:
-             manager.bind_room(room_id, user_id)
-             await manager.broadcast_not_playing("LISTA")
-        except Exception as e:
-            raise Exception(f"Error:{str(e)}")
-      
-    
-    async def create_room_modularized(self, new_room: RoomIn) -> RoomOut:
+          
+    async def create_room(self, new_room: RoomIn) -> RoomOut:
         if new_room.players_expected < 2 or new_room.players_expected > 4:
          raise HTTPException(
              status_code=status.HTTP_400_BAD_REQUEST,
@@ -55,19 +46,9 @@ class RoomHandler:
                 )
          
         return self.repo.create_room(new_room)
+            
     
-    
-    async def join_bind_and_broadcast(self, room_id: UUID, user_id: UUID):
-        try:
-            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
-            manager.bind_room(room_id, user_id)
-            await manager.broadcast_not_playing("LISTA")
-            await manager.broadcast_by_room(room_id, "ROOM")
-        except Exception as e:
-            raise Exception(f"Error: {str(e)}")
-        
-    
-    async def join_room_modularized(self, room_id: int, player_name: str, user_id: UUID):
+    async def join_room(self, room_id: int, player_name: str, user_id: UUID):
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -90,18 +71,8 @@ class RoomHandler:
         except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está 
          raise http_exc
-     
-    async def leave_unbind_and_broadcast(self, room_id: UUID, user_id: UUID):
-        try:
-            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
-            manager.unbind_room(room_id, user_id)
-            await manager.broadcast_not_playing("LISTA")
-            await manager.broadcast_by_room(room_id, "ROOM")
-        except Exception as e:
-            raise Exception(f"Error: {str(e)}")
         
-    
-    async def leave_room_modularized(self, room_id: int, player_name: str, user_id: UUID):
+    async def leave_room(self, room_id: int, player_name: str, user_id: UUID):
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:

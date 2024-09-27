@@ -71,3 +71,28 @@ class ConnectionManager:
                 await connection.get_ws().send_text(message)
             except WebSocketDisconnect:
                 self.disconnect(uuid)
+                
+    async def join_bind_and_broadcast(self, room_id: UUID, user_id: UUID):
+        try:
+            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
+            self.manager.bind_room(room_id, user_id)
+            await self.manager.broadcast_not_playing("LISTA")
+            await self.manager.broadcast_by_room(room_id, "ROOM")
+        except Exception as e:
+            raise Exception(f"Error: {str(e)}")
+        
+    async def leave_unbind_and_broadcast(self, room_id: UUID, user_id: UUID):
+        try:
+            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
+            self.manager.unbind_room(room_id, user_id)
+            await self.manager.broadcast_not_playing("LISTA")
+            await self.manager.broadcast_by_room(room_id, "ROOM")
+        except Exception as e:
+            raise Exception(f"Error: {str(e)}")
+        
+    async def create_bind_and_broadcast(self, room_id: UUID, user_id: UUID): 
+        try:
+             self.manager.bind_room(room_id, user_id)
+             await self.manager.broadcast_not_playing("LISTA")
+        except Exception as e:
+            raise Exception(f"Error:{str(e)}")

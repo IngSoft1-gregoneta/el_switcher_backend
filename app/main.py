@@ -92,8 +92,8 @@ async def get_rooms():
 )
 async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
     try:
-        result = await room_handler.create_room_modularized(new_room)
-        room_handler.create_bind_and_broadcast(result["room_id"], user_id)
+        result = await room_handler.create_room(new_room)
+        manager.create_bind_and_broadcast(result["room_id"], user_id)
         return result
     except HTTPException as http_ex:
         raise http_ex
@@ -103,7 +103,6 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
             detail="Internal Server Error",
         )
 
-
 # TODO: This url change so i gess test must change
 @app.put(
     "/rooms/join/{room_id}/{player_name}/{user_id}",
@@ -112,8 +111,8 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
 )
 async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
-        result = await room_handler.join_room_modularized(room_id, player_name, user_id)
-        room_handler.join_bind_and_broadcast(room_id, user_id)
+        result = await room_handler.join_room(room_id, player_name, user_id)
+        manager.join_bind_and_broadcast(room_id, user_id)
         return result 
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
@@ -124,7 +123,6 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
             detail="Internal Server Error",
         )
 
-
 # endpoint for room leave request
 @app.put(
     "/rooms/leave/{room_id}/{player_name}/{user_id}",
@@ -133,8 +131,8 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 )
 async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
-        result = await room_handler.leave_room_modularized(room_id, player_name, user_id)
-        room_handler.leave_unbind_and_broadcast(room_id, user_id)
+        result = await room_handler.leave_room(room_id, player_name, user_id)
+        manager.leave_unbind_and_broadcast(room_id, user_id)
         return result
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
@@ -148,27 +146,11 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{match_id}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn):
-    try:
-        return await match_handler.create_match_modularized(matchIn)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}"
-        )
+    return await match_handler.create_match(matchIn)
+
 
 @app.get("/matchs/{match_id}")
 async def get_match_data(
     match_id: int,
 ) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
-    try:
-        repo = MatchRepository()
-        match = repo.get_match_by_id(match_id)
-        if match is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        return match
-    except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
+    return await match_handler.get_match_by_id(match_id)
