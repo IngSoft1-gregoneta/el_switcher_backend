@@ -144,9 +144,10 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
         )
 
 # endopint to create a match
-@app.post("/matchs/create_match/{match_id}", status_code=status.HTTP_201_CREATED)
-async def create_match_endpoint(matchIn: MatchIn):
-    return await match_handler.create_match(matchIn)
+@app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
+async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
+    
+    return await match_handler.create_match(matchIn, owner_name)
 
 
 @app.get("/matchs/{match_id}")
