@@ -47,7 +47,7 @@ def test_endturn_correctness():
         next_turn(match)
         current_turn = check_turn(match)
         
-        assert previous_turn == current_turn
+        assert previous_turn != current_turn
         
     except ValueError as e:
         assert False, f"Error: {e}"
