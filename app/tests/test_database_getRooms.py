@@ -41,7 +41,8 @@ def generate_test_room():
 
 # test: para asegurarse de que no hay salas, devuelve HTTP200OK y lista vacia
 def test_empty_rooms():
-    response = client.get("/rooms/")    
+    reset()
+    response = client.get("/rooms")    
     assert response.status_code == status.HTTP_200_OK
 
     assert response.json() == []
@@ -49,9 +50,11 @@ def test_empty_rooms():
 def test_basic_get():
     reset()
     generate_test_room()
-    response = client.get("/rooms/")
+    response = client.get("/rooms")
     assert response.status_code == status.HTTP_200_OK
     # Check if room is correctly 
     assert response.json() == repo.get_rooms()
     reset()
+    
+
 reset()

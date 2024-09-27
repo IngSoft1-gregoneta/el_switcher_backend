@@ -30,7 +30,7 @@ class MatchOut(BaseModel):
 
     def validate_room(self, match_id: int) -> List[str]:
         repo = RoomRepository()
-        rooms_whit_match_id = 0   
+        rooms_whit_match_id = 0
         for room in repo.get_rooms():
             if room["room_id"] == match_id:
                  room_of_match = room

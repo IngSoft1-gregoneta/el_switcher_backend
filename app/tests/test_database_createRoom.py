@@ -25,7 +25,7 @@ def test_create_room_1_player():
     )
     response = client.post(f"/rooms/create_room/{user_id}", json=roomIn.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert repo.get_room_by_id(1) == None
+    assert repo.get_room_by_id(1) is None
 
 
 def test_create_room_5_players():
