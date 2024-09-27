@@ -156,7 +156,7 @@ async def get_match_data(
     return await match_handler.get_match_by_id(match_id)
 
 
-@app.put("/matchs/leave/{match_id}/{player_name}/{user_id}",
+@app.put("/matchs/leave_match/{match_id}/{player_name}/{user_id}",
     response_model=Union[MatchOut, str],
     status_code=status.HTTP_202_ACCEPTED,
 )
@@ -164,7 +164,7 @@ async def get_match_data(
 async def leave_match(
     match_id: int,
     player_name: str,
-    user_id: int,
+    user_id: UUID,
     )-> Union[MatchOut,str]:
     try:
         result = await match_handler.leave_match(player_name, match_id)
