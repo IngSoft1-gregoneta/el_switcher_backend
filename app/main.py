@@ -197,8 +197,8 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
         raise http_exc
 
 
-# Define endpoint to create a room
-@app.post("/matchs/create_match", status_code=status.HTTP_201_CREATED)
+# endopint to create a match
+@app.post("/matchs/create_match/{match_id}", status_code=status.HTTP_201_CREATED)
 async def create_match(matchIn: MatchIn):
     repo = MatchRepository()
     try:
@@ -208,4 +208,22 @@ async def create_match(matchIn: MatchIn):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}"
+        )
+
+@app.get("/matchs/{match_id}")
+async def get_match_data(
+    match_id: int,
+) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
+    try:
+        repo = MatchRepository()
+        match = repo.get_match_by_id(match_id)
+        if match is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return match
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
         )
