@@ -208,7 +208,7 @@ async def create_match(matchIn: MatchIn):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
 
-@app.put("matchs/{match_id}/endturn")
+@app.put("/matchs/{match_id}/endturn", status_code=status.HTTP_202_ACCEPTED)
 async def endturn(match_id: int):
     repo = MatchRepository()
     try:

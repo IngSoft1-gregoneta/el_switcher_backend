@@ -169,6 +169,27 @@ class MatchRepository:
         finally:
             db.close()
 
+def check_turn(input: MatchOut) -> Player:
+    db = Session()
+    try:
+        # Request match info
+        matchdb = db.query(Match).filter(Match.match_id == input.match_id).one_or_none()
+        if matchdb is None:
+            raise ValueError("No match found")
+        
+        #Deserialize turn data
+        players_data = matchdb.players
+        done = False
+        for player in players_data:
+            curr_turn = player["has_turn"]
+            if curr_turn == True:
+                done = True
+                return player
+        if not done:
+            raise ValueError("Player with turn not found")
+    finally:
+        db.close()
+
 def next_turn(input: MatchOut):
     db = Session()
     try:
@@ -177,20 +198,21 @@ def next_turn(input: MatchOut):
         if not matchdb:
             raise ValueError("No match found")
         
-        #Deserialize turn data
-        turns = matchdb.players["has_turn"]
-
+        players_data = matchdb.players
         done = False
-        for i, curr_player in turns:
-            if curr_player == True:
-                curr_player = False
-                next_player_index: int = (i + 1) % len(turns)
-                turns[next_player_index] = True
+        i = 0
+
+        for player in players_data:
+            if player["has_turn"] == True:
+                player["has_turn"] = False
+                next_player_index: int = (i + 1) % len(players_data)
+                players_data[next_player_index]["has_turn"] = True
                 # Update match with new turns
-                matchdb.players["has_turn"] = turns
+                matchdb.players = players_data
                 db.commit()
                 done = True
                 break
+            i += 1
 
         if not done:
             raise ValueError("An error occured when trying to pass to the next turn")
