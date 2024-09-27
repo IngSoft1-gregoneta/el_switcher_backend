@@ -39,3 +39,17 @@ class MatchHandler:
             detail="Internal Server Error",
         )
         
+    
+    async def leave_match(self, player_name: str, match_id: int) -> Union[MatchOut, str]:
+        try:
+            match = self.repo.delete_player(player_name,match_id)
+            return match
+        
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+        

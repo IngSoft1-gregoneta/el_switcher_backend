@@ -154,3 +154,27 @@ async def get_match_data(
     match_id: int,
 ) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
     return await match_handler.get_match_by_id(match_id)
+
+
+@app.put("/matchs/leave/{match_id}/{player_name}/{user_id}",
+    response_model=Union[MatchOut, str],
+    status_code=status.HTTP_202_ACCEPTED,
+)
+
+async def leave_match(
+    match_id: int,
+    player_name: str,
+    user_id: int,
+    )-> Union[MatchOut,str]:
+    try:
+        result = await match_handler.leave_match(player_name, match_id)
+        manager.leave_unbind_and_broadcast(match_id, user_id)
+        return result
+    except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
