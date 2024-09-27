@@ -122,3 +122,10 @@ class RoomRepository:
         finally:
             db.close()
 
+    def delete_rooms(self):
+        db = Session()
+        try:
+            db.query(Room).delete()
+            db.commit()
+        finally:
+            db.close()

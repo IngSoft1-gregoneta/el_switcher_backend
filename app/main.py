@@ -108,10 +108,34 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+    repo = RoomRepository()
     try:
-        result = await room_handler.join_room_modularized(room_id, player_name, user_id)
-        room_handler.join_bind_and_broadcast(room_id, user_id)
-        return result
+        room = repo.get_room_by_id(room_id)
+
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+        if len(room.players_names) == room.players_expected:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+            )
+
+        if player_name in room.players_names:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player name is already on the room, choose another name",
+            )
+        repo.update_players(room.players_names, player_name, room_id, "add")
+        try:
+            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
+            manager.bind_room(room_id, user_id)
+            await manager.broadcast_not_playing("LISTA")
+            await manager.broadcast_by_room(room_id, "ROOM")
+        except Exception as e:
+            print("ERROR JOIN ", e)
+
+        return repo.get_room_by_id(room_id)
+
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
         raise http_exc
@@ -128,21 +152,33 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+    repo = RoomRepository()
     try:
-        result = await room_handler.leave_room_modularized(room_id, player_name, user_id)
-        room_handler.leave_unbind_and_broadcast(room_id, user_id)
-        return result
+        room = repo.get_room_by_id(room_id)
+        if room == None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not (player_name in room.players_names):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if player_name == room.owner_name: # si el owner abandona la sala, eliminar la sala
+            repo.delete(room_id)
+            return {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
+        try:
+            manager.unbind_room(room_id, user_id)
+            await manager.broadcast_not_playing("LISTA")
+            await manager.broadcast_by_room(room_id, "ROOM")
+        except Exception as e:
+            print(f"Error al enviar el mensaje al socket: {e}")
+
+        repo.update_players(room.players_names, player_name, room_id, "remove")
+        return repo.get_room_by_id(room_id)
+
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
         raise http_exc
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
 
-# Define endpoint to create a room
-@app.post("/matchs/create_match", status_code=status.HTTP_201_CREATED)
+
+# endopint to create a match
+@app.post("/matchs/create_match/{match_id}", status_code=status.HTTP_201_CREATED)
 async def create_match(matchIn: MatchIn):
     repo = MatchRepository()
     try:
@@ -152,4 +188,22 @@ async def create_match(matchIn: MatchIn):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}"
+        )
+
+@app.get("/matchs/{match_id}")
+async def get_match_data(
+    match_id: int,
+) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
+    try:
+        repo = MatchRepository()
+        match = repo.get_match_by_id(match_id)
+        if match is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return match
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
         )

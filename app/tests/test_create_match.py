@@ -10,11 +10,8 @@ repo_room = RoomRepository()
 repo_match = MatchRepository()
 
 def reset():
-    for i in range(1,7):
-        if repo_room.get_room_by_id(i):
-            repo_room.delete(i)
-        if repo_match.get_match_by_id(i):
-            repo_match.delete(i)
+    repo_match.delete_matchs()
+    repo_room.delete_rooms()
 
 def generate_test_room():
     db = Session()
@@ -80,67 +77,76 @@ def generate_test_room():
 def test_match_2_players():
     reset()
     generate_test_room()
-    matchIn = MatchIn(room_id=1)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=1
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(matchIn.room_id).model_dump(mode="json")
+    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
     reset()
 
 def test_match_3_players():
     reset()
     generate_test_room()
-    matchIn = MatchIn(room_id=2)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=2
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(matchIn.room_id).model_dump(mode="json")
+    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
     reset()
 
 def test_match_4_players():
     reset()
     generate_test_room()
-    matchIn = MatchIn(room_id=3)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=3
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(matchIn.room_id).model_dump(mode="json")
+    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
 
 def test_dup_match():
-    matchIn = MatchIn(room_id=3)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=3
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
+    reset()
 
 def test_no_full_match():
     reset()
     generate_test_room()
-    matchIn = MatchIn(room_id=4)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=4
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There must be exactly players expected amount of players'}
-    reset()
-
-def test_match_without_room():
-    reset()
-    generate_test_room()
-    matchIn = MatchIn(room_id=7)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
-    reset()
-
-def test_match_a_player():
-    reset()
-    generate_test_room()
-    matchIn = MatchIn(room_id=6)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
     reset()
 
 def test_match_5_player():
     reset()
     generate_test_room()
-    matchIn = MatchIn(room_id=5)
-    response = client.post("/matchs/create_match", json=matchIn.model_dump())
+    room_id=5
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
+    reset()
+
+def test_match_a_player():
+    reset()
+    generate_test_room()
+    room_id=6
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
+    reset()
+
+def test_match_without_room():
+    reset()
+    generate_test_room()
+    room_id=0
+    match_in = MatchIn(room_id=room_id)
+    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
     reset()

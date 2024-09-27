@@ -9,8 +9,7 @@ repo = RoomRepository()
 
 
 def reset():
-    if repo.get_room_by_id(1):
-        repo.delete(1)
+    repo.delete_rooms()
 
 def generate_test_room():
     db = Session()

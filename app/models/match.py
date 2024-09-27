@@ -131,11 +131,12 @@ class MatchRepository:
             tiles_db = board_data[0]
             tileslist = []
             for tile in tiles_db:
-                tileslist.append(Tile(TileColor(tile["tile_color"]), 
-                                  tile["tile_pos_x"], 
-                                  tile["tile_pos_y"]
-                                  )
-                            )
+                tileslist.append(Tile.model_construct(
+                    tile_color=TileColor(tile["tile_color"]).value,  
+                    tile_pos_x=tile["tile_pos_x"], 
+                    tile_pos_y=tile["tile_pos_y"]
+                ))
+
             board_db = Board.model_construct(match_id = board_data[1], tiles = tileslist)
         
             # Deserializar jugadores
@@ -149,10 +150,10 @@ class MatchRepository:
                 player_data_has_turn = player_data["has_turn"]
                 fig_cards_db = []
                 for fig_card in player_data_fig_cards:
-                    fig_cards_db.append(FigCard.model_construct(match_id = fig_card["match_id"],player_name= fig_card["player_name"],card_color= CardColor(fig_card["card_color"]),fig_type = FigType(fig_card["fig_type"]),is_visible = fig_card["is_visible"]))
+                    fig_cards_db.append(FigCard.model_construct(match_id = fig_card["match_id"],player_name= fig_card["player_name"],card_color= CardColor(fig_card["card_color"]).value,fig_type = FigType(fig_card["fig_type"]).value,is_visible = fig_card["is_visible"]))
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
-                    mov_cards_db.append(MovCard.model_construct(match_id=mov_card["match_id"],player_name = mov_card["player_name"],mov_type = MovType(mov_card["mov_type"])))
+                    mov_cards_db.append(MovCard.model_construct(match_id=mov_card["match_id"],player_name = mov_card["player_name"],mov_type = MovType(mov_card["mov_type"]).value))
                 players_db.append(Player.model_construct(match_id= player_data_id,player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
             match = MatchOut.model_construct(match_id = match_id_selected, board=board_db, players = players_db)
@@ -168,3 +169,11 @@ class MatchRepository:
             db.commit()
         finally:
             db.close()
+
+    def delete_matchs(self):
+     db = Session()
+     try:
+         db.query(Match).delete()
+         db.commit()
+     finally:
+         db.close()
