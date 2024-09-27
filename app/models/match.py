@@ -16,7 +16,6 @@ import random
 
 class MatchIn(BaseModel):
     room_id: int
-    player_name: str
     
 class MatchOut(BaseModel):
     match_id: int

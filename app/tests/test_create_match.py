@@ -78,8 +78,9 @@ def test_match_2_players():
     reset()
     generate_test_room()
     room_id=1
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name="Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
     reset()
@@ -88,8 +89,9 @@ def test_match_3_players():
     reset()
     generate_test_room()
     room_id=2
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name="Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
     reset()
@@ -98,15 +100,17 @@ def test_match_4_players():
     reset()
     generate_test_room()
     room_id=3
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name="Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
 
 def test_dup_match():
     room_id=3
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name = "Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
     reset()
@@ -115,8 +119,9 @@ def test_no_full_match():
     reset()
     generate_test_room()
     room_id=4
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name = "Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There must be exactly players expected amount of players'}
     reset()
@@ -125,8 +130,9 @@ def test_match_5_player():
     reset()
     generate_test_room()
     room_id=5
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name="Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
     reset()
@@ -135,8 +141,9 @@ def test_match_a_player():
     reset()
     generate_test_room()
     room_id=6
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name = "Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
     reset()
@@ -145,8 +152,9 @@ def test_match_without_room():
     reset()
     generate_test_room()
     room_id=0
-    match_in = MatchIn(room_id=room_id, player_name="Braian")
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name = "Braian"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
     reset()
@@ -155,8 +163,9 @@ def test_create_match_not_owner():
     reset()
     generate_test_room()
     room_id = 1
-    match_in = MatchIn(room_id=room_id, player_name="Tadeo")  # Tadeo no es el propietario
-    response = client.post(f"/matchs/create_match/{room_id}", json=match_in.model_dump())
+    match_in = MatchIn(room_id=room_id)
+    owner_name = "Tadeo"
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json() == {'detail': 'Only the owner can create a match'}
     reset()
