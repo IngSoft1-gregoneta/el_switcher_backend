@@ -208,8 +208,12 @@ async def create_match(matchIn: MatchIn):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
 
-@app.put("match/{match_id}/endturn")
-async def endturn(match_id: int) -> Match:
-    match = get_match_by_id(match_id)
-    next_turn(match)
-    return {'message': '¡Próximo Turno!'}
+@app.put("matchs/{match_id}/endturn")
+async def endturn(match_id: int):
+    repo = MatchRepository()
+    try:
+        match = repo.get_match_by_id(match_id)
+        next_turn(match)
+        return {'message': '¡Próximo Turno!'}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
