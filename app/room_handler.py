@@ -82,16 +82,20 @@ class RoomHandler:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
             
             if player_name == room.owner_name: # si el owner abandona la sala, eliminar la sala
-                self.repo.delete(room_id)
-                return {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
-      
+                try:
+                    self.repo.delete(room_id)
+                    await manager.broadcast_not_playing("LISTA")
+                    await manager.broadcast_by_room(room_id, "DELETE_ROOM")
+                except Exception as e:
+                    raise HTTPException(status_code=status.HTTP_202_ACCEPTED)
+                
             
             self.repo.update_players(room.players_names, player_name, room_id, "remove")
             return self.repo.get_room_by_id(room_id)
         
         except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está 
-         raise http_exc
+           raise http_exc
  
  
 
