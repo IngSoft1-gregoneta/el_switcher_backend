@@ -54,7 +54,9 @@ class MatchOut(BaseModel):
         players = []
         index = 0
         for player_name in players_names:
-            fig_cards = self.create_fig_cards(len_players=len(players_names), match_id=match_id, player_name=player_name)
+            fig_cards = self.create_fig_cards(len_players=len(players_names),
+                                                match_id=match_id,
+                                                player_name=player_name)
             mov_cards = self.create_mov_cards(match_id=match_id, player_name=player_name)
             has_turn = index == 0
             player = Player(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
@@ -67,7 +69,12 @@ class MatchOut(BaseModel):
         fig_cards = []
         white_figs = list(FigType)[:7]
         for i in range(50 // len_players):
-            new_fig_card = FigCard(match_id=match_id, player_name=player_name, card_color=CardColor.WHITE, fig_type=random.choice(white_figs))
+            is_visible = i <= 2
+            new_fig_card = FigCard(match_id=match_id, 
+                                   player_name=player_name, 
+                                   card_color=CardColor.WHITE, 
+                                   fig_type=random.choice(white_figs), 
+                                   is_visible=is_visible)
             fig_cards.append(new_fig_card)
         return fig_cards
 
