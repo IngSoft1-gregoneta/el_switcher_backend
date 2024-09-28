@@ -93,7 +93,8 @@ def test_leave_noroom():
     assert repo.get_room_by_id(room_id) == None
     assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()
-    
+
+
 def test_owner_leave():
     reset()
     generate_test_room()
@@ -104,15 +105,14 @@ def test_owner_leave():
     # Respuesta esperada cuando el propietario abandona la sala
 
     response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
-    
+
     # Verificar que la sala ha sido eliminada
     assert repo.get_room_by_id(room_id) is None  # La sala debe estar eliminada
-    
+
     # Verificar el mensaje de respuesta
     assert response.status_code == status.HTTP_202_ACCEPTED
 
     reset()
 
-    
-reset()
 
+reset()
