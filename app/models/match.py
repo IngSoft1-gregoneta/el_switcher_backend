@@ -86,8 +86,11 @@ class MatchOut(BaseModel):
             mov_cards.append(new_mov_card)
         return mov_cards
 
-MATCHS = [
-]
+    def get_player_by_name(self, player_name) -> Player:
+        for player in self.players:
+            if player.player_name == player_name:
+                return player
+        return None
 
 class MatchRepository:
     def create_match(self, new_match: MatchOut):
