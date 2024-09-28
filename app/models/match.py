@@ -17,7 +17,7 @@ import random
 
 class MatchIn(BaseModel):
     room_id: int
-
+    
 class MatchOut(BaseModel):
     match_id: int
     board: Board
