@@ -1,5 +1,6 @@
 import json
 from typing import List
+from enum import Enum
 from pydantic import BaseModel
 from .board import Board
 from .fig_card import FigCard, CardColor, FigType
@@ -177,7 +178,7 @@ class MatchRepository:
             db.commit()
         finally:
             db.close()
-
+            
     def delete_matchs(self):
      db = Session()
      try:
@@ -185,6 +186,7 @@ class MatchRepository:
          db.commit()
      finally:
          db.close()
+
 
     def delete_player(self, player_name: str, match_id: int):
         db = Session()
@@ -233,3 +235,85 @@ class MatchRepository:
             return match
         finally:
             db.close()
+
+def check_turn(input: MatchOut) -> Player:   
+    done = False
+    for player in input.players:
+        if player.has_turn == True:
+            done = True
+            return player
+    if not done:
+        raise ValueError("Player with turn not found")
+
+def next_turn(input: MatchOut):
+    db = Session()
+    try:
+        # Request match info
+        matchdb = db.query(Match).filter(Match.match_id == input.match_id).one_or_none()
+        if not matchdb:
+            raise ValueError("No match found")
+
+        i = 0
+        done = False
+        players_db = []
+        tiles_db = []
+        for player in input.players:
+            # Process mov_cards
+            for card in player.mov_cards:
+                if isinstance(card, dict):
+                    card["mov_type"] = card.get("mov_type", card["mov_type"])
+                else:
+                    if hasattr(card.mov_type, 'value'):
+                        card.mov_type = card.mov_type.value
+
+            # Process fig_cards
+            for card in player.fig_cards:
+                if isinstance(card, dict):
+                    card["card_color"] = card.get("card_color", card["card_color"])
+                    card["fig_type"] = card.get("fig_type", card["fig_type"])
+                else:
+                    if hasattr(card.card_color, 'value'):
+                        card.card_color = card.card_color.value
+                    if hasattr(card.fig_type, 'value'):
+                        card.fig_type = card.fig_type.value
+                    
+            # Convert the cards to dictionaries after processing
+            player.mov_cards = [card.model_dump() if not isinstance(card, dict) else card for card in player.mov_cards]
+            player.fig_cards = [card.model_dump() if not isinstance(card, dict) else card for card in player.fig_cards]
+
+            # Turn handler
+            if player.has_turn and not done:
+                player.has_turn = False
+                next_player = (i + 1) % len(input.players)
+                input.players[next_player].has_turn = True
+                done = True
+
+            # Convert player to a dictionary and store in players_db
+            players_db.append(player.model_dump() if not isinstance(player, dict) else player)
+            i += 1
+
+        # Process board tiles
+        for tile in input.board.tiles:
+            if hasattr(tile.tile_color, 'value'):
+                tile.tile_color = tile.tile_color.value
+            tiles_db.append(tile.model_dump() if not isinstance(tile, dict) else tile)
+        # Build board tuple
+        board_db = (tiles_db, input.match_id)
+
+        new_match = Match(
+            match_id = input.match_id,
+            room_id = input.match_id,
+            board = board_db,
+            players = players_db
+            )
+        matchdb.match_id = new_match.match_id
+        matchdb.room_id = new_match.room_id
+        matchdb.board = new_match.board
+        matchdb.players = new_match.players
+        db.commit()
+        done = True
+
+        if not done:
+            raise ValueError("An error occured when trying to pass to the next turn")
+    finally:
+        db.close()
