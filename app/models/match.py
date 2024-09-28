@@ -192,7 +192,6 @@ class MatchRepository:
             match = self.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
-
             match_id = match.match_id
             matchdb = db.query(Match).filter(Match.match_id == match_id).one_or_none()
             player_to_remove = None
@@ -202,9 +201,9 @@ class MatchRepository:
             if player_to_remove == None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
             match.players.remove(player_to_remove)
-            if len(match.players) == 1:
+            if len(match.players) == 0:
                 self.delete(match_id)
-                return match.players[0].player_name
+                return "Match destroyed"
             players_db = []
             tiles_db = []
             for player in match.players:
