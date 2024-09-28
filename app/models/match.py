@@ -10,9 +10,7 @@ from .room import RoomRepository
 from config.repositorymanager import Session,Match
 from .tile import Tile, TileColor
 import random
-
-
-
+from fastapi import HTTPException, status
 
 
 class MatchIn(BaseModel):
@@ -179,6 +177,56 @@ class MatchRepository:
      finally:
          db.close()
 
+
+    def delete_player(self, player_name: str, match_id: int):
+        db = Session()
+        try:
+            match = self.get_match_by_id(match_id)
+            if match is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
+
+            match_id = match.match_id
+            matchdb = db.query(Match).filter(Match.match_id == match_id).one_or_none()
+            player_to_remove = None
+            for player in match.players:
+                if player.player_name == player_name:
+                    player_to_remove = player
+            if player_to_remove == None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+            match.players.remove(player_to_remove)
+            if len(match.players) == 1:
+                self.delete(match_id)
+                return match.players[0].player_name
+            players_db = []
+            tiles_db = []
+            for player in match.players:
+                for card in player.mov_cards:
+                    card.mov_type = card.mov_type
+                for card in player.fig_cards:
+                    card.card_color = card.card_color
+                    card.fig_type = card.fig_type
+                player.mov_cards = [Movcard.model_dump() for Movcard in player.mov_cards]
+                player.fig_cards = [figcard.model_dump() for figcard in player.fig_cards]
+                player = player.model_dump()
+                players_db.append(player)
+            for tile in match.board.tiles:
+                tile.tile_color = tile.tile_color
+                tiles_db.append(tile.model_dump())
+            board_db = (tiles_db, match.match_id)
+            matchdb = Match(
+                match_id = match.match_id,
+                room_id = match.match_id,
+                board = board_db,
+                players = players_db
+                )
+            self.delete(match_id)
+            db.add(matchdb)
+            db.commit()
+
+            return match
+        finally:
+            db.close()
+
 def check_turn(input: MatchOut) -> Player:   
     done = False
     for player in input.players:
@@ -262,6 +310,3 @@ def next_turn(input: MatchOut):
             raise ValueError("An error occured when trying to pass to the next turn")
     finally:
         db.close()
-
-
-

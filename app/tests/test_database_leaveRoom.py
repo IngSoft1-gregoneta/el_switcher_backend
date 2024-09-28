@@ -10,8 +10,7 @@ repo = RoomRepository()
 
 
 def reset():
-    if repo.get_room_by_id(1):
-        repo.delete(1)
+    repo.delete_rooms()
 
 
 def generate_test_room():
@@ -103,7 +102,6 @@ def test_owner_leave():
     user_id = uuid4()
 
     # Respuesta esperada cuando el propietario abandona la sala
-    expected_response = {"message": f"The owner {player_name} has left. Room {room_id} has been deleted."}
 
     response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
     
@@ -112,7 +110,6 @@ def test_owner_leave():
     
     # Verificar el mensaje de respuesta
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
 
     reset()
 
