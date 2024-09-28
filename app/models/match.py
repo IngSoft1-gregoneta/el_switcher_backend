@@ -249,17 +249,16 @@ def next_turn(input: MatchOut):
         players_db = []
         tiles_db = []
         for player in input.players:
+            # Process mov_cards
             for card in player.mov_cards:
                 if isinstance(card, dict):
                     card["mov_type"] = card.get("mov_type", card["mov_type"])
                 else:
-                    # If it's an object, convert its enum-like mov_type
                     if hasattr(card.mov_type, 'value'):
                         card.mov_type = card.mov_type.value
 
             # Process fig_cards
             for card in player.fig_cards:
-                # Same logic for fig_cards, ensure card_color and fig_type are strings or convert them
                 if isinstance(card, dict):
                     card["card_color"] = card.get("card_color", card["card_color"])
                     card["fig_type"] = card.get("fig_type", card["fig_type"])
@@ -273,7 +272,7 @@ def next_turn(input: MatchOut):
             player.mov_cards = [card.model_dump() if not isinstance(card, dict) else card for card in player.mov_cards]
             player.fig_cards = [card.model_dump() if not isinstance(card, dict) else card for card in player.fig_cards]
 
-            # Turn switch handler
+            # Turn handler
             if player.has_turn and not done:
                 player.has_turn = False
                 next_player = (i + 1) % len(input.players)
@@ -284,13 +283,12 @@ def next_turn(input: MatchOut):
             players_db.append(player.model_dump() if not isinstance(player, dict) else player)
             i += 1
 
-        # Process each tile in the board
+        # Process board tiles
         for tile in input.board.tiles:
-            # Ensure tile_color is a string or convert it
             if hasattr(tile.tile_color, 'value'):
                 tile.tile_color = tile.tile_color.value
             tiles_db.append(tile.model_dump() if not isinstance(tile, dict) else tile)
-
+        # Build board tuple
         board_db = (tiles_db, input.match_id)
 
         new_match = Match(

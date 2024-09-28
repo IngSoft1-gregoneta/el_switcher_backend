@@ -53,3 +53,31 @@ def test_endturn_correctness():
         assert False, f"Error: {e}"
     finally:
         reset()
+
+def test_endturn_cycle():
+    reset()
+    generate_test_room()
+
+    try:
+        match = MatchOut(match_id=1)
+        assert match.match_id == 1
+        repo_match.create_match(match)
+
+        first_turn = check_turn(match)
+        
+        for _ in range(len(match.players)):    
+            previous_turn = check_turn(match)
+            next_turn(match)
+            current_turn = check_turn(match)
+            # Turn switches properly
+            assert previous_turn != current_turn
+            
+        # Turn cycles properly
+        last_turn = check_turn(match)
+
+        assert first_turn == last_turn
+        
+    except ValueError as e:
+        assert False, f"Error: {e}"
+    finally:
+        reset()
