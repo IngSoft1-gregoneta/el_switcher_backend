@@ -21,7 +21,7 @@ class ConnectionManager:
     def __init__(self):
         # USER_ID
         self.active_connections: Dict[UUID | int, Connection] = {}
-        # ROOM_ID USER_ID
+        # ROOM_ID list(USER_ID)
         self.rooms: Dict[UUID | int, list[UUID]] = {}
 
     async def connect(self, user_id: UUID | int, websocket: WebSocket):
@@ -32,9 +32,11 @@ class ConnectionManager:
 
     def disconnect(self, user_id: UUID | int):
         # TODO: think another way  this should be sooo slow
-        for room, list_uuid in self.rooms.items():
-            if user_id in list_uuid:
-                list_uuid.remove(user_id)
+        # TODO: also we could think if we should reconnect, maybe we shouldnt remove from the list
+        # TODO: what happens if we try to send a message where there is no connection?
+        # for _, list_uuid in self.rooms.items():
+        #     if user_id in list_uuid:
+        #         list_uuid.remove(user_id)
         del self.active_connections[user_id]
 
     def bind_room(self, room_id: UUID | int, user_id: UUID):
@@ -55,7 +57,11 @@ class ConnectionManager:
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:
             print(user_id, " ", message)
-            await self.send_personal_message_id(user_id, message)
+            try:
+                # If ws of user_id disconnect we shoulnt send a message
+                await self.send_personal_message_id(user_id, message)
+            except Exception as e:
+                print(f"Error broadcast_by_room {e}")
 
     async def broadcast_not_playing(self, message: str):
         for uuid, connection in self.active_connections.items():
@@ -71,28 +77,35 @@ class ConnectionManager:
                 await connection.get_ws().send_text(message)
             except WebSocketDisconnect:
                 self.disconnect(uuid)
-                
-    async def join_bind_and_broadcast(self, room_id: UUID, user_id: UUID):
+
+    async def join(self, room_id: UUID | int, user_id: UUID):
         try:
-            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
-            self.manager.bind_room(room_id, user_id)
-            await self.manager.broadcast_not_playing("LISTA")
-            await self.manager.broadcast_by_room(room_id, "ROOM")
+            self.bind_room(room_id, user_id)
+            await self.broadcast_not_playing("LISTA")
+            await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
             raise Exception(f"Error: {str(e)}")
-        
-    async def leave_unbind_and_broadcast(self, room_id: UUID, user_id: UUID):
+
+    async def leave(self, room_id: UUID | int, user_id: UUID):
+        # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
         try:
-            # TODO:  ENUMS PARA MANAGER, o mejor encargarse todo el la clase
-            self.manager.unbind_room(room_id, user_id)
-            await self.manager.broadcast_not_playing("LISTA")
-            await self.manager.broadcast_by_room(room_id, "ROOM")
+            self.unbind_room(room_id, user_id)
+            await self.broadcast_not_playing("LISTA")
+            await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
             raise Exception(f"Error: {str(e)}")
-        
-    async def create_bind_and_broadcast(self, room_id: UUID, user_id: UUID): 
+
+    async def create(self, room_id: UUID | int, user_id: UUID):
         try:
-             self.manager.bind_room(room_id, user_id)
-             await self.manager.broadcast_not_playing("LISTA")
+            self.bind_room(room_id, user_id)
+            await self.broadcast_not_playing("LISTA")
+        except Exception as e:
+            raise Exception(f"Error:{str(e)}")
+
+    async def destroy_room(self, room_id: UUID | int):
+        try:
+            await self.broadcast_not_playing("LISTA")
+            await self.broadcast_by_room(room_id, "DELETE_ROOM")
+            del self.rooms[room_id]
         except Exception as e:
             raise Exception(f"Error:{str(e)}")

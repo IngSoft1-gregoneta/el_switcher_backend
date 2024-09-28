@@ -1,8 +1,9 @@
 import json
 from typing import List
 
-from config.repositorymanager import Room, Session
 from pydantic import BaseModel, Field
+
+from config.repositorymanager import Room, Session
 
 
 class RoomIn(BaseModel):
