@@ -3,13 +3,9 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 
-from manager.manager import ConnectionManager
-
-#from manager.manager import ConnectionManager
 from models.match import MatchIn, MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
-manager = ConnectionManager()
 
 class MatchHandler:
     def __init__(self):
@@ -43,7 +39,7 @@ class MatchHandler:
         
         except Exception as e:
             if isinstance(e, HTTPException):
-                raise e
+               raise e
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
