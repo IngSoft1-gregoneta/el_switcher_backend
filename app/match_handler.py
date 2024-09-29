@@ -70,3 +70,24 @@ class MatchHandler:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
+    async def end_match(self, match_id: int) -> str:
+        try:
+            match = self.repo.get_match_by_id(match_id)
+            if not match:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Match with id {match_id} not found"
+                )
+            if len(match.players) < 2:
+                last_player = match.players[0].player_name
+
+                return last_player
+
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )

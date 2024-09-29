@@ -229,3 +229,17 @@ async def endturn(match_id: int):
         return {'message': '¡Próximo Turno!'}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
+    
+@app.put(
+    "/matchs/end/{match_id}",
+    status_code=status.HTTP_202_ACCEPTED
+    )
+async def endmatch(match_id: int):
+    try:
+        result = await match_handler.end_match(match_id)
+        # Send message to front
+        manager.broadcast(message=f"La partida ha finalizado. Ganador: {result}")
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
