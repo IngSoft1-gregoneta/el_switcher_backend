@@ -22,6 +22,7 @@ from manager.manager import ConnectionManager
 from match_handler import MatchHandler
 from models.match import *
 from models.room import *
+from models.visible_match import *
 from room_handler import RoomHandler
 
 app = FastAPI()
@@ -163,10 +164,9 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 
 
 # endopint to create a match
-@app.post(
-    "/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED
-)
+@app.post("/matchs/create_match/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
+    await manager.broadcast_by_room(matchIn.room_id, "MATCH_STARTED")
     return await match_handler.create_match(matchIn, owner_name)
 
 
@@ -195,7 +195,22 @@ async def leave_match(
             print(e)
         return result
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+
+@app.get("/matchs/visible_match/{match_id}/{player_name}")
+async def get_match_data_by_player(match_id: int, player_name: str) -> VisibleMatchData:
+    try:
+        visible_match = await match_handler.get_visible_data_by_player(
+            match_id, player_name
+        )
+        return visible_match
+    except HTTPException as http_exc:
         raise http_exc
     except Exception:
         raise HTTPException(
