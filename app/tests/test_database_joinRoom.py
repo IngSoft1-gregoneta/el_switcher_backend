@@ -2,10 +2,12 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app
+from main import app,manager
 from models.room import *
 
 client = TestClient(app)
+uuid = uuid4()
+
 repo = RoomRepository()
 
 
@@ -47,23 +49,23 @@ def test_join_room1():
     reset()
     generate_test_room()
     room_id = 1
-    player_name = "Tito"
-    user_id = uuid4()
-
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
-    expected_response = {
-        "room_id": 1,
-        "room_name": "Room 1",
-        "players_expected": 3,
-        "players_names": ["Yamil", "Tito"],
-        "owner_name": "Yamil",
-        "is_active": True,
-    }
-
-    assert "Tito" in repo.get_room_by_id(room_id).players_names
-    assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+    player_name = "Tito"  
+    with client.websocket_connect(f"/ws/{uuid}") as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/rooms/join/{room_id}/{player_name}/{uuid}")
+        expected_response = {
+            "room_id": 1,
+            "room_name": "Room 1",
+            "players_expected": 3,
+            "players_names": ["Yamil", "Tito"],
+            "owner_name": "Yamil",
+            "is_active": True,
+        }
+        assert "Tito" in repo.get_room_by_id(room_id).players_names
+        data = websocket.receive_text()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == expected_response
+        assert data == f"ROOM"
 
 
 # test para asegurarse de que no haya duplicados de nombres de jugadores
@@ -71,8 +73,7 @@ def test_same_name():
     room_id = 1
 
     player_name = "Yamil"
-    user_id = uuid4()
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
+    response = client.put(f"/rooms/join/{room_id}/{player_name}/{uuid}")
     expected_response = {
         "detail": "Player name is already on the room, choose another name"
     }
@@ -87,32 +88,33 @@ def test_same_name():
 def test_join_room2():
     room_id = 1
     player_name = "Tadeo"
-    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{uuid}") as websocket:
+        response = client.put(f"/rooms/join/{room_id}/{player_name}/{uuid}")
+        expected_response = expected_response = {
+            "room_id": 1,
+            "room_name": "Room 1",
+            "players_expected": 3,
+            "players_names": ["Yamil", "Tito", "Tadeo"],
+            "owner_name": "Yamil",
+            "is_active": True,
+        }
 
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
-    expected_response = expected_response = {
-        "room_id": 1,
-        "room_name": "Room 1",
-        "players_expected": 3,
-        "players_names": ["Yamil", "Tito", "Tadeo"],
-        "owner_name": "Yamil",
-        "is_active": True,
-    }
-
-    assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
-    assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+        assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
+        assert repo.get_room_by_id(room_id).room_id == 1
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == expected_response
+        data = websocket.receive_text()
+        assert data == f"ROOM"
 
 
 # test para evitar que otro jugador se una a una sala llena
 def test_join_full_room():
     room_id = 1
     player_name = "Mou"
-    user_id = uuid4()
 
     expected_response = {"detail": "Room is full"}
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
+    playerID = uuid4()
+    response = client.put(f"/rooms/join/{room_id}/{player_name}/{playerID}")
 
     assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
     assert repo.get_room_by_id(room_id).room_id == 1

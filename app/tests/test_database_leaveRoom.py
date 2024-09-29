@@ -2,10 +2,11 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app
+from main import app,manager
 from models.room import *
 
 client = TestClient(app)
+uuid = uuid4()
 repo = RoomRepository()
 
 
@@ -50,7 +51,6 @@ def test_leave_room1():
     generate_test_room()
     room_id = 1
     player_name = "Yamil"
-    user_id = uuid4()
     expected_response = {
         "room_id": 1,
         "room_name": "Room 1",
@@ -59,11 +59,14 @@ def test_leave_room1():
         "owner_name": "Braian",
         "is_active": True,
     }
-
-    response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert player_name not in repo.get_room_by_id(room_id).players_names
-    assert response.json() == expected_response
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/rooms/leave/{room_id}/{player_name}/{uuid}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert player_name not in repo.get_room_by_id(room_id).players_names
+        assert response.json() == expected_response
+        data = websocket.receive_text()
+        assert data == "LISTA"
     reset()
 
 
@@ -73,11 +76,11 @@ def test_leave_room2():
     generate_test_room()
     room_id = 1
     player_name = "Tadeo"
-    user_id = uuid4()
-
-    response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
-    assert player_name not in repo.get_room_by_id(room_id).players_names
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/rooms/leave/{room_id}/{player_name}/{uuid}")
+        assert player_name not in repo.get_room_by_id(room_id).players_names
+        assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()
 
 
@@ -87,11 +90,11 @@ def test_leave_noroom():
     generate_test_room()
     room_id = 2
     player_name = "Yamil"
-    user_id = uuid4()
-
-    response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
-    assert repo.get_room_by_id(room_id) == None
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/rooms/leave/{room_id}/{player_name}/{uuid}")
+        assert repo.get_room_by_id(room_id) == None
+        assert response.status_code == status.HTTP_404_NOT_FOUND
     reset()
 
 
@@ -100,17 +103,19 @@ def test_owner_leave():
     generate_test_room()
     room_id = 1
     player_name = "Braian"
-    user_id = uuid4()
 
     # Respuesta esperada cuando el propietario abandona la sala
-
-    response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/rooms/leave/{room_id}/{player_name}/{uuid}")
 
     # Verificar que la sala ha sido eliminada
-    assert repo.get_room_by_id(room_id) is None  # La sala debe estar eliminada
+        assert repo.get_room_by_id(room_id) is None  # La sala debe estar eliminada
 
     # Verificar el mensaje de respuesta
-    assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        data = websocket.receive_text()
+        assert data == "LISTA"
 
     reset()
 

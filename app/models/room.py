@@ -78,7 +78,6 @@ class RoomRepository:
             players.append(player_name)
         elif method == "remove" and player_name in players:
             players.remove(player_name)
-
         db = Session()
         try:
             db_room = db.query(Room).filter(Room.room_id == room_id).one()

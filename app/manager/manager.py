@@ -28,7 +28,7 @@ class ConnectionManager:
         conn = Connection(user_id, websocket)
         await websocket.accept()
         self.active_connections[user_id] = conn
-        print("CONN ", self.active_connections)
+        #print("CONN ", self.active_connections) #lo dejo en comentario para que quede mas clean
 
     def disconnect(self, user_id: UUID | int):
         # TODO: think another way  this should be sooo slow
@@ -55,8 +55,9 @@ class ConnectionManager:
         await self.active_connections[user_id].get_ws().send_text(message)
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
+        
         for user_id in self.rooms[room_id]:
-            print(user_id, " ", message)
+            #print(user_id, " ", message)  #lo dejo en comentario para que quede mas clean
             try:
                 # If ws of user_id disconnect we shoulnt send a message
                 await self.send_personal_message_id(user_id, message)
@@ -84,7 +85,7 @@ class ConnectionManager:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            raise Exception(f"Error: {str(e)}")
+            raise Exception(f"Error in join: {str(e)}")
 
     async def leave(self, room_id: UUID | int, user_id: UUID):
         # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
@@ -93,19 +94,19 @@ class ConnectionManager:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            raise Exception(f"Error: {str(e)}")
+            raise Exception(f"Error in leave: {str(e)}")
 
     async def create(self, room_id: UUID | int, user_id: UUID):
         try:
             self.bind_room(room_id, user_id)
             await self.broadcast_not_playing("LISTA")
         except Exception as e:
-            raise Exception(f"Error:{str(e)}")
+            raise Exception(f"Error in create:{str(e)}")
 
-    async def destroy_room(self, room_id: UUID | int):
+    async def destroy_room(self, room_id: UUID | int,user_id: UUID):
         try:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "DELETE_ROOM")
             del self.rooms[room_id]
         except Exception as e:
-            raise Exception(f"Error:{str(e)}")
+            raise Exception(f"Error in destroy:{str(e)}")

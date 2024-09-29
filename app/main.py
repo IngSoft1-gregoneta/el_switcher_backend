@@ -49,8 +49,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
     # logger.debug(user_id)
     await manager.connect(user_id, websocket)
     try:
-        while True:
-            data = await websocket.receive_text()
+        data = await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(user_id)
 
@@ -96,11 +95,7 @@ async def get_rooms():
 async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
     try:
         result = await room_handler.create_room(new_room)
-        # TODO: Sacar esto hacer mock
-        try:
-            await manager.create(result["room_id"], user_id)
-        except Exception as e:
-            print(e)
+        await manager.create(result["room_id"], user_id)
         return result
     except HTTPException as http_ex:
         raise http_ex
@@ -119,10 +114,7 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
 async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.join_room(room_id, player_name, user_id)
-        try:
-            await manager.join(room_id, user_id)
-        except Exception as e:
-            print(e)
+        await manager.join(room_id, user_id)
         return result
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
@@ -144,18 +136,14 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
         # Si es none es porq se destruyo la room
-        try:
-            if result == None:
-                await manager.destroy_room(room_id)
-            else:
-                await manager.leave(room_id, user_id)
-        except Exception as e:
-            print(e)
+        await manager.leave(room_id, user_id)
+        if result == None:
+            await manager.destroy_room(room_id,user_id)
         return result
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
         raise http_exc
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
@@ -189,10 +177,7 @@ async def leave_match(
 ) -> Union[MatchOut, str]:
     try:
         result = await match_handler.leave_match(player_name, match_id)
-        try:
-            await manager.leave(match_id, user_id)
-        except Exception as e:
-            print(e)
+        await manager.leave(match_id, user_id)
         return result
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está

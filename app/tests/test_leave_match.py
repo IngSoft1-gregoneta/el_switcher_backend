@@ -1,11 +1,12 @@
 from fastapi.testclient import TestClient
 from fastapi import status
 from models.room import *
-from main import app
+from main import app,manager
 from uuid import uuid4
 
 
 client = TestClient(app)
+uuid = uuid4()
 repo = RoomRepository()
 
 from models.match import *
@@ -49,26 +50,32 @@ def test_leave_from_match_of_4_players():
     generate_test_match()
     room_id = 1
     player_name = "Braian"
-    user_id = uuid4()
     match = repo_match.get_match_by_id(room_id)
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert player_deleted not in repo_match.get_match_by_id(room_id)
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{uuid}")    
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert player_deleted not in repo_match.get_match_by_id(room_id)
+        data = websocket.receive_text()
+        assert data == "LISTA"
 
 def test_leave_from_match_of_3_players():
     room_id = 1
     player_name = "Tadeo"
-    user_id = uuid4()
     match = repo_match.get_match_by_id(room_id)
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert player_deleted not in repo_match.get_match_by_id(room_id)
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{uuid}")    
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert player_deleted not in repo_match.get_match_by_id(room_id)
+        data = websocket.receive_text()
+        assert data == "LISTA"
 
 def test_no_player_leave_from_match():
     room_id = 1
@@ -89,7 +96,10 @@ def test_leave_from_no_match():
 def test_leave_and_destroy_match():
     room_id = 1
     player_name = "Facu"
-    user_id = uuid4()
-    response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert repo_match.get_match_by_id(room_id) is None
+    with client.websocket_connect(f'/ws/{uuid}') as websocket:
+        manager.bind_room(room_id,uuid)
+        response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{uuid}")    
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert repo_match.get_match_by_id(room_id) is None
+        data = websocket.receive_text()
+        assert data == "LISTA"
