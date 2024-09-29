@@ -55,7 +55,9 @@ class MatchOut(BaseModel):
         players = []
         index = 0
         for player_name in players_names:
-            fig_cards = self.create_fig_cards(len_players=len(players_names), match_id=match_id, player_name=player_name)
+            fig_cards = self.create_fig_cards(len_players=len(players_names),
+                                                match_id=match_id,
+                                                player_name=player_name)
             mov_cards = self.create_mov_cards(match_id=match_id, player_name=player_name)
             has_turn = index == 0
             player = Player(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
@@ -68,7 +70,12 @@ class MatchOut(BaseModel):
         fig_cards = []
         white_figs = list(FigType)[:7]
         for i in range(50 // len_players):
-            new_fig_card = FigCard(match_id=match_id, player_name=player_name, card_color=CardColor.WHITE, fig_type=random.choice(white_figs))
+            is_visible = i <= 2
+            new_fig_card = FigCard(match_id=match_id, 
+                                   player_name=player_name, 
+                                   card_color=CardColor.WHITE, 
+                                   fig_type=random.choice(white_figs), 
+                                   is_visible=is_visible)
             fig_cards.append(new_fig_card)
         return fig_cards
 
@@ -80,8 +87,11 @@ class MatchOut(BaseModel):
             mov_cards.append(new_mov_card)
         return mov_cards
 
-MATCHS = [
-]
+    def get_player_by_name(self, player_name) -> Player:
+        for player in self.players:
+            if player.player_name == player_name:
+                return player
+        return None
 
 class MatchRepository:
     def create_match(self, new_match: MatchOut):
@@ -184,7 +194,6 @@ class MatchRepository:
             match = self.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
-
             match_id = match.match_id
             matchdb = db.query(Match).filter(Match.match_id == match_id).one_or_none()
             player_to_remove = None
@@ -194,9 +203,9 @@ class MatchRepository:
             if player_to_remove == None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
             match.players.remove(player_to_remove)
-            if len(match.players) == 1:
+            if len(match.players) == 0:
                 self.delete(match_id)
-                return match.players[0].player_name
+                return "Match destroyed"
             players_db = []
             tiles_db = []
             for player in match.players:

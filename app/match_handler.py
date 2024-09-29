@@ -8,7 +8,7 @@ from manager.manager import ConnectionManager
 #from manager.manager import ConnectionManager
 from models.match import MatchIn, MatchOut, MatchRepository
 from models.room import RoomRepository
-    
+from models.visible_match import *
 manager = ConnectionManager()
 
 class MatchHandler:
@@ -63,3 +63,14 @@ class MatchHandler:
             detail="Internal Server Error",
         )
         
+    async def get_visible_data_by_player(self, match_id: int, player_name: str) -> VisibleMatchData:
+        try:
+            visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
+            return visible_match
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )

@@ -19,10 +19,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
 from manager.manager import ConnectionManager
+from room_handler import RoomHandler
 from match_handler import MatchHandler
 from models.match import *
 from models.room import *
-from room_handler import RoomHandler
+from models.visible_match import *
 
 app = FastAPI()
 
@@ -195,7 +196,6 @@ async def leave_match(
             print(e)
         return result
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
         raise http_exc
     except Exception:
         raise HTTPException(
@@ -203,6 +203,22 @@ async def leave_match(
             detail="Internal Server Error",
         )
 
+@app.get("/matchs/visible_match/{match_id}/{player_name}")
+async def get_match_data(
+    match_id: int,
+    player_name: str
+) -> VisibleMatchData:
+    try:
+        visible_match = await match_handler.get_visible_data_by_player(match_id, player_name)
+        return visible_match
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+    
 @app.put("/matchs/{match_id}/endturn", status_code=status.HTTP_202_ACCEPTED)
 async def endturn(match_id: int):
     repo = MatchRepository()

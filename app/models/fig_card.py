@@ -27,10 +27,10 @@ class FigCard(BaseModel):
     player_name: str
     card_color: CardColor
     fig_type: FigType
-    is_visible: bool = False
+    is_visible: bool
 
-    def __init__(self, match_id: int, player_name: str, card_color: CardColor, fig_type: FigType):
-        super().__init__(match_id=match_id, player_name=player_name, card_color=card_color, fig_type=fig_type, is_visible=False)
+    def __init__(self, match_id: int, player_name: str, card_color: CardColor, fig_type: FigType, is_visible: bool):
+        super().__init__(match_id=match_id, player_name=player_name, card_color=card_color, fig_type=fig_type, is_visible=is_visible)
         self.validate_card()
 
     def validate_card(self):
