@@ -66,9 +66,9 @@ async def get_room_data(
 ) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
     try:
         return await room_handler.get_data_from_a_room(room_id)
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
@@ -203,12 +203,16 @@ async def leave_match(
             detail="Internal Server Error",
         )
 
+
 @app.put("/matchs/{match_id}/endturn", status_code=status.HTTP_202_ACCEPTED)
 async def endturn(match_id: int):
     repo = MatchRepository()
     try:
         match = repo.get_match_by_id(match_id)
         next_turn(match)
-        return {'message': '¡Próximo Turno!'}
+        return {"message": "¡Próximo Turno!"}
+
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}"
+        )

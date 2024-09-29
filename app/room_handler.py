@@ -18,19 +18,13 @@ class RoomHandler:
         self.repo = RoomRepository()
 
     async def get_all_rooms(self):
-        try:
-            return self.repo.get_rooms()
-        except Exception:
-            raise Exception("Error getting rooms")
+        return self.repo.get_rooms()
 
     async def get_data_from_a_room(self, room_id: int) -> Union[RoomOut, dict]:
-        try:
-            room = self.repo.get_room_by_id(room_id)
-            if room is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-            return room
-        except Exception:
-            raise Exception("Error getting room")
+        room = self.repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return room
 
     async def create_room(self, new_room: RoomIn) -> RoomOut:
         if new_room.players_expected < 2 or new_room.players_expected > 4:
@@ -95,4 +89,3 @@ class RoomHandler:
         except HTTPException as http_exc:
             # si es una HTTPException, dejamos que pase como está
             raise http_exc
-

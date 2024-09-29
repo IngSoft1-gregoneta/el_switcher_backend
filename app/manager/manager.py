@@ -28,7 +28,8 @@ class ConnectionManager:
         conn = Connection(user_id, websocket)
         await websocket.accept()
         self.active_connections[user_id] = conn
-        print("CONN ", self.active_connections)
+        # When ws discconect but user is playing i should let them know to fetch, becouse changes could been made
+        # for know i would fetch all again in the client side
 
     def disconnect(self, user_id: UUID | int):
         # TODO: think another way  this should be sooo slow
@@ -40,9 +41,15 @@ class ConnectionManager:
         del self.active_connections[user_id]
 
     def bind_room(self, room_id: UUID | int, user_id: UUID):
+        try:
+            print(user_id)
+            print(self.rooms[room_id])
+        except Exception as e:
+            print(e)
         self.rooms.setdefault(room_id, [])
         self.rooms[room_id].append(user_id)
         self.active_connections[user_id].set_playing(True)
+        print(self.rooms[room_id])
 
     def unbind_room(self, room_id: UUID | int, user_id: UUID):
         self.rooms[room_id].remove(user_id)
@@ -64,12 +71,13 @@ class ConnectionManager:
                 print(f"Error broadcast_by_room {e}")
 
     async def broadcast_not_playing(self, message: str):
-        for uuid, connection in self.active_connections.items():
+        for user_id, connection in self.active_connections.items():
             try:
                 if not connection.is_playing:
+                    print(user_id, " ", message)
                     await connection.get_ws().send_text(message)
             except WebSocketDisconnect:
-                self.disconnect(uuid)
+                self.disconnect(user_id)
 
     async def broadcast(self, message: str):
         for uuid, connection in self.active_connections.items():
@@ -84,28 +92,33 @@ class ConnectionManager:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            raise Exception(f"Error: {str(e)}")
+            raise Exception(f"Error join: {str(e)}")
 
     async def leave(self, room_id: UUID | int, user_id: UUID):
         # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
         try:
             self.unbind_room(room_id, user_id)
+            print("leave", user_id)
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            raise Exception(f"Error: {str(e)}")
+            raise Exception(f"Error leave: {str(e)}")
 
     async def create(self, room_id: UUID | int, user_id: UUID):
         try:
             self.bind_room(room_id, user_id)
             await self.broadcast_not_playing("LISTA")
         except Exception as e:
-            raise Exception(f"Error:{str(e)}")
+            raise Exception(f"Error create:{str(e)}")
 
     async def destroy_room(self, room_id: UUID | int):
         try:
             await self.broadcast_not_playing("LISTA")
-            await self.broadcast_by_room(room_id, "DELETE_ROOM")
+            await self.broadcast_by_room(room_id, "ROOM")
+            print(self.rooms[room_id])
+            for user_id in list(self.rooms[room_id]):
+                print("ESTO ES DESTroy", user_id)
+                self.unbind_room(room_id, user_id)
             del self.rooms[room_id]
         except Exception as e:
-            raise Exception(f"Error:{str(e)}")
+            raise Exception(f"Error destroy :{str(e)}")
