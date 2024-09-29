@@ -83,6 +83,11 @@ class MatchHandler:
                 last_player = match.players[0].player_name
 
                 return last_player
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Match {match_id} is still ongoing"
+            )
 
         except Exception as e:
             if isinstance(e, HTTPException):

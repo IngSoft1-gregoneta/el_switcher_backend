@@ -46,12 +46,36 @@ def test_end_match_one_player():
     generate_test_match()
     match_id = 1
 
-    match = repo_match.get_match_by_id(match_id)
     repo_match.delete_player("Tadeo", match_id)
+    match = repo_match.get_match_by_id(match_id)
 
     response = client.put(f"/matchs/end/{match_id}")
     assert response.status_code == status.HTTP_202_ACCEPTED
 
-    assert response == match.players[0]
+    assert len(match.players) == 1
+    # Winner should be 'Braian'
+    assert response.json() == match.players[0].player_name
     reset()
+
+def test_end_match_with_two_players():
+    reset()
+    generate_test_room()
+    generate_test_match()
+    match_id = 1
+
+    response = client.put(f"/matchs/end/{match_id}")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    
+    match = repo_match.get_match_by_id(match_id)
+    assert len(match.players) == 2
+
+def test_end_match_invalid_id():
+    reset()
+    generate_test_room()
+    # If we manage to host 999 matches, someone will fire me :p
+    invalid_match_id = 999
+
+    response = client.put(f"/matchs/end/{invalid_match_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
     

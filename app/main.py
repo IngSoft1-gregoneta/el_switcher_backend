@@ -234,11 +234,12 @@ async def endturn(match_id: int):
     "/matchs/end/{match_id}",
     status_code=status.HTTP_202_ACCEPTED
     )
-async def endmatch(match_id: int):
+async def endmatch(match_id: int) -> str:
     try:
         result = await match_handler.end_match(match_id)
         # Send message to front
         manager.broadcast(message=f"La partida ha finalizado. Ganador: {result}")
+        return result
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
