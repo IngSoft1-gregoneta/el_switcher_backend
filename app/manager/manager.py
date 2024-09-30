@@ -28,7 +28,7 @@ class ConnectionManager:
         conn = Connection(user_id, websocket)
         await websocket.accept()
         self.active_connections[user_id] = conn
-        #print("CONN ", self.active_connections)
+        # print("CONN ", self.active_connections)
 
     def disconnect(self, user_id: UUID | int):
         # TODO: think another way  this should be sooo slow
@@ -43,6 +43,7 @@ class ConnectionManager:
         self.rooms.setdefault(room_id, [])
         self.rooms[room_id].append(user_id)
         self.active_connections[user_id].set_playing(True)
+        print(self.rooms[room_id])
 
     def unbind_room(self, room_id: UUID | int, user_id: UUID):
         self.rooms[room_id].remove(user_id)
@@ -59,7 +60,7 @@ class ConnectionManager:
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:
-            #print(user_id, " ", message)
+            # print(user_id, " ", message)
             try:
                 # If ws of user_id disconnect we shoulnt send a message
                 await self.send_personal_message_id(user_id, message)
@@ -96,7 +97,7 @@ class ConnectionManager:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            return #Esto es para propositos de evitar el error:1
+            return  # Esto es para propositos de evitar el error:1
 
     async def leave_match(self, room_id: UUID | int, user_id: UUID):
         # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
@@ -117,8 +118,9 @@ class ConnectionManager:
     async def destroy_room(self, room_id: UUID | int):
         try:
             await self.broadcast_by_room(room_id, "ROOM")
-            for userid in self.rooms[room_id]:
-                self.unbind_room(room_id,userid)
+            print(self.rooms[room_id])
+            for userid in list(self.rooms[room_id]):
+                self.unbind_room(room_id, userid)
             await self.broadcast_not_playing("LISTA")
             del self.rooms[room_id]
         except Exception as e:
