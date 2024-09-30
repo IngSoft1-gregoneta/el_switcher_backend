@@ -156,7 +156,7 @@ def test_match_without_room():
     owner_name = "Braian"
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
+    assert response.json() == {'detail': 'Room not found'}
     reset()
 
 def test_create_match_not_owner():

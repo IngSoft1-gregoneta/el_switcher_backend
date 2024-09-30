@@ -15,21 +15,23 @@ class MatchHandler:
         repo_room = RoomRepository()
         try:
             room = repo_room.get_room_by_id(match_in.room_id)
-            if not room:
-                raise HTTPException(status_code=404, detail="Room not found")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-        if room.owner_name != owner_name:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can create a match")
-        
-        try:
+            if room is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+            if room.owner_name != owner_name:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can create a match")
             match = MatchOut(match_in.room_id)
             self.repo.create_match(match)
             return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
         except ValueError as ve:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {str(ve)}")
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {str(e)}")
+            if isinstance(e, HTTPException):
+               raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+        
         
         
     async def get_match_by_id(self, match_id: int) -> Union[MatchOut, dict]:
@@ -65,6 +67,18 @@ class MatchHandler:
         try:
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
             return visible_match
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+    
+    async def end_turn(self, match_id: int, player_name: str):
+        try:
+            match = self.repo.end_turn(match_id=match_id, player_name=player_name)
+            return match
         except Exception as e:
             if isinstance(e, HTTPException):
                 raise e

@@ -2,6 +2,7 @@
 # Default query parameters
 from typing import Annotated, Any, Optional, Union
 
+from models.visible_match import VisibleMatchData
 from room_handler import RoomHandler
 from match_handler import MatchHandler
 
@@ -160,17 +161,58 @@ async def get_match_data(
 ) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
     return await match_handler.get_match_by_id(match_id)
 
+
+@app.put(
+    "/matchs/leave_match/{match_id}/{player_name}/{user_id}",
+    response_model=Union[MatchOut, str],
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def leave_match(
     match_id: int,
     player_name: str,
     user_id: UUID,
-    )-> Union[MatchOut,str]:
+) -> Union[MatchOut, str]:
     try:
         result = await match_handler.leave_match(player_name, match_id)
-        manager.leave(match_id, user_id)
+        try:
+            await manager.leave(match_id, user_id)
+        except Exception as e:
+            print(e)
         return result
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+
+    
+@app.put("/matchs/end_turn/{match_id}/{player_name}")
+async def get_match_data(
+    match_id: int,
+    player_name: str
+) -> MatchOut:
+    try:
+        match = await match_handler.end_turn(match_id, player_name)
+        return match
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+        
+@app.get("/matchs/visible_match/{match_id}/{player_name}")
+async def get_match_data(
+    match_id: int,
+    player_name: str
+) -> VisibleMatchData:
+    try:
+        visible_match = await match_handler.get_visible_data_by_player(match_id, player_name)
+        return visible_match
+    except HTTPException as http_exc:
         raise http_exc
     except Exception:
         raise HTTPException(

@@ -76,7 +76,9 @@ def verify_test_ok(match_id, player_name):
     assert response.json() == expected_response.model_dump()
     match = repo_match.get_match_by_id(match_id)
     assert expected_response.match_id == match_id
+    has_turn_count = 0
     for player in match.players:
+        if player.has_turn: has_turn_count = has_turn_count + 1
         for other_player in expected_response.other_players:
             for fig_card in player.fig_cards:
                 if other_player.player_name == player.player_name:
@@ -94,6 +96,7 @@ def verify_test_ok(match_id, player_name):
             assert expected_response.me.deck_len == len(player.fig_cards)
             for mov_card in player.mov_cards:
                 assert mov_card in expected_response.me.mov_cards
+    assert has_turn_count == 1
     assert expected_response.board == match.board
 
 def test_get_visible_data_in_match_of_2_players():
