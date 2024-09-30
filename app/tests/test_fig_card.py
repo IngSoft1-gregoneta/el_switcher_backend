@@ -13,8 +13,8 @@ def test_valid_fig_card():
 
 def test_valid_fig_card_str():
     try:
-        FigCard(match_id=1, player_name="Player1", card_color="White", fig_type="L", is_visible=False)
-        FigCard(match_id=1, player_name="Player1", card_color="Blue", fig_type="B1", is_visible=False)
+        FigCard(match_id=1, player_name="Player1", card_color="White", fig_type="fige01", is_visible=False)
+        FigCard(match_id=1, player_name="Player1", card_color="Blue", fig_type="fig01", is_visible=False)
     except ValueError as e:
         assert False, f"Error: {e}"
 

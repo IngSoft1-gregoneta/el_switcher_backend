@@ -15,7 +15,7 @@ def test_random_mov_card():
 def test_valid_mov_card():
     match_id = 1
     player_name = "Player1"
-    mov_type = MovType.SIDE
+    mov_type = random.choice(list(MovType))
     try:
         card = MovCard(match_id=match_id, player_name=player_name, mov_type=mov_type)
         assert card.match_id == match_id, f"game id {card.match_id} must be {match_id}"
@@ -27,12 +27,12 @@ def test_valid_mov_card():
 def test_valid_mov_card_str():
     match_id = 1
     player_name = "Player1"
-    mov_type = "Side"
+    mov_type = "mov1"
     try:
         card = MovCard(match_id=match_id, player_name=player_name, mov_type=mov_type)
         assert card.match_id == match_id, f"game id {card.match_id} must be {match_id}"
         assert card.player_name == player_name, f"player name {card.player_name} must be {player_name}"
-        assert card.mov_type == MovType.SIDE, f"mov type {card.mov_type} must be {mov_type}"
+        assert card.mov_type == MovType.mov1, f"mov type {card.mov_type} must be {mov_type}"
     except ValueError as e:
         assert False, f"Error: {e}"
     

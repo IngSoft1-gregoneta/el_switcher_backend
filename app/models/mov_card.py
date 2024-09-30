@@ -4,12 +4,13 @@ import random
 
 # Define the Enum for movement card types
 class MovType(Enum):
-    SIDE = "Side"
-    NEXT_TO_THE_SIDE = "Next to the side"
-    CROSS = "Cross"
-    RIGHT_CHESS_HORSE = "Right chess horse"
-    LEFT_CHESS_HORSE = "Left chess horse"
-
+    mov1 = "mov1"
+    mov2 = "mov2"
+    mov3 = "mov3"
+    mov4 = "mov4"
+    mov5 = "mov5"
+    mov6 = "mov6"
+    mov7 = "mov7"
     
 # Define the Pydantic model
 class MovCard(BaseModel):
