@@ -95,6 +95,15 @@ class ConnectionManager:
         except Exception as e:
             raise Exception(f"Error: {str(e)}")
 
+    async def leave_match(self, room_id: UUID | int, user_id: UUID):
+        # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
+        try:
+            self.unbind_room(room_id, user_id)
+            await self.broadcast_not_playing("LISTA")
+            await self.broadcast_by_room(room_id, "MATCH")
+        except Exception as e:
+            raise Exception(f"Error: {str(e)}")
+
     async def create(self, room_id: UUID | int, user_id: UUID):
         try:
             self.bind_room(room_id, user_id)
