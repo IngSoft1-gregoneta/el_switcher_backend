@@ -2,6 +2,10 @@
 # Default query parameters
 from typing import Annotated, Any, Optional, Union
 
+from models.visible_match import VisibleMatchData
+from room_handler import RoomHandler
+from match_handler import MatchHandler
+
 # Unique id
 from uuid import UUID, uuid4
 
@@ -19,11 +23,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
 from manager.manager import ConnectionManager
-from room_handler import RoomHandler
-from match_handler import MatchHandler
 from models.match import *
 from models.room import *
-from models.visible_match import *
 
 app = FastAPI()
 
@@ -39,7 +40,7 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
-# instancia de RoomHandler para manejar la lógica de los endpoints de room
+#instancia de RoomHandler para manejar la lógica de los endpoints de room
 room_handler = RoomHandler()
 
 match_handler = MatchHandler()
@@ -62,9 +63,7 @@ def get_id():
 
 
 @app.get("/room/{room_id}")
-async def get_room_data(
-    room_id: int,
-) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
+async def get_room_data(room_id: int) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
     try:
         return await room_handler.get_data_from_a_room(room_id)
     except Exception as e:
@@ -74,7 +73,6 @@ async def get_room_data(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
 
 # Define endpoint to get rooms list
 @app.get("/rooms")
@@ -86,7 +84,6 @@ async def get_rooms():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
 
 # endpoint for create room
 @app.post(
@@ -110,8 +107,8 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
-
+        
+# TODO: This url change so i gess test must change
 @app.put(
     "/rooms/join/{room_id}/{player_name}/{user_id}",
     response_model=Union[RoomOut, dict],
@@ -120,41 +117,33 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
 async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.join_room(room_id, player_name, user_id)
-        try:
-            await manager.join(room_id, user_id)
-        except Exception as e:
-            print(e)
-        return result
+        await manager.join(room_id, user_id)
+        return result 
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
-        raise http_exc
+         raise http_exc
     except Exception:
-        raise HTTPException(
+         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
 
-
 # endpoint for room leave request
 @app.put(
     "/rooms/leave/{room_id}/{player_name}/{user_id}",
-    response_model=RoomOut | dict | None,
+    response_model=Union[RoomOut, dict],
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
         # Si es none es porq se destruyo la room
-        try:
-            if result == None:
-                await manager.destroy_room(room_id)
-            else:
-                await manager.leave(room_id, user_id)
-        except Exception as e:
-            print(e)
+        if result == None:
+            await manager.destroy_room(room_id,user_id)
+        else:
+            await manager.leave(room_id, user_id)
         return result
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
         raise http_exc
     except Exception:
         raise HTTPException(
@@ -162,14 +151,12 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
             detail="Internal Server Error",
         )
 
-
 # endopint to create a match
-@app.post(
-    "/matchs/create_match/{owner_name}", status_code=status.HTTP_201_CREATED
-)
+@app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
+    result = await match_handler.create_match(matchIn, owner_name) 
     await manager.broadcast_by_room(matchIn.room_id,"MATCH")
-    return await match_handler.create_match(matchIn, owner_name) 
+    return result
 
 
 @app.get("/matchs/{match_id}")
@@ -204,21 +191,6 @@ async def leave_match(
             detail="Internal Server Error",
         )
 
-@app.get("/matchs/visible_match/{match_id}/{player_name}")
-async def get_match_data(
-    match_id: int,
-    player_name: str
-) -> VisibleMatchData:
-    try:
-        visible_match = await match_handler.get_visible_data_by_player(match_id, player_name)
-        return visible_match
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
     
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
 async def get_match_data(
@@ -229,6 +201,22 @@ async def get_match_data(
         match = await match_handler.end_turn(match_id, player_name)
         await manager.broadcast_by_room(match_id,"MATCH")
         return match
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+        
+@app.get("/matchs/visible_match/{match_id}/{player_name}")
+async def get_match_data(
+    match_id: int,
+    player_name: str
+) -> VisibleMatchData:
+    try:
+        visible_match = await match_handler.get_visible_data_by_player(match_id, player_name)
+        return visible_match
     except HTTPException as http_exc:
         raise http_exc
     except Exception:

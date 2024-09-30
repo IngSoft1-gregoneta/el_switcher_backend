@@ -1,8 +1,9 @@
+from uuid import uuid4
 from fastapi.testclient import TestClient
 from fastapi import status
 from models.room import *
 from models.match import *
-from main import app
+from main import app,manager
 
 client = TestClient(app)
 
@@ -15,6 +16,8 @@ repo_match = MatchRepository()
 def reset():
     repo_room.delete_rooms()
     repo_match.delete_matchs()
+    manager.active_connections.clear()
+    manager.rooms.clear()
 
 def generate_test_room():
     db = Session()
@@ -72,15 +75,21 @@ def verify_test_ok(match_id):
     assert match.players[0].has_turn
     assert not match.players[1].has_turn
     players_len = len(match.players)
-    for i in range(len(match.players)):
-        index = (i+1)%players_len
-        response = client.put(f"/matchs/end_turn/{match_id}/{match.players[i].player_name}")
-        assert response.status_code == status.HTTP_200_OK
-        match = repo_match.get_match_by_id(match_id)
-        for j in range(players_len):
-            if match.players[index].player_name != match.players[j].player_name:
-                assert not match.players[j].has_turn
-        assert match.players[index].has_turn
+    player_id = uuid4()
+    with client.websocket_connect(f'/ws/{player_id}') as Clientwebsocket:
+        manager.bind_room(match_id,player_id)
+        for i in range(len(match.players)):
+            index = (i+1)%players_len
+            response = client.put(f"/matchs/end_turn/{match_id}/{match.players[i].player_name}")
+            assert response.status_code == status.HTTP_200_OK
+            match = repo_match.get_match_by_id(match_id)
+            for j in range(players_len):
+                if match.players[index].player_name != match.players[j].player_name:
+                    assert not match.players[j].has_turn
+            assert match.players[index].has_turn
+        data = Clientwebsocket.receive_text()
+        print(data)
+        assert data == "MATCH"
 
 def test_endturn_in_match_of_2_players():
     reset()

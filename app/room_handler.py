@@ -74,7 +74,7 @@ class RoomHandler:
 
     async def leave_room(
         self, room_id: int, player_name: str, user_id: UUID
-    ) -> RoomOut | None:
+    ) -> RoomOut:
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -87,7 +87,7 @@ class RoomHandler:
                 player_name == room.owner_name
             ):  # si el owner abandona la sala, eliminar la sala
                 self.repo.delete(room_id)
-                return None
+                return {}
 
             self.repo.update_players(room.players_names, player_name, room_id, "remove")
             return self.repo.get_room_by_id(room_id)
