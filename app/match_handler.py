@@ -13,10 +13,12 @@ class MatchHandler:
         
     async def create_match(self, match_in: MatchIn, owner_name: str):
         repo_room = RoomRepository()
-        room = repo_room.get_room_by_id(match_in.room_id)  # Asegúrate de tener este método en tu repositorio
-        if not room:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= 'Bad request: There must be exactly one room per match')
-        
+        try:
+            room = repo_room.get_room_by_id(match_in.room_id)
+            if not room:
+                raise HTTPException(status_code=404, detail="Room not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
         if room.owner_name != owner_name:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can create a match")
         

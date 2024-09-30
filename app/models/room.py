@@ -118,8 +118,9 @@ class RoomRepository:
 
         try:
             todelete = db.query(Room).filter(Room.room_id == id).one_or_none()
-            db.delete(todelete)
-            db.commit()
+            if todelete:
+                db.delete(todelete)
+                db.commit()
         finally:
             db.close()
 

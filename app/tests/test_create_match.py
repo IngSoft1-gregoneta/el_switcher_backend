@@ -20,8 +20,8 @@ def generate_test_room():
                 room_name="Room 1",
                 room_id=1,
                 players_expected=2,
-                owner_name="Braian",
                 players_names=json.dumps(["Braian","Tadeo"]),
+                owner_name="Braian",
                 is_active=True
             )
         roombd2 = Room(
@@ -132,7 +132,7 @@ def test_match_5_player():
     room_id=5
     match_in = MatchIn(room_id=room_id)
     owner_name="Braian"
-    response = client.post(f"/matchs/create_match/{owner_name}", json=match_in)
+    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
     reset()
