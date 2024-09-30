@@ -116,7 +116,7 @@ class ConnectionManager:
 
     async def destroy_room(self, room_id: UUID | int):
         try:
-            await self.broadcast_by_room(room_id, "DELETEROOM")
+            await self.broadcast_by_room(room_id, "ROOM")
             for userid in self.rooms[room_id]:
                 self.unbind_room(room_id,userid)
             await self.broadcast_not_playing("LISTA")
