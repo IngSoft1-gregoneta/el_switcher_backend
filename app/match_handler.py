@@ -71,7 +71,7 @@ class MatchHandler:
             detail="Internal Server Error",
         )
     
-    async def end_turn(self, match_id: int, player_name: str) -> MatchOut:
+    async def end_turn(self, match_id: int, player_name: str):
         try:
             match = self.repo.end_turn(match_id=match_id, player_name=player_name)
             return match

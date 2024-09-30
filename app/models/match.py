@@ -259,17 +259,17 @@ class MatchRepository:
         finally:
             db.close()
 
-    def end_turn(self, player_name: str, match_id: int):
+    def end_turn(self, match_id: int, player_name: str):
         db = Session()
         try:
             match = self.get_match_by_id(match_id)
             if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
             target_player = match.get_player_by_name(player_name)
+            if target_player is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
             if target_player.has_turn is False:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="player has not the turn")
-            player = None
-            next_player = None
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
             for i in range(len(match.players)):
                 if match.players[i].player_name == player_name:
                     match.players[i].has_turn = False # this player
@@ -301,7 +301,6 @@ class MatchRepository:
             self.delete(match_id)
             db.add(matchdb)
             db.commit()
-
             return match
         finally:
             db.close()
