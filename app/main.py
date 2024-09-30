@@ -160,9 +160,7 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
-    print(matchIn)
     result = await match_handler.create_match(matchIn, owner_name)
-    print(result)
     await manager.broadcast_by_room(matchIn.room_id, "MATCH")
     return result
 
@@ -229,4 +227,3 @@ async def get_visible_match(match_id: int, player_name: str) -> VisibleMatchData
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-

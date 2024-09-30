@@ -43,7 +43,6 @@ class ConnectionManager:
         self.rooms.setdefault(room_id, [])
         self.rooms[room_id].append(user_id)
         self.active_connections[user_id].set_playing(True)
-        print(self.rooms[room_id])
 
     def unbind_room(self, room_id: UUID | int, user_id: UUID):
         self.rooms[room_id].remove(user_id)
@@ -118,7 +117,6 @@ class ConnectionManager:
     async def destroy_room(self, room_id: UUID | int):
         try:
             await self.broadcast_by_room(room_id, "ROOM")
-            print(self.rooms[room_id])
             for userid in list(self.rooms[room_id]):
                 self.unbind_room(room_id, userid)
             await self.broadcast_not_playing("LISTA")

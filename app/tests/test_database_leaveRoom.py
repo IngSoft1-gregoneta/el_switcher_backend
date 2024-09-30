@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app,manager
+from main import app, manager
 from models.room import *
 
 client = TestClient(app)
@@ -62,7 +62,7 @@ def test_leave_room1():
         "is_active": True,
     }
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
-        manager.bind_room(room_id,user_id)
+        manager.bind_room(room_id, user_id)
         response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert player_name not in repo.get_room_by_id(room_id).players_names
@@ -107,12 +107,12 @@ def test_owner_leave():
     player_name = "Braian"
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
-        manager.bind_room(room_id,user_id)
+        manager.bind_room(room_id, user_id)
         response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
-        assert repo.get_room_by_id(room_id) is None 
+        assert repo.get_room_by_id(room_id) is None
         assert response.status_code == status.HTTP_202_ACCEPTED
         data = Clientwebsocket.receive_text()
-        assert data == "LISTA"
+        assert data == "ROOM"
 
     reset()
 
