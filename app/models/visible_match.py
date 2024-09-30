@@ -7,14 +7,17 @@ class VisiblePlayer(BaseModel):
     player_name: str
     visible_fig_cards: List[FigCard]
     deck_len: int 
+    has_turn: bool
 
     def __init__(self, match_id: int, player_name: str):
         visible_fig_cards = self.get_visible_fig_cards(match_id, player_name)
         deck_len = self.get_deck_len(match_id, player_name)
+        has_turn = self.get_has_turn(match_id, player_name)
         super().__init__(match_id=match_id,
                          player_name=player_name,
                          visible_fig_cards=visible_fig_cards,
-                         deck_len=deck_len)
+                         deck_len=deck_len,
+                         has_turn=has_turn)
 
         
     def get_visible_fig_cards(self, match_id, player_name) -> List[FigCard]:
@@ -36,6 +39,14 @@ class VisiblePlayer(BaseModel):
             return len(player.fig_cards)
         except Exception as e:
             raise e
+        
+    def get_has_turn(self, match_id, player_name) -> bool:
+        try:
+            match = match_repository.get_match_by_id(match_id)
+            player = match.get_player_by_name(player_name)
+            return player.has_turn
+        except Exception as e:
+            raise e
 
 class Me(BaseModel):
     match_id: int
@@ -43,16 +54,20 @@ class Me(BaseModel):
     visible_fig_cards: List[FigCard]
     deck_len: int 
     mov_cards: List[MovCard]
+    has_turn: bool
 
     def __init__(self, match_id: int, player_name: str):
         visible_fig_cards = self.get_visible_fig_cards(match_id, player_name)
         deck_len = self.get_deck_len(match_id, player_name)
         mov_cards = self.get_mov_cards(match_id, player_name)
+        has_turn = self.get_has_turn(match_id, player_name)
+
         super().__init__(match_id=match_id,
                          player_name=player_name,
                          visible_fig_cards=visible_fig_cards,
                          deck_len=deck_len,
-                         mov_cards=mov_cards)
+                         mov_cards=mov_cards,
+                         has_turn=has_turn)
 
     def get_visible_fig_cards(self, match_id, player_name) -> List[FigCard]:
         try:
@@ -79,6 +94,14 @@ class Me(BaseModel):
             match = match_repository.get_match_by_id(match_id)
             player = match.get_player_by_name(player_name)
             return player.mov_cards
+        except Exception as e:
+            raise e
+        
+    def get_has_turn(self, match_id, player_name) -> bool:
+        try:
+            match = match_repository.get_match_by_id(match_id)
+            player = match.get_player_by_name(player_name)
+            return player.has_turn
         except Exception as e:
             raise e
 

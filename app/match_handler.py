@@ -70,3 +70,15 @@ class MatchHandler:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
+    async def end_turn(self, match_id: int, player_name: str):
+        try:
+            match = self.repo.end_turn(match_id=match_id, player_name=player_name)
+            return match
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
