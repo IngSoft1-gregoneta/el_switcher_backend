@@ -117,7 +117,7 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
 async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.join_room(room_id, player_name, user_id)
-        manager.join(room_id, user_id)
+        await manager.join(room_id, user_id)
         return result 
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
@@ -137,10 +137,13 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
-        manager.leave(room_id, user_id)
+        # Si es none es porq se destruyo la room
+        if result == None:
+            await manager.destroy_room(room_id,user_id)
+        else:
+            await manager.leave(room_id, user_id)
         return result
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
         raise http_exc
     except Exception:
         raise HTTPException(
@@ -151,8 +154,9 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
+    result = await match_handler.create_match(matchIn, owner_name) 
     await manager.broadcast_by_room(matchIn.room_id,"MATCH")
-    return await match_handler.create_match(matchIn, owner_name) 
+    return result
 
 
 @app.get("/matchs/{match_id}")

@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app
+from main import app,manager
 from models.room import *
 
 client = TestClient(app)
@@ -12,7 +12,8 @@ repo = RoomRepository()
 def reset():
     if repo.get_room_by_id(1):
         repo.delete(1)
-
+    manager.active_connections.clear()
+    manager.rooms.clear()
 
 def generate_test_room():
     db = Session()
@@ -49,21 +50,21 @@ def test_join_room1():
     room_id = 1
     player_name = "Tito"
     user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
+        expected_response = {
+            "room_id": 1,
+            "room_name": "Room 1",
+            "players_expected": 3,
+            "players_names": ["Yamil", "Tito"],
+            "owner_name": "Yamil",
+            "is_active": True,
+        }
 
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
-    expected_response = {
-        "room_id": 1,
-        "room_name": "Room 1",
-        "players_expected": 3,
-        "players_names": ["Yamil", "Tito"],
-        "owner_name": "Yamil",
-        "is_active": True,
-    }
-
-    assert "Tito" in repo.get_room_by_id(room_id).players_names
-    assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+        assert "Tito" in repo.get_room_by_id(room_id).players_names
+        assert repo.get_room_by_id(room_id).room_id == 1
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == expected_response
 
 
 # test para asegurarse de que no haya duplicados de nombres de jugadores
@@ -88,21 +89,21 @@ def test_join_room2():
     room_id = 1
     player_name = "Tadeo"
     user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as clientwebsocket:
+        response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
+        expected_response = expected_response = {
+            "room_id": 1,
+            "room_name": "Room 1",
+            "players_expected": 3,
+            "players_names": ["Yamil", "Tito", "Tadeo"],
+            "owner_name": "Yamil",
+            "is_active": True,
+        }
 
-    response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
-    expected_response = expected_response = {
-        "room_id": 1,
-        "room_name": "Room 1",
-        "players_expected": 3,
-        "players_names": ["Yamil", "Tito", "Tadeo"],
-        "owner_name": "Yamil",
-        "is_active": True,
-    }
-
-    assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
-    assert repo.get_room_by_id(room_id).room_id == 1
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert response.json() == expected_response
+        assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
+        assert repo.get_room_by_id(room_id).room_id == 1
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == expected_response
 
 
 # test para evitar que otro jugador se una a una sala llena

@@ -1,6 +1,7 @@
+from uuid import uuid4
 from fastapi.testclient import TestClient
 from fastapi import status
-from main import app
+from main import app,manager
 from models.match import *
 from models.room import * 
 
@@ -9,10 +10,13 @@ client = TestClient(app)
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
-def reset():
-    repo_match.delete_matchs()
+def resetrooms():
     repo_room.delete_rooms()
-
+def resetmatchs():
+    repo_match.delete_matchs()
+def resetmanager():
+    manager.active_connections.clear()
+    manager.rooms.clear()
 def generate_test_room():
     db = Session()
     try:
@@ -74,49 +78,82 @@ def generate_test_room():
     finally:
         db.close()    
 
+# test: para asegurarse que un jugador puede unirse a una partida, devuelve HTTP200OK y mensaje advirtiendo
+
 def test_match_2_players():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=1
     match_in = MatchIn(room_id=room_id)
     owner_name="Braian"
-    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
-    reset()
+    player_id = uuid4()
+    with client.websocket_connect(f'/ws/{player_id}') as Clientwebsocket:
+        manager.bind_room(room_id,player_id)
+        response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
+        data = Clientwebsocket.receive_text()
+        assert data == "MATCH"
+    resetrooms()
+    resetmatchs()
 
 def test_match_3_players():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=2
     match_in = MatchIn(room_id=room_id)
     owner_name="Braian"
-    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
-    reset()
+    player_id = uuid4()
+    with client.websocket_connect(f'/ws/{player_id}') as Clientwebsocket:
+        manager.bind_room(room_id,player_id)
+        response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
+        data = Clientwebsocket.receive_text()
+        assert data == "MATCH"
+    resetrooms()
+    resetmatchs()
 
-def test_match_4_players():
-    reset()
+def test_match4_players():
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=3
     match_in = MatchIn(room_id=room_id)
     owner_name="Braian"
-    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
+    player_id = uuid4()
+    with client.websocket_connect(f'/ws/{player_id}') as Clientwebsocket:
+        manager.bind_room(room_id,player_id)
+        response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == repo_match.get_match_by_id(room_id).model_dump(mode="json")
+        data = Clientwebsocket.receive_text()
+        assert data == "MATCH"
+    resetrooms()
+#---
 
 def test_dup_match():
+    resetrooms()
+    generate_test_room()
     room_id=3
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
-    response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
-    reset()
+    player_id = uuid4()
+    with client.websocket_connect(f'/ws/{player_id}') as Clientwebsocket:
+        manager.bind_room(room_id,player_id)
+        response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {'detail': 'Bad request: There must be exactly one room per match'}
+    resetrooms()
+    resetmatchs()
+
+
 
 def test_no_full_match():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=4
     match_in = MatchIn(room_id=room_id)
@@ -124,10 +161,12 @@ def test_no_full_match():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There must be exactly players expected amount of players'}
-    reset()
+    resetrooms()
+    resetmatchs()
 
 def test_match_5_player():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=5
     match_in = MatchIn(room_id=room_id)
@@ -135,10 +174,12 @@ def test_match_5_player():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
-    reset()
+    resetrooms()
+    resetmatchs()
 
 def test_match_a_player():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=6
     match_in = MatchIn(room_id=room_id)
@@ -146,10 +187,12 @@ def test_match_a_player():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Bad request: There are not between 2 and 4 players'}
-    reset()
+    resetrooms()
+    resetmatchs()
 
 def test_match_without_room():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id=0
     match_in = MatchIn(room_id=room_id)
@@ -157,10 +200,12 @@ def test_match_without_room():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Room not found'}
-    reset()
+    resetrooms()
+    resetmatchs()
 
 def test_create_match_not_owner():
-    reset()
+    resetrooms()
+    resetmatchs()
     generate_test_room()
     room_id = 1
     match_in = MatchIn(room_id=room_id)
@@ -168,4 +213,5 @@ def test_create_match_not_owner():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}", json=match_in.model_dump())
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json() == {'detail': 'Only the owner can create a match'}
-    reset()
+    resetrooms()
+    resetmatchs()
