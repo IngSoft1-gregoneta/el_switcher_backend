@@ -11,7 +11,7 @@ from config.repositorymanager import Session,Match
 from .tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
-
+from typing import Tuple
 
 class MatchIn(BaseModel):
     room_id: int
@@ -53,11 +53,19 @@ class MatchOut(BaseModel):
     def create_players(self, match_id: int) -> List[Player]:
         players_names = self.validate_room(match_id)
         players = []
+        
+        white_deck = list(FigType)[:7] * 2  # 14 cartas blancas, dos de cada figura
+        blue_deck = list(FigType)[7:] * 2  # 36 cartas azules, dos de cada figura
+        random.shuffle(white_deck)
+        random.shuffle(blue_deck)
+        
+        white_per_player = 14 // len(players_names)
+        blue_per_player = 36 // len(players_names)
+
         index = 0
         for player_name in players_names:
-            fig_cards = self.create_fig_cards(len_players=len(players_names),
-                                                match_id=match_id,
-                                                player_name=player_name)
+            fig_cards, white_deck, blue_deck = self.create_fig_cards(match_id,player_name,white_per_player,blue_per_player,white_deck,blue_deck)
+            for i in range(3): fig_cards[i].is_visible = True
             mov_cards = self.create_mov_cards(match_id=match_id, player_name=player_name)
             has_turn = index == 0
             player = Player(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
@@ -65,19 +73,34 @@ class MatchOut(BaseModel):
             index = index + 1
         return players
 
+
     @staticmethod
-    def create_fig_cards(len_players: int, match_id: int, player_name: str) -> List[FigCard]:
+    def create_fig_cards(match_id: int, player_name: str, white_per_player: int, 
+                         blue_per_player: int, white_deck: List[FigCard],
+                        blue_deck: List[FigCard]) -> Tuple[List[FigCard], List[FigCard], List[FigCard]]:
         fig_cards = []
-        white_figs = list(FigType)[:7]
-        for i in range(50 // len_players):
-            is_visible = i <= 2
-            new_fig_card = FigCard(match_id=match_id, 
-                                   player_name=player_name, 
-                                   card_color=CardColor.WHITE, 
-                                   fig_type=random.choice(white_figs), 
-                                   is_visible=is_visible)
+        for i in range(white_per_player):
+            fig_type = white_deck.pop(0)
+            new_fig_card = FigCard(
+                match_id=match_id,
+                player_name=player_name,
+                card_color=CardColor.WHITE,
+                fig_type=fig_type,
+                is_visible=False
+            )
             fig_cards.append(new_fig_card)
-        return fig_cards
+        for i in range(blue_per_player):
+            fig_type = blue_deck.pop(0)
+            new_fig_card = FigCard(
+                match_id=match_id,
+                player_name=player_name,
+                card_color=CardColor.BLUE,
+                fig_type=fig_type,
+                is_visible=False
+            )
+            fig_cards.append(new_fig_card)
+            random.shuffle(fig_cards)
+        return fig_cards, white_deck, blue_deck
 
     @staticmethod
     def create_mov_cards(match_id: int, player_name: str) -> List[MovCard]:
