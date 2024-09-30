@@ -76,13 +76,19 @@ def test_match_2_players():
             if player.has_turn: has_turn_count = has_turn_count + 1
             assert fig_deck_len == 25, f"expected 50 fig cards between 2 players (25), got {fig_deck_len}"
             assert mov_deck_len == 3, f"expected 3 mov fig cards, got {mov_deck_len}"
-            count = 0
+            visible_cards = 0
+            white_deck_len = 0
+            blue_deck_len = 0
             for fig_card in player.fig_cards:
-                if count > 2:
-                    assert fig_card.is_visible is False
-                else:
-                    assert fig_card.is_visible is True
-                count = count + 1
+                if fig_card.is_visible: 
+                    visible_cards = visible_cards + 1
+                if fig_card.card_color == CardColor.WHITE:
+                    white_deck_len = white_deck_len + 1
+                if fig_card.card_color == CardColor.BLUE:
+                    blue_deck_len = blue_deck_len + 1
+            assert white_deck_len == 7
+            assert blue_deck_len == 18
+            assert visible_cards == 3, f"initially expected 3 visible cards"
         assert has_turn_count == 1, f"more than a player can not have the turn"
     except ValueError as e:
         assert False, f"Error: {e}"
@@ -102,13 +108,19 @@ def test_match_3_players():
             if player.has_turn: has_turn_count = has_turn_count + 1
             assert fig_deck_len == 16, f"expected 50 fig cards between 3 players (16), got {fig_deck_len}"
             assert mov_deck_len == 3, f"expected 3 mov fig cards, got {mov_deck_len}"
-            count = 0
+            visible_cards = 0
+            white_deck_len = 0
+            blue_deck_len = 0
             for fig_card in player.fig_cards:
-                if count > 2:
-                    assert fig_card.is_visible is False
-                else:
-                    assert fig_card.is_visible is True
-                count = count + 1
+                if fig_card.is_visible: 
+                    visible_cards = visible_cards + 1
+                if fig_card.card_color == CardColor.WHITE:
+                    white_deck_len = white_deck_len + 1
+                if fig_card.card_color == CardColor.BLUE:
+                    blue_deck_len = blue_deck_len + 1
+            assert white_deck_len == 4
+            assert blue_deck_len == 12
+            assert visible_cards == 3, f"initially expected 3 visible cards"
         assert has_turn_count == 1, f"more than a player can not have the turn"
     except ValueError as e:
         assert False, f"Error: {e}"
@@ -128,13 +140,19 @@ def test_match_4_players():
             if player.has_turn: has_turn_count = has_turn_count + 1
             assert fig_deck_len == 12, f"expected 50 fig cards between 4 players (12), got {fig_deck_len}"
             assert mov_deck_len == 3, f"expected 3 mov fig cards, got {mov_deck_len}"
-            count = 0
+            visible_cards = 0
+            white_deck_len = 0
+            blue_deck_len = 0
             for fig_card in player.fig_cards:
-                if count > 2:
-                    assert fig_card.is_visible is False
-                else:
-                    assert fig_card.is_visible is True
-                count = count + 1
+                if fig_card.is_visible: 
+                    visible_cards = visible_cards + 1
+                if fig_card.card_color == CardColor.WHITE:
+                    white_deck_len = white_deck_len + 1
+                if fig_card.card_color == CardColor.BLUE:
+                    blue_deck_len = blue_deck_len + 1
+            assert white_deck_len == 3
+            assert blue_deck_len == 9
+            assert visible_cards == 3, f"initially expected 3 visible cards"
         assert has_turn_count == 1, f"more than a player can not have the turn"
     except ValueError as e:
         assert False, f"Error: {e}"

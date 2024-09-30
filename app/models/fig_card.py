@@ -9,17 +9,32 @@ class CardColor(Enum):
     
 class FigType(Enum):
     # White figs (Tetris figs)
-    T = "T"
-    L = "L"
-    L_LEFT = "Left_L"
-    I = "I"
-    S = "S"
-    Z = "Z"
-    QUAD = "Quad"
+    fige01 = "fige01"
+    fige02 = "fige02"
+    fige03 = "fige03"
+    fige04 = "fige04"
+    fige05 = "fige05"
+    fige06 = "fige06"
+    fige07 = "fige07"
     # Blue figs (other figs)
-    F1 = "B1"
-    # Add more blue figs as needed
-    Fn = "Bn"
+    fig01 = "fig01"
+    fig02 = "fig02"
+    fig03 = "fig03"
+    fig04 = "fig04"
+    fig05 = "fig05"
+    fig06 = "fig06"
+    fig07 = "fig07"
+    fig08 = "fig08"
+    fig09 = "fig09"
+    fig10 = "fig10"
+    fig11 = "fig11"
+    fig12 = "fig12"
+    fig13 = "fig13"
+    fig14 = "fig14"
+    fig15 = "fig15"
+    fig16 = "fig16"
+    fig17 = "fig17"
+    fig18 = "fig18"
 
 # Define the FigCard class
 class FigCard(BaseModel):
