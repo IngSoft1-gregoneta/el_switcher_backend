@@ -5,14 +5,7 @@ from typing import Annotated, Any, Optional, Union
 # Unique id
 from uuid import UUID, uuid4
 
-from fastapi import (
-    Cookie,
-    FastAPI,
-    HTTPException,
-    WebSocket,
-    WebSocketDisconnect,
-    status,
-)
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
 
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,8 +56,8 @@ def get_id():
 
 @app.get("/room/{room_id}")
 async def get_room_data(
-    room_id: int,
-) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
+    room_id: UUID,
+) -> Union[RoomOut, dict]:
     try:
         return await room_handler.get_data_from_a_room(room_id)
     except HTTPException as e:
@@ -117,7 +110,7 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
     response_model=Union[RoomOut, dict],
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+async def join_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
     try:
         result = await room_handler.join_room(room_id, player_name, user_id)
         try:
@@ -141,7 +134,7 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
     response_model=RoomOut | dict | None,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
         # Si es none es porq se destruyo la room
@@ -166,13 +159,15 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
-    await manager.broadcast_by_room(matchIn.room_id, "MATCH_STARTED")
-    return await match_handler.create_match(matchIn, owner_name)
+
+    match = await match_handler.create_match(matchIn, owner_name)
+    await manager.broadcast_by_room(matchIn.room_id, "MATCH")
+    return match
 
 
 @app.get("/matchs/{match_id}")
 async def get_match_data(
-    match_id: int,
+    match_id: UUID,
 ) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
     return await match_handler.get_match_by_id(match_id)
 
@@ -183,7 +178,7 @@ async def get_match_data(
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def leave_match(
-    match_id: int,
+    match_id: UUID,
     player_name: str,
     user_id: UUID,
 ) -> Union[MatchOut, str]:
@@ -204,7 +199,9 @@ async def leave_match(
 
 
 @app.get("/matchs/visible_match/{match_id}/{player_name}")
-async def get_match_data_by_player(match_id: int, player_name: str) -> VisibleMatchData:
+async def get_match_data_by_player(
+    match_id: UUID, player_name: str
+) -> VisibleMatchData:
     try:
         visible_match = await match_handler.get_visible_data_by_player(
             match_id, player_name
@@ -216,18 +213,4 @@ async def get_match_data_by_player(match_id: int, player_name: str) -> VisibleMa
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
-        )
-
-
-@app.put("/matchs/{match_id}/endturn", status_code=status.HTTP_202_ACCEPTED)
-async def endturn(match_id: int):
-    repo = MatchRepository()
-    try:
-        match = repo.get_match_by_id(match_id)
-        next_turn(match)
-        return {"message": "¡Próximo Turno!"}
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}"
         )

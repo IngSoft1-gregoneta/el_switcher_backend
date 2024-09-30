@@ -2,12 +2,11 @@ from typing import Any, Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from starlette.status import HTTP_202_ACCEPTED
-
 from manager.manager import ConnectionManager
 
 # from manager.manager import ConnectionManager
 from models.room import RoomIn, RoomOut, RoomRepository
+from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
 
@@ -20,7 +19,7 @@ class RoomHandler:
     async def get_all_rooms(self):
         return self.repo.get_rooms()
 
-    async def get_data_from_a_room(self, room_id: int) -> Union[RoomOut, dict]:
+    async def get_data_from_a_room(self, room_id: UUID) -> Union[RoomOut, dict]:
         room = self.repo.get_room_by_id(room_id)
         if room is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -42,7 +41,7 @@ class RoomHandler:
 
         return self.repo.create_room(new_room)
 
-    async def join_room(self, room_id: int, player_name: str, user_id: UUID):
+    async def join_room(self, room_id: UUID, player_name: str, user_id: UUID):
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -67,7 +66,7 @@ class RoomHandler:
             raise http_exc
 
     async def leave_room(
-        self, room_id: int, player_name: str, user_id: UUID
+        self, room_id: UUID, player_name: str, user_id: UUID
     ) -> RoomOut | None:
         try:
             room = self.repo.get_room_by_id(room_id)

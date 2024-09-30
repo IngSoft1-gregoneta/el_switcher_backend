@@ -14,9 +14,7 @@ class MatchHandler:
 
     async def create_match(self, match_in: MatchIn, owner_name: str):
         repo_room = RoomRepository()
-        room = repo_room.get_room_by_id(
-            match_in.room_id
-        )  # Asegúrate de tener este método en tu repositorio
+        room = repo_room.get_room_by_id(match_in.room_id)
         if not room:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -30,10 +28,12 @@ class MatchHandler:
             )
 
         try:
+
             match = MatchOut(match_in.room_id)
             self.repo.create_match(match)
             return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
         except ValueError as ve:
+            print(ve)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Bad request: {str(ve)}",
@@ -44,7 +44,7 @@ class MatchHandler:
                 detail=f"Error: {str(e)}",
             )
 
-    async def get_match_by_id(self, match_id: int) -> Union[MatchOut, dict]:
+    async def get_match_by_id(self, match_id: UUID) -> Union[MatchOut, dict]:
         try:
             match = self.repo.get_match_by_id(match_id)
             if match is None:
@@ -60,7 +60,7 @@ class MatchHandler:
         )
 
     async def leave_match(
-        self, player_name: str, match_id: int
+        self, player_name: str, match_id: UUID
     ) -> Union[MatchOut, str]:
         try:
             match = self.repo.delete_player(player_name, match_id)
@@ -75,7 +75,7 @@ class MatchHandler:
         )
 
     async def get_visible_data_by_player(
-        self, match_id: int, player_name: str
+        self, match_id: UUID, player_name: str
     ) -> VisibleMatchData:
         try:
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)

@@ -1,6 +1,9 @@
-from pydantic import BaseModel, validator
-from enum import Enum
 import random
+from enum import Enum
+from uuid import UUID
+
+from pydantic import BaseModel, validator
+
 
 # Define the Enum for movement card types
 class MovType(Enum):
@@ -11,14 +14,15 @@ class MovType(Enum):
     mov5 = "mov5"
     mov6 = "mov6"
     mov7 = "mov7"
-    
+
+
 # Define the Pydantic model
 class MovCard(BaseModel):
-    match_id: int
+    match_id: UUID
     player_name: str
     mov_type: MovType
 
-    def __init__(self, *, match_id: int, player_name: str, mov_type: MovType = None):
+    def __init__(self, *, match_id: UUID, player_name: str, mov_type: MovType = None):
         if mov_type is None:
             mov_type = self.create_random_mov()
         # Initialize the BaseModel with the given parameters
