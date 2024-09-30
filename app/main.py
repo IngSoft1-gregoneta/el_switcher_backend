@@ -220,12 +220,16 @@ async def get_match_data(
             detail="Internal Server Error",
         )
     
-@app.put("/matchs/{match_id}/endturn", status_code=status.HTTP_202_ACCEPTED)
-async def endturn(match_id: int):
+@app.put("/matchs/endturn/{match_id}/{player_name}", status_code=status.HTTP_202_ACCEPTED)
+async def endturn(match_id: int, player_name: str):
     repo = MatchRepository()
     try:
         match = repo.get_match_by_id(match_id)
-        next_turn(match)
-        return {'message': '¡Próximo Turno!'}
+        if player_name == check_turn(match).player_name:
+            next_turn(match)
+            manager.broadcast("¡Próximo Turno!")
+        else:
+            player_id = uuid4()
+            manager.send_personal_message_id(player_id, "Espera a tu turno para saltear")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Bad request: {e}")
