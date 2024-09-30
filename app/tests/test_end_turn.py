@@ -81,3 +81,31 @@ def test_endturn_cycle():
         assert False, f"Error: {e}"
     finally:
         reset()
+
+def test_player_without_turn_possession():
+    reset()
+    generate_test_room()
+
+    try:
+        match_id = 1
+        match = MatchOut(match_id)
+        assert match.match_id == 1
+        repo_match.create_match(match)
+
+        player_name = "Tadeo"
+
+        first_turn = check_turn(match)
+
+        response = client.put(f"/matchs/endturn/{match_id}/{player_name}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        current_turn = check_turn(match)
+        
+        # Should still be 'Braian'
+        assert first_turn == current_turn
+        assert current_turn != player_name
+
+    except ValueError as e:
+        assert False, f"Error: {e}"
+    finally:
+        reset()

@@ -243,7 +243,7 @@ def check_turn(input: MatchOut) -> Player:
             done = True
             return player
     if not done:
-        raise ValueError("Player with turn not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player with turn not found")
 
 def next_turn(input: MatchOut):
     db = Session()
@@ -251,7 +251,7 @@ def next_turn(input: MatchOut):
         # Request match info
         matchdb = db.query(Match).filter(Match.match_id == input.match_id).one_or_none()
         if not matchdb:
-            raise ValueError("No match found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No match found")
 
         i = 0
         done = False
@@ -314,6 +314,7 @@ def next_turn(input: MatchOut):
         done = True
 
         if not done:
-            raise ValueError("An error occured when trying to pass to the next turn")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="An error occured when trying to pass to the next turn")
     finally:
         db.close()
