@@ -11,9 +11,9 @@ def test_valid_player():
         mov_cards = []
         fig_cards = []
         for i in range(3):
-            mov_cards.append(MovCard(match_id=1, player_name="Player1", mov_type=random.choice(list(MovType))))
+            mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
         for i in range(25):
-            fig_cards.append(FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
+            fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
            match_id=1,
            player_name="Player1",
@@ -31,9 +31,9 @@ def test_invalid_mov_cards():
         mov_cards = []
         fig_cards = []
         for i in range(4):
-            mov_cards.append(MovCard(match_id=1, player_name="Player1", mov_type=random.choice(list(MovType))))
+            mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
         for i in range(25):
-            fig_cards.append(FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
+            fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
             match_id=1,
             player_name="Player1",
@@ -53,9 +53,9 @@ def test_invalid_fig_cards():
         mov_cards = []
         fig_cards = []
         for i in range(3):
-            mov_cards.append(MovCard(match_id=1, player_name="Player1", mov_type=random.choice(list(MovType))))
+            mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
         for i in range(26):
-            fig_cards.append(FigCard(match_id=1, player_name="Player1", card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
+            fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
             match_id=1,
             player_name="Player1",

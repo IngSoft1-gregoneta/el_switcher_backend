@@ -64,9 +64,9 @@ class MatchOut(BaseModel):
 
         index = 0
         for player_name in players_names:
-            fig_cards, white_deck, blue_deck = self.create_fig_cards(match_id,player_name,white_per_player,blue_per_player,white_deck,blue_deck)
+            fig_cards, white_deck, blue_deck = self.create_fig_cards(white_per_player,blue_per_player,white_deck,blue_deck)
             for i in range(3): fig_cards[i].is_visible = True
-            mov_cards = self.create_mov_cards(match_id=match_id, player_name=player_name)
+            mov_cards = self.create_mov_cards()
             has_turn = index == 0
             player = Player(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
             players.append(player)
@@ -75,15 +75,13 @@ class MatchOut(BaseModel):
 
 
     @staticmethod
-    def create_fig_cards(match_id: int, player_name: str, white_per_player: int, 
+    def create_fig_cards(white_per_player: int, 
                          blue_per_player: int, white_deck: List[FigCard],
                         blue_deck: List[FigCard]) -> Tuple[List[FigCard], List[FigCard], List[FigCard]]:
         fig_cards = []
         for i in range(white_per_player):
             fig_type = white_deck.pop(0)
             new_fig_card = FigCard(
-                match_id=match_id,
-                player_name=player_name,
                 card_color=CardColor.WHITE,
                 fig_type=fig_type,
                 is_visible=False
@@ -92,8 +90,6 @@ class MatchOut(BaseModel):
         for i in range(blue_per_player):
             fig_type = blue_deck.pop(0)
             new_fig_card = FigCard(
-                match_id=match_id,
-                player_name=player_name,
                 card_color=CardColor.BLUE,
                 fig_type=fig_type,
                 is_visible=False
@@ -103,10 +99,10 @@ class MatchOut(BaseModel):
         return fig_cards, white_deck, blue_deck
 
     @staticmethod
-    def create_mov_cards(match_id: int, player_name: str) -> List[MovCard]:
+    def create_mov_cards() -> List[MovCard]:
         mov_cards = []
         for i in range(3):
-            new_mov_card = MovCard(match_id=match_id, player_name=player_name, mov_type=random.choice(list(MovType)))
+            new_mov_card = MovCard(mov_type=random.choice(list(MovType)))
             mov_cards.append(new_mov_card)
         return mov_cards
 
@@ -182,10 +178,14 @@ class MatchRepository:
                 player_data_has_turn = player_data["has_turn"]
                 fig_cards_db = []
                 for fig_card in player_data_fig_cards:
-                    fig_cards_db.append(FigCard.model_construct(match_id = fig_card["match_id"],player_name= fig_card["player_name"],card_color= CardColor(fig_card["card_color"]).value,fig_type = FigType(fig_card["fig_type"]).value,is_visible = fig_card["is_visible"]))
+                    fig_cards_db.append(FigCard.model_construct(
+                        card_color= CardColor(fig_card["card_color"]).value,
+                        fig_type = FigType(fig_card["fig_type"]).value,
+                        is_visible = fig_card["is_visible"]))
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
-                    mov_cards_db.append(MovCard.model_construct(match_id=mov_card["match_id"],player_name = mov_card["player_name"],mov_type = MovType(mov_card["mov_type"]).value))
+                    mov_cards_db.append(MovCard.model_construct(
+                        mov_type = MovType(mov_card["mov_type"]).value))
                 players_db.append(Player.model_construct(match_id= player_data_id,player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
             match = MatchOut.model_construct(match_id = match_id_selected, board=board_db, players = players_db)
