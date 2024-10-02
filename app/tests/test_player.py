@@ -15,7 +15,6 @@ def test_valid_player():
         for i in range(25):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
-           match_id=1,
            player_name="Player1",
            mov_cards=mov_cards,
            fig_cards=fig_cards,
@@ -35,7 +34,6 @@ def test_invalid_mov_cards():
         for i in range(25):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
-            match_id=1,
             player_name="Player1",
             mov_cards=mov_cards,
             fig_cards=fig_cards,
@@ -57,7 +55,6 @@ def test_invalid_fig_cards():
         for i in range(26):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
-            match_id=1,
             player_name="Player1",
             mov_cards=mov_cards,
             fig_cards=fig_cards,

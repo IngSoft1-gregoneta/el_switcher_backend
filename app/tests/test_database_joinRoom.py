@@ -8,10 +8,10 @@ from models.room import *
 client = TestClient(app)
 repo = RoomRepository()
 
+room_id = uuid1()
 
 def reset():
-    if repo.get_room_by_id(1):
-        repo.delete(1)
+    repo.delete_rooms()
     manager.active_connections.clear()
     manager.rooms.clear()
 
@@ -22,7 +22,7 @@ def generate_test_room():
         players_expected = 3
         owner_name = "Yamil"
         roomOut = RoomOut(
-            room_id=1,
+            room_id=room_id,
             room_name=room_name,
             players_expected=players_expected,
             players_names=["Yamil"],
@@ -31,7 +31,7 @@ def generate_test_room():
         )
         roombd = Room(
             room_name=roomOut.room_name,
-            room_id=roomOut.room_id,
+            room_id=str(roomOut.room_id),
             players_expected=roomOut.players_expected,
             owner_name=roomOut.owner_name,
             players_names=json.dumps(roomOut.players_names),
@@ -47,13 +47,12 @@ def generate_test_room():
 def test_join_room1():
     reset()
     generate_test_room()
-    room_id = 1
     player_name = "Tito"
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
         expected_response = {
-            "room_id": 1,
+            "room_id": str(room_id),
             "room_name": "Room 1",
             "players_expected": 3,
             "players_names": ["Yamil", "Tito"],
@@ -62,14 +61,13 @@ def test_join_room1():
         }
 
         assert "Tito" in repo.get_room_by_id(room_id).players_names
-        assert repo.get_room_by_id(room_id).room_id == 1
+        assert repo.get_room_by_id(room_id).room_id == room_id
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json() == expected_response
 
 
 # test para asegurarse de que no haya duplicados de nombres de jugadores
 def test_same_name():
-    room_id = 1
 
     player_name = "Yamil"
     user_id = uuid4()
@@ -79,20 +77,19 @@ def test_same_name():
     }
 
     assert player_name in repo.get_room_by_id(room_id).players_names
-    assert repo.get_room_by_id(room_id).room_id == 1
+    assert repo.get_room_by_id(room_id).room_id == room_id
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
 
 
 # test para que otro jugador se una a la misma partida
 def test_join_room2():
-    room_id = 1
     player_name = "Tadeo"
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as clientwebsocket:
         response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
         expected_response = expected_response = {
-            "room_id": 1,
+            "room_id": str(room_id),
             "room_name": "Room 1",
             "players_expected": 3,
             "players_names": ["Yamil", "Tito", "Tadeo"],
@@ -101,14 +98,13 @@ def test_join_room2():
         }
 
         assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
-        assert repo.get_room_by_id(room_id).room_id == 1
+        assert repo.get_room_by_id(room_id).room_id == room_id
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json() == expected_response
 
 
 # test para evitar que otro jugador se una a una sala llena
 def test_join_full_room():
-    room_id = 1
     player_name = "Mou"
     user_id = uuid4()
 
@@ -116,7 +112,7 @@ def test_join_full_room():
     response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
 
     assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]
-    assert repo.get_room_by_id(room_id).room_id == 1
+    assert repo.get_room_by_id(room_id).room_id == room_id
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == expected_response
     reset()

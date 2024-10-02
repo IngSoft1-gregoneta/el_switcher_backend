@@ -3,7 +3,6 @@ from .match import *
 match_repository = MatchRepository()
 
 class VisiblePlayer(BaseModel):
-    match_id: UUID
     player_name: str
     visible_fig_cards: List[FigCard]
     deck_len: int 
@@ -13,8 +12,7 @@ class VisiblePlayer(BaseModel):
         visible_fig_cards = self.get_visible_fig_cards(match_id, player_name)
         deck_len = self.get_deck_len(match_id, player_name)
         has_turn = self.get_has_turn(match_id, player_name)
-        super().__init__(match_id=match_id,
-                         player_name=player_name,
+        super().__init__(player_name=player_name,
                          visible_fig_cards=visible_fig_cards,
                          deck_len=deck_len,
                          has_turn=has_turn)
@@ -49,7 +47,6 @@ class VisiblePlayer(BaseModel):
             raise e
 
 class Me(BaseModel):
-    match_id: UUID
     player_name: str
     visible_fig_cards: List[FigCard]
     deck_len: int 
@@ -62,8 +59,7 @@ class Me(BaseModel):
         mov_cards = self.get_mov_cards(match_id, player_name)
         has_turn = self.get_has_turn(match_id, player_name)
 
-        super().__init__(match_id=match_id,
-                         player_name=player_name,
+        super().__init__(player_name=player_name,
                          visible_fig_cards=visible_fig_cards,
                          deck_len=deck_len,
                          mov_cards=mov_cards,
@@ -106,7 +102,7 @@ class Me(BaseModel):
             raise e
 
 class VisibleMatchData(BaseModel):
-    match_id: UUID
+    match_id: str
     me: Me
     other_players: List[VisiblePlayer]
     board: Board
@@ -117,7 +113,7 @@ class VisibleMatchData(BaseModel):
         me = Me(match_id=match_id, player_name=player_name)
         other_players = self.get_other_players(match_id, player_name)
         board = match.board
-        super().__init__(match_id=match_id, 
+        super().__init__(match_id=str(match_id),
                         me=me,
                         other_players=other_players,
                         board=board)

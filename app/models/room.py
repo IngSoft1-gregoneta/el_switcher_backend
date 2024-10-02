@@ -90,18 +90,17 @@ class RoomRepository:
         db = Session()
         try:
             rooms = db.query(Room).all()
-
-            return [
-                RoomOut(
+            rooms_out = []
+            for room in rooms:
+                rooms_out.append(RoomOut(
                     room_id=room.room_id,
                     room_name=room.room_name,
                     players_expected=room.players_expected,
                     players_names=json.loads(room.players_names) or [],
                     owner_name=room.owner_name,
                     is_active=room.is_active,
-                ).model_dump()
-                for room in rooms
-            ]
+                ).model_dump())
+            return rooms_out
         finally:
             db.close()
 

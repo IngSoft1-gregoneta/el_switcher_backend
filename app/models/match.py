@@ -19,12 +19,9 @@ class MatchOut(BaseModel):
     players: List[Player]
 
     def __init__(self, match_id: UUID):
-        print("creando board en MatchOut")
         board = self.create_board()
-        print("creando players en MatchOut")
         players = self.create_players(match_id)
         super().__init__(match_id=match_id, board=board, players=players)
-        print("validando MatchOut")
         self.validate_match()
 
     def validate_room(self, match_id: UUID) -> List[str]:
@@ -116,11 +113,8 @@ class MatchRepository:
     def create_match(self, new_match: MatchOut):
         db = Session()
         try:
-            print("entrando a match repository")
-            print("creando match en db")
             matchdb = db.query(Match).filter(Match.match_id == str(new_match.match_id)).one_or_none()
             if matchdb: raise ValueError("There must be exactly one room per match")
-            print("inicializando Match")
             players_db = []
             tiles_db = []
             for player in new_match.players:
@@ -137,32 +131,23 @@ class MatchRepository:
                 tile.tile_color = tile.tile_color.value
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
-            print("creando Match")
             matchdb = Match(
                 match_id = str(new_match.match_id),
                 board = board_db,
                 players = players_db
                 )
-            print("Match creada")
             db.add(matchdb)
-            print("db add")
             db.commit()
-            print("db commit")
 
         finally:
             db.close()
-            print("db close")
             
-    def get_match_by_id(self, match_id_selected: UUID) -> MatchOut | None:
+    def get_match_by_id(self, match_id_selected: UUID) -> MatchOut:
         db = Session()
-        print("entrando a get match by id")
-        print("getting match by id")
         try:
             matchdb = db.query(Match).filter(Match.match_id == str(match_id_selected)).one_or_none()
             if not matchdb:
-                print("match is None ")
                 return None
-            print("deserializando board")
             # Deserializar el tablero
             board_data = matchdb.board
             tiles_db = board_data
@@ -176,7 +161,6 @@ class MatchRepository:
 
             board_db = Board.model_construct(tiles = tileslist)
 
-            print("deserializando players")
             # Deserializar jugadores
             players_db = []
             players_data = matchdb.players
@@ -197,7 +181,6 @@ class MatchRepository:
                         mov_type = MovType(mov_card["mov_type"]).value))
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
-                print("construyendo modelo MatchOut")
             match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)
             return match
         finally:
@@ -227,7 +210,6 @@ class MatchRepository:
             match = self.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
-            match_id = match.match_id
             matchdb = db.query(Match).filter(Match.match_id == str(match_id)).one_or_none()
             player_to_remove = None
             for player in match.players:
@@ -256,7 +238,7 @@ class MatchRepository:
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
             matchdb = Match(
-                match_id = match.match_id,
+                match_id = str(match.match_id),
                 board = board_db,
                 players = players_db
                 )
@@ -283,7 +265,6 @@ class MatchRepository:
                 if match.players[i].player_name == player_name:
                     match.players[i].has_turn = False # this player
                     match.players[(i+1)%len(match.players)].has_turn = True # next player
-            match_id = match.match_id
             matchdb = db.query(Match).filter(Match.match_id == str(match_id)).one_or_none()
             players_db = []
             tiles_db = []
@@ -302,7 +283,7 @@ class MatchRepository:
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
             matchdb = Match(
-                match_id = match.match_id,
+                match_id = str(match.match_id),
                 board = board_db,
                 players = players_db
                 )

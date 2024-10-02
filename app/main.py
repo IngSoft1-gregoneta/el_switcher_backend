@@ -159,18 +159,15 @@ async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(match_id: UUID, owner_name: str):
-    print("entrando al endpoint")
     match = await match_handler.create_match(match_id, owner_name)
-    print("enviando mensaje")
     await manager.broadcast_by_room(match_id, "MATCH")
-    print("saliendo del endpoint")
     return match
 
 
 @app.get("/matchs/{match_id}")
 async def get_match_data(
     match_id: UUID,
-) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
+) -> Union[MatchOut, dict]: 
     return await match_handler.get_match_by_id(match_id)
 
 
@@ -209,6 +206,21 @@ async def get_match_data_by_player(
             match_id, player_name
         )
         return visible_match
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+    
+
+@app.put("/matchs/end_turn/{match_id}/{player_name}")
+async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
+    try:
+        match = await match_handler.end_turn(match_id, player_name)
+        await manager.broadcast_by_room(match_id, "MATCH")
+        return match
     except HTTPException as http_exc:
         raise http_exc
     except Exception:

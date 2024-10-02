@@ -14,6 +14,9 @@ from models.room import *
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
+room1_id = uuid1()
+room2_id = uuid1()
+room3_id = uuid1()
 
 def reset():
     repo_room.delete_rooms()
@@ -27,7 +30,7 @@ def generate_test_room():
     try:
         roombd1 = Room(
             room_name="Room 1",
-            room_id=1,
+            room_id=str(room1_id),
             players_expected=2,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo"]),
@@ -35,7 +38,7 @@ def generate_test_room():
         )
         roombd2 = Room(
             room_name="Room 2",
-            room_id=2,
+            room_id=str(room2_id),
             players_expected=3,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
@@ -43,7 +46,7 @@ def generate_test_room():
         )
         roombd3 = Room(
             room_name="Room 3",
-            room_id=3,
+            room_id=str(room3_id),
             players_expected=4,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Grego"]),
@@ -59,9 +62,9 @@ def generate_test_room():
 
 def generate_test_match():
     try:
-        match_1 = MatchOut(match_id=1)
-        match_2 = MatchOut(match_id=2)
-        match_3 = MatchOut(match_id=3)
+        match_1 = MatchOut(match_id=room1_id)
+        match_2 = MatchOut(match_id=room2_id)
+        match_3 = MatchOut(match_id=room3_id)
         repo_match.create_match(match_1)
         repo_match.create_match(match_2)
         repo_match.create_match(match_3)
@@ -96,7 +99,7 @@ def test_endturn_in_match_of_2_players():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 1
+    match_id = room1_id
     verify_test_ok(match_id=match_id)
     reset()
 
@@ -105,7 +108,7 @@ def test_endturn_in_match_of_3_players():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 2
+    match_id = room2_id
     verify_test_ok(match_id=match_id)
     reset()
 
@@ -114,7 +117,7 @@ def test_endturn_in_match_of_4_players():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 3
+    match_id = room3_id
     verify_test_ok(match_id=match_id)
     reset()
 
@@ -123,7 +126,7 @@ def test_end_turn_no_match():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 4
+    match_id = uuid1()
     player_name = "Braian"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -135,7 +138,7 @@ def test_end_turn_no_player():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 1
+    match_id = room1_id
     player_name = "Yamil"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -147,7 +150,7 @@ def test_end_turn_player_has_no_turn():
     reset()
     generate_test_room()
     generate_test_match()
-    match_id = 1
+    match_id = room1_id
     player_name = "Tadeo"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND

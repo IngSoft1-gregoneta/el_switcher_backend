@@ -12,24 +12,19 @@ class MatchHandler:
         self.repo = MatchRepository()
 
     async def create_match(self, match_id: UUID, owner_name: str):
-        print("entrando a match handler")
         repo_room = RoomRepository()
         try:
-            print("obteniendo sala")
             room = repo_room.get_room_by_id(match_id)
             if room is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
                 )
-            print("verificando owner")
             if room.owner_name != owner_name:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the owner can create a match",
                 )
-            print("creando MatchOut")
             match = MatchOut(match_id)
-            print("creando Match repo")
             self.repo.create_match(match)
             return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
         except ValueError as ve:

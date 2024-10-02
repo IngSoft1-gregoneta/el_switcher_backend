@@ -1,12 +1,14 @@
 from fastapi.testclient import TestClient
 from fastapi import status
 from models.room import *
-from main import app
+from main import app, room_handler
 
 
 client = TestClient(app)
 repo = RoomRepository()
 
+room1_id = uuid1()
+room2_id = uuid1()
 
 def reset():
     repo.delete_rooms()
@@ -14,24 +16,38 @@ def reset():
 def generate_test_room():
     db = Session()
     try:
-        room_name = "Room 1"
         players_expected = 2
         owner_name = "Braian"
-        roomOut = RoomOut(room_id=1,
-                            room_name=room_name,
+        room1Out = RoomOut(room_id=room1_id,
+                            room_name="Room 1",
                             players_expected=players_expected,
                             players_names=["Braian"],
                             owner_name=owner_name,
                             is_active=True)
-        roombd = Room(
-                room_name=roomOut.room_name,
-                room_id=roomOut.room_id,
-                players_expected=roomOut.players_expected,
-                owner_name=roomOut.owner_name,
-                players_names=json.dumps(roomOut.players_names),
+        room2Out = RoomOut(room_id=room2_id,
+                         room_name="Room 2",
+                         players_expected=players_expected,
+                         players_names=["Braian"],
+                         owner_name=owner_name,
+                         is_active=True)
+        room1bd = Room(
+                room_name=room1Out.room_name,
+                room_id=str(room1Out.room_id),
+                players_expected=room1Out.players_expected,
+                owner_name=room1Out.owner_name,
+                players_names=json.dumps(room1Out.players_names),
                 is_active=True
             )
-        db.add(roombd)
+        room2bd = Room(
+                room_name=room2Out.room_name,
+                room_id=str(room2Out.room_id),
+                players_expected=room2Out.players_expected,
+                owner_name=room2Out.owner_name,
+                players_names=json.dumps(room2Out.players_names),
+                is_active=True
+            )
+        db.add(room1bd)
+        db.add(room2bd)
         db.commit()
     finally:
         db.close()    
@@ -52,8 +68,11 @@ def test_basic_get():
     response = client.get("/rooms")
     assert response.status_code == status.HTTP_200_OK
     # Check if room is correctly 
-    assert response.json() == repo.get_rooms()
+    for i in range(2):
+        assert str(repo.get_rooms()[i]["room_id"]) == response.json()[i]["room_id"]
+        assert repo.get_rooms()[i]["players_expected"] == response.json()[i]["players_expected"]
+        assert repo.get_rooms()[i]["players_names"] == response.json()[i]["players_names"]
+        assert str(repo.get_rooms()[i]["owner_name"]) == response.json()[i]["owner_name"]
+        assert repo.get_rooms()[i]["is_active"] == response.json()[i]["is_active"]
     reset()
     
-
-reset()

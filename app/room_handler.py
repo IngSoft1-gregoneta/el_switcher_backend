@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, List
 from uuid import UUID
 
 from fastapi import HTTPException, status
