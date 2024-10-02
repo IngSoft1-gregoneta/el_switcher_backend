@@ -40,7 +40,7 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def get_match_by_id(self, match_id: int) -> Union[MatchOut, dict]:
+    async def get_match_by_id(self, match_id: UUID) -> Union[MatchOut, dict]:
         try:
             match = self.repo.get_match_by_id(match_id)
             if match is None:
@@ -56,7 +56,7 @@ class MatchHandler:
         )
 
     async def leave_match(
-        self, player_name: str, match_id: int
+        self, player_name: str, match_id: UUID
     ) -> Union[MatchOut, str]:
         try:
             match = self.repo.delete_player(player_name, match_id)
@@ -70,7 +70,7 @@ class MatchHandler:
         )
 
     async def get_visible_data_by_player(
-        self, match_id: int, player_name: str
+        self, match_id: UUID, player_name: str
     ) -> VisibleMatchData:
         try:
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
@@ -83,7 +83,7 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def end_turn(self, match_id: int, player_name: str):
+    async def end_turn(self, match_id: UUID, player_name: str):
         try:
             match = self.repo.end_turn(match_id=match_id, player_name=player_name)
             return match

@@ -2,14 +2,15 @@ import random
 from typing import List
 from pydantic import BaseModel
 from .tile import Tile, TileColor
+from uuid import UUID 
 
 AMOUNT_OF_TILES = 36
 
 class Board(BaseModel):
-    match_id: int
+    match_id: UUID
     tiles: List[Tile]
 
-    def __init__(self, match_id: int):
+    def __init__(self, match_id: UUID):
         tiles = self._create_tiles()
         super().__init__(match_id=match_id, tiles=tiles)
 

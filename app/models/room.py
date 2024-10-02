@@ -1,9 +1,9 @@
 import json
 from typing import List
-
-from pydantic import BaseModel, Field
+from uuid import UUID, uuid1
 
 from config.repositorymanager import Room, Session
+from pydantic import BaseModel, Field
 
 
 class RoomIn(BaseModel):
@@ -13,7 +13,7 @@ class RoomIn(BaseModel):
 
 
 class RoomOut(BaseModel):
-    room_id: int
+    room_id: UUID
     room_name: str
     players_expected: int
     players_names: List[str] = []
@@ -25,8 +25,7 @@ class RoomRepository:
     def create_room(self, new_room: RoomIn):
         db = Session()
         try:
-            last_room = db.query(Room).order_by(Room.room_id.desc()).first()
-            new_id = (last_room.room_id if last_room else 0) + 1
+            new_id = uuid1()
 
             roomOut = RoomOut(
                 room_id=new_id,
@@ -39,7 +38,7 @@ class RoomRepository:
 
             roombd = Room(
                 room_name=new_room.room_name,
-                room_id=new_id,
+                room_id=str(new_id),
                 players_expected=new_room.players_expected,
                 owner_name=new_room.owner_name,
                 players_names=json.dumps(roomOut.players_names),
@@ -52,10 +51,10 @@ class RoomRepository:
             db.close()
 
     # Fetch room by id or return None if the room was not found
-    def get_room_by_id(self, room_id: int) -> RoomOut | None:
+    def get_room_by_id(self, room_id: UUID) -> RoomOut | None:
         db = Session()
         try:
-            result = db.query(Room).filter(Room.room_id == room_id).one_or_none()
+            result = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
             if result:
                 room = RoomOut(
                     room_id=result.room_id,
@@ -72,7 +71,7 @@ class RoomRepository:
 
     # Methods are: add, remove
     def update_players(
-        self, players: List[str], player_name: str, room_id: int, method: str
+        self, players: List[str], player_name: str, room_id: UUID, method: str
     ):
         if method == "add":
             players.append(player_name)
@@ -81,7 +80,7 @@ class RoomRepository:
 
         db = Session()
         try:
-            db_room = db.query(Room).filter(Room.room_id == room_id).one()
+            db_room = db.query(Room).filter(Room.room_id == str(room_id)).one()
             db_room.players_names = json.dumps(players)
             db.commit()
         finally:
@@ -113,14 +112,13 @@ class RoomRepository:
         finally:
             db.close()
 
-    def delete(self, id):
+    def delete(self, room_id: UUID):
         db = Session()
 
         try:
-            todelete = db.query(Room).filter(Room.room_id == id).one_or_none()
-            if todelete:
-                db.delete(todelete)
-                db.commit()
+            todelete = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
+            db.delete(todelete)
+            db.commit()
         finally:
             db.close()
 

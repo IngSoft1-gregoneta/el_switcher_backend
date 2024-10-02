@@ -3,13 +3,13 @@ from .match import *
 match_repository = MatchRepository()
 
 class VisiblePlayer(BaseModel):
-    match_id: int
+    match_id: UUID
     player_name: str
     visible_fig_cards: List[FigCard]
     deck_len: int 
     has_turn: bool
 
-    def __init__(self, match_id: int, player_name: str):
+    def __init__(self, match_id: UUID, player_name: str):
         visible_fig_cards = self.get_visible_fig_cards(match_id, player_name)
         deck_len = self.get_deck_len(match_id, player_name)
         has_turn = self.get_has_turn(match_id, player_name)
@@ -49,14 +49,14 @@ class VisiblePlayer(BaseModel):
             raise e
 
 class Me(BaseModel):
-    match_id: int
+    match_id: UUID
     player_name: str
     visible_fig_cards: List[FigCard]
     deck_len: int 
     mov_cards: List[MovCard]
     has_turn: bool
 
-    def __init__(self, match_id: int, player_name: str):
+    def __init__(self, match_id: UUID, player_name: str):
         visible_fig_cards = self.get_visible_fig_cards(match_id, player_name)
         deck_len = self.get_deck_len(match_id, player_name)
         mov_cards = self.get_mov_cards(match_id, player_name)
@@ -89,7 +89,7 @@ class Me(BaseModel):
         except Exception as e:
             raise e
 
-    def get_mov_cards(self, match_id: int, player_name: str) -> List[MovCard]:
+    def get_mov_cards(self, match_id: UUID, player_name: str) -> List[MovCard]:
         try:
             match = match_repository.get_match_by_id(match_id)
             player = match.get_player_by_name(player_name)
@@ -106,12 +106,12 @@ class Me(BaseModel):
             raise e
 
 class VisibleMatchData(BaseModel):
-    match_id: int
+    match_id: UUID
     me: Me
     other_players: List[VisiblePlayer]
     board: Board
 
-    def __init__(self, match_id: int, player_name: str):
+    def __init__(self, match_id: UUID, player_name: str):
         self.validate_player(match_id, player_name)
         match = match_repository.get_match_by_id(match_id)
         me = Me(match_id=match_id, player_name=player_name)

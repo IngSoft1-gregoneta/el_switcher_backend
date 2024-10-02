@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app, manager
+from app.main import app, manager
 from models.match import *
 from models.room import *
 
@@ -24,13 +24,19 @@ def resetmanager():
     manager.active_connections.clear()
     manager.rooms.clear()
 
+room1_id = uuid1()
+room2_id = uuid1()
+room3_id = uuid1()
+room4_id = uuid1()
+room5_id = uuid1()
+room6_id = uuid1()
 
 def generate_test_room():
     db = Session()
     try:
         roombd1 = Room(
             room_name="Room 1",
-            room_id=1,
+            room_id=room1_id,
             players_expected=2,
             players_names=json.dumps(["Braian", "Tadeo"]),
             owner_name="Braian",
@@ -38,7 +44,7 @@ def generate_test_room():
         )
         roombd2 = Room(
             room_name="Room 2",
-            room_id=2,
+            room_id=room2_id,
             players_expected=3,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
@@ -46,7 +52,7 @@ def generate_test_room():
         )
         roombd3 = Room(
             room_name="Room 3",
-            room_id=3,
+            room_id=room3_id,
             players_expected=4,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Mao"]),
@@ -54,7 +60,7 @@ def generate_test_room():
         )
         roombd4 = Room(
             room_name="Room 4",
-            room_id=4,
+            room_id=room4_id,
             players_expected=4,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
@@ -62,7 +68,7 @@ def generate_test_room():
         )
         roombd5 = Room(
             room_name="Room 5",
-            room_id=5,
+            room_id=room5_id,
             players_expected=5,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Franco", "Grego"]),
@@ -70,7 +76,7 @@ def generate_test_room():
         )
         roombd6 = Room(
             room_name="Room 6",
-            room_id=6,
+            room_id=room6_id,
             players_expected=1,
             owner_name="Braian",
             players_names=json.dumps(["Braian"]),
@@ -94,7 +100,7 @@ def test_match_2_players():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 1
+    room_id = room1_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     player_id = uuid4()
@@ -117,7 +123,7 @@ def test_match_3_players():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 2
+    room_id = room2_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     player_id = uuid4()
@@ -140,7 +146,7 @@ def test_match4_players():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 3
+    room_id = room3_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     player_id = uuid4()
@@ -158,13 +164,10 @@ def test_match4_players():
     resetrooms()
 
 
-# ---
-
-
 def test_dup_match():
     resetrooms()
     generate_test_room()
-    room_id = 3
+    room_id = room3_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     player_id = uuid4()
@@ -185,7 +188,7 @@ def test_no_full_match():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 4
+    room_id = room4_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     response = client.post(
@@ -203,7 +206,7 @@ def test_match_5_player():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 5
+    room_id = room5_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     response = client.post(
@@ -221,7 +224,7 @@ def test_match_a_player():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 6
+    room_id = room6_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     response = client.post(
@@ -239,7 +242,7 @@ def test_match_without_room():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 0
+    room_id = uuid1()
     match_in = MatchIn(room_id=room_id)
     owner_name = "Braian"
     response = client.post(
@@ -255,7 +258,7 @@ def test_create_match_not_owner():
     resetrooms()
     resetmatchs()
     generate_test_room()
-    room_id = 1
+    room_id = room1_id
     match_in = MatchIn(room_id=room_id)
     owner_name = "Tadeo"
     response = client.post(

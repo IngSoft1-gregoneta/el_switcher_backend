@@ -2,15 +2,16 @@ from typing import List
 from pydantic import BaseModel
 from .mov_card import MovCard
 from .fig_card import FigCard
+from uuid import UUID 
 
 class Player(BaseModel):
-    match_id: int
+    match_id: UUID
     player_name: str
     mov_cards: List[MovCard]
     fig_cards: List[FigCard]
     has_turn: bool
 
-    def __init__(self, match_id: int, player_name: str, mov_cards: List[MovCard], fig_cards: List[FigCard], has_turn: bool):
+    def __init__(self, match_id: UUID, player_name: str, mov_cards: List[MovCard], fig_cards: List[FigCard], has_turn: bool):
         super().__init__(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
         self.validate()
 
