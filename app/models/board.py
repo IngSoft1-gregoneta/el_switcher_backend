@@ -7,12 +7,11 @@ from uuid import UUID
 AMOUNT_OF_TILES = 36
 
 class Board(BaseModel):
-    match_id: UUID
     tiles: List[Tile]
 
-    def __init__(self, match_id: UUID):
+    def __init__(self):
         tiles = self._create_tiles()
-        super().__init__(match_id=match_id, tiles=tiles)
+        super().__init__(tiles=tiles)
 
     def _create_tiles(self) -> List[Tile]:
         # Define colors and create list of 9 tiles for each color

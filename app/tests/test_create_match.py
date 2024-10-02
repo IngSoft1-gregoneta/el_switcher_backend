@@ -112,6 +112,9 @@ def test_match_2_players():
             f"/matchs/create_match/{room_id}/{owner_name}"
         )
         assert response.status_code == status.HTTP_201_CREATED
+        print(response.json())
+        print()
+        print(repo_match.get_match_by_id(room_id).model_dump())
         assert response.json() == repo_match.get_match_by_id(room_id).model_dump()
         data = Clientwebsocket.receive_text()
         assert data == "MATCH"

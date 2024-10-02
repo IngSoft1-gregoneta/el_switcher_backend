@@ -29,7 +29,6 @@ Base = declarative_base()
 
 class Match(Base):
     __tablename__ = "Matches"
-
     match_id = Column(String(36), primary_key=True, index=True)
     board = Column(JSON)
     players = Column(JSON)
