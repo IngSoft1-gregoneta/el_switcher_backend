@@ -2,7 +2,7 @@ from typing import Any, Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from models.match import MatchIn, MatchOut, MatchRepository
+from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
 
@@ -11,20 +11,25 @@ class MatchHandler:
     def __init__(self):
         self.repo = MatchRepository()
 
-    async def create_match(self, match_in: MatchIn, owner_name: str):
+    async def create_match(self, match_id: UUID, owner_name: str):
+        print("entrando a match handler")
         repo_room = RoomRepository()
         try:
-            room = repo_room.get_room_by_id(match_in.room_id)
+            print("obteniendo sala")
+            room = repo_room.get_room_by_id(match_id)
             if room is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
                 )
+            print("verificando owner")
             if room.owner_name != owner_name:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the owner can create a match",
                 )
-            match = MatchOut(match_in.room_id)
+            print("creando MatchOut")
+            match = MatchOut(match_id)
+            print("creando Match repo")
             self.repo.create_match(match)
             return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
         except ValueError as ve:

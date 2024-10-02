@@ -1,9 +1,10 @@
 from collections import Counter
 from models.board import Board
 from models.tile import TileColor 
+from uuid import uuid1
 
 try:
-    match_id = 1
+    match_id = uuid1()
     board = Board(match_id=match_id)
 except ValueError as e:
     print(f"Error: {e}")

@@ -32,8 +32,7 @@ class RoomHandler:
                 detail="Wrong amount of players",
             )
 
-        existing_room = self.repo.check_for_names(new_room.room_name)
-        if existing_room:
+        if self.repo.check_for_names(new_room.room_name):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Room name already exists",

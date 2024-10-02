@@ -12,9 +12,6 @@ from .tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
 from typing import Tuple
-
-class MatchIn(BaseModel):
-    room_id: UUID
     
 class MatchOut(BaseModel):
     match_id: UUID
@@ -76,8 +73,8 @@ class MatchOut(BaseModel):
 
     @staticmethod
     def create_fig_cards(white_per_player: int, 
-                         blue_per_player: int, white_deck: List[FigCard],
-                        blue_deck: List[FigCard]) -> Tuple[List[FigCard], List[FigCard], List[FigCard]]:
+                         blue_per_player: int, white_deck: List[FigType],
+                        blue_deck: List[FigType]) -> Tuple[List[FigCard], List[FigType], List[FigType]]:
         fig_cards = []
         for i in range(white_per_player):
             fig_type = white_deck.pop(0)
@@ -106,7 +103,7 @@ class MatchOut(BaseModel):
             mov_cards.append(new_mov_card)
         return mov_cards
 
-    def get_player_by_name(self, player_name) -> Player:
+    def get_player_by_name(self, player_name) -> Player | None:
         for player in self.players:
             if player.player_name == player_name:
                 return player
@@ -116,9 +113,11 @@ class MatchRepository:
     def create_match(self, new_match: MatchOut):
         db = Session()
         try:
+            print("entrando a match repository")
+            print("creando match en db")
             matchdb = db.query(Match).filter(Match.match_id == str(new_match.match_id)).one_or_none()
             if matchdb: raise ValueError("There must be exactly one room per match")
-                
+            print("inicializando Match")
             players_db = []
             tiles_db = []
             for player in new_match.players:
@@ -135,19 +134,22 @@ class MatchRepository:
                 tile.tile_color = tile.tile_color.value
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db, new_match.match_id)
-                
+            print("creando Match")
             matchdb = Match(
                 match_id = str(new_match.match_id),
-                room_id = str(new_match.match_id),
                 board = board_db,
                 players = players_db
                 )
+            print("Match creada")
             db.add(matchdb)
+            print("db add")
             db.commit()
+            print("db commit")
+
         finally:
             db.close()
             
-    def get_match_by_id(self, match_id_selected: int) -> MatchOut:
+    def get_match_by_id(self, match_id_selected: UUID) -> MatchOut | None:
         db = Session()
         try:
             matchdb = db.query(Match).filter(Match.match_id == str(match_id_selected)).one_or_none()
