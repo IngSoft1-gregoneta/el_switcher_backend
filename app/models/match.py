@@ -51,8 +51,8 @@ class MatchOut(BaseModel):
         players_names = self.validate_room(match_id)
         players = []
         
-        white_deck = list(FigType)[:7] * 2  # 14 cartas blancas, dos de cada figura
-        blue_deck = list(FigType)[7:] * 2  # 36 cartas azules, dos de cada figura
+        white_deck = list(FigType)[1:8] * 2  # 14 cartas blancas, dos de cada figura
+        blue_deck = list(FigType)[8:] * 2  # 36 cartas azules, dos de cada figura
         random.shuffle(white_deck)
         random.shuffle(blue_deck)
         
@@ -129,6 +129,7 @@ class MatchRepository:
                 players_db.append(player)
             for tile in new_match.board.tiles:
                 tile.tile_color = tile.tile_color.value
+                tile.tile_in_figure = tile.tile_in_figure.value
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
             matchdb = Match(
@@ -154,10 +155,12 @@ class MatchRepository:
             tileslist = []
             for tile in tiles_db:
                 tileslist.append(Tile.model_construct(
-                    tile_color=TileColor(tile["tile_color"]).value,  
+                    tile_color=TileColor(tile["tile_color"]).value, 
+                    tile_in_figure=FigType(tile["tile_in_figure"]).value, 
                     tile_pos_x=tile["tile_pos_x"], 
                     tile_pos_y=tile["tile_pos_y"]
-                ))
+                )) 
+
 
             board_db = Board.model_construct(tiles = tileslist)
 
@@ -235,6 +238,7 @@ class MatchRepository:
                 players_db.append(player)
             for tile in match.board.tiles:
                 tile.tile_color = tile.tile_color
+                tile.tile_in_figure = tile.tile_in_figure 
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
             matchdb = Match(
@@ -280,6 +284,7 @@ class MatchRepository:
                 players_db.append(player)
             for tile in match.board.tiles:
                 tile.tile_color = tile.tile_color
+                tile.tile_in_figure = tile.tile_in_figure 
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
             matchdb = Match(

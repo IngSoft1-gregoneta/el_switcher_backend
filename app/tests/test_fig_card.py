@@ -1,8 +1,8 @@
 from models.fig_card import FigCard, CardColor, FigType
 import random
 
-white_figs = list(FigType)[:7]
-blue_figs = list(FigType)[7:]
+white_figs = list(FigType)[1:8]
+blue_figs = list(FigType)[8:]
 
 def test_valid_fig_card():
     try:

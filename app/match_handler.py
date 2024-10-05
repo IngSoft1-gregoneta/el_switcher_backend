@@ -26,7 +26,9 @@ class MatchHandler:
                 )
             match = MatchOut(match_id)
             self.repo.create_match(match)
-            return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
+            match_repo = self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
+            return match_repo
+
         except ValueError as ve:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
