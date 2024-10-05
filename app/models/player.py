@@ -4,14 +4,13 @@ from .mov_card import MovCard
 from .fig_card import FigCard
 
 class Player(BaseModel):
-    match_id: int
     player_name: str
     mov_cards: List[MovCard]
     fig_cards: List[FigCard]
     has_turn: bool
 
-    def __init__(self, match_id: int, player_name: str, mov_cards: List[MovCard], fig_cards: List[FigCard], has_turn: bool):
-        super().__init__(match_id=match_id, player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
+    def __init__(self, player_name: str, mov_cards: List[MovCard], fig_cards: List[FigCard], has_turn: bool):
+        super().__init__(player_name=player_name, mov_cards=mov_cards, fig_cards=fig_cards, has_turn=has_turn)
         self.validate()
 
     def validate(self):

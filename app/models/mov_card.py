@@ -14,15 +14,12 @@ class MovType(Enum):
     
 # Define the Pydantic model
 class MovCard(BaseModel):
-    match_id: int
-    player_name: str
     mov_type: MovType
 
-    def __init__(self, *, match_id: int, player_name: str, mov_type: MovType = None):
+    def __init__(self, mov_type: MovType = None):
         if mov_type is None:
             mov_type = self.create_random_mov()
-        # Initialize the BaseModel with the given parameters
-        super().__init__(match_id=match_id, player_name=player_name, mov_type=mov_type)
+        super().__init__(mov_type=mov_type)
         self.validate_mov_type()
 
     def validate_mov_type(self):

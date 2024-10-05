@@ -5,14 +5,7 @@ from typing import Annotated, Any, Optional, Union
 # Unique id
 from uuid import UUID, uuid4
 
-from fastapi import (
-    Cookie,
-    FastAPI,
-    HTTPException,
-    WebSocket,
-    WebSocketDisconnect,
-    status,
-)
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
 
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +15,7 @@ from manager.manager import ConnectionManager
 from match_handler import MatchHandler
 from models.match import *
 from models.room import *
-from models.visible_match import VisibleMatchData
+from models.visible_match import *
 from room_handler import RoomHandler
 
 app = FastAPI()
@@ -63,13 +56,13 @@ def get_id():
 
 @app.get("/room/{room_id}")
 async def get_room_data(
-    room_id: int,
-) -> Union[RoomOut, dict]:  # union para que pueda devolver tanto RoomOut como un dict
+    room_id: UUID,
+) -> Union[RoomOut, dict]:
     try:
         return await room_handler.get_data_from_a_room(room_id)
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
@@ -112,16 +105,18 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
         )
 
 
-# TODO: This url change so i gess test must change
 @app.put(
     "/rooms/join/{room_id}/{player_name}/{user_id}",
     response_model=Union[RoomOut, dict],
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+async def join_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
     try:
         result = await room_handler.join_room(room_id, player_name, user_id)
-        await manager.join(room_id, user_id)
+        try:
+            await manager.join(room_id, user_id)
+        except Exception as e:
+            print(e)
         return result
     except HTTPException as http_exc:
         # si es una HTTPException, dejamos que pase como está
@@ -136,19 +131,23 @@ async def join_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 # endpoint for room leave request
 @app.put(
     "/rooms/leave/{room_id}/{player_name}/{user_id}",
-    response_model=Union[RoomOut, dict],
+    response_model=RoomOut | dict | None,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
+async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
         # Si es none es porq se destruyo la room
-        if result == {}:
-            await manager.destroy_room(room_id)
-        else:
-            await manager.leave(room_id, user_id)
+        try:
+            if result == None:
+                await manager.destroy_room(room_id)
+            else:
+                await manager.leave(room_id, user_id)
+        except Exception as e:
+            print(e)
         return result
     except HTTPException as http_exc:
+        # si es una HTTPException, dejamos que pase como está
         raise http_exc
     except Exception:
         raise HTTPException(
@@ -158,17 +157,17 @@ async def leave_room_endpoint(room_id: int, player_name: str, user_id: UUID):
 
 
 # endopint to create a match
-@app.post("/matchs/create_match/{owner_name}", status_code=status.HTTP_201_CREATED)
-async def create_match_endpoint(matchIn: MatchIn, owner_name: str):
-    result = await match_handler.create_match(matchIn, owner_name)
-    await manager.broadcast_by_room(matchIn.room_id, "MATCH")
-    return result
+@app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
+async def create_match_endpoint(match_id: UUID, owner_name: str):
+    match = await match_handler.create_match(match_id, owner_name)
+    await manager.broadcast_by_room(match_id, "MATCH")
+    return match
 
 
 @app.get("/matchs/{match_id}")
 async def get_match_data(
-    match_id: int,
-) -> Union[MatchOut, dict]:  # union para que pueda devolver tanto MatchOut como un dict
+    match_id: UUID,
+) -> Union[MatchOut, dict]: 
     return await match_handler.get_match_by_id(match_id)
 
 
@@ -178,14 +177,14 @@ async def get_match_data(
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def leave_match(
-    match_id: int,
+    match_id: UUID,
     player_name: str,
     user_id: UUID,
 ) -> Union[MatchOut, str]:
     try:
         result = await match_handler.leave_match(player_name, match_id)
         try:
-            await manager.leave_match(match_id, user_id)
+            await manager.leave(match_id, user_id)
         except Exception as e:
             print(e)
         return result
@@ -198,12 +197,15 @@ async def leave_match(
         )
 
 
-@app.put("/matchs/end_turn/{match_id}/{player_name}")
-async def end_turn(match_id: int, player_name: str) -> MatchOut:
+@app.get("/matchs/visible_match/{match_id}/{player_name}")
+async def get_match_data_by_player(
+    match_id: UUID, player_name: str
+) -> VisibleMatchData:
     try:
-        match = await match_handler.end_turn(match_id, player_name)
-        await manager.broadcast_by_room(match_id, "MATCH")
-        return match
+        visible_match = await match_handler.get_visible_data_by_player(
+            match_id, player_name
+        )
+        return visible_match
     except HTTPException as http_exc:
         raise http_exc
     except Exception:
@@ -211,15 +213,14 @@ async def end_turn(match_id: int, player_name: str) -> MatchOut:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
 
-
-@app.get("/matchs/visible_match/{match_id}/{player_name}")
-async def get_visible_match(match_id: int, player_name: str) -> VisibleMatchData:
+@app.put("/matchs/end_turn/{match_id}/{player_name}")
+async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
     try:
-        visible_match = await match_handler.get_visible_data_by_player(
-            match_id, player_name
-        )
-        return visible_match
+        match = await match_handler.end_turn(match_id, player_name)
+        await manager.broadcast_by_room(match_id, "MATCH")
+        return match
     except HTTPException as http_exc:
         raise http_exc
     except Exception:

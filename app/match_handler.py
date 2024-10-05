@@ -2,7 +2,7 @@ from typing import Any, Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from models.match import MatchIn, MatchOut, MatchRepository
+from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
 
@@ -11,10 +11,10 @@ class MatchHandler:
     def __init__(self):
         self.repo = MatchRepository()
 
-    async def create_match(self, match_in: MatchIn, owner_name: str):
+    async def create_match(self, match_id: UUID, owner_name: str):
         repo_room = RoomRepository()
         try:
-            room = repo_room.get_room_by_id(match_in.room_id)
+            room = repo_room.get_room_by_id(match_id)
             if room is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
@@ -24,7 +24,7 @@ class MatchHandler:
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Only the owner can create a match",
                 )
-            match = MatchOut(match_in.room_id)
+            match = MatchOut(match_id)
             self.repo.create_match(match)
             return self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
         except ValueError as ve:
@@ -40,7 +40,7 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def get_match_by_id(self, match_id: int) -> Union[MatchOut, dict]:
+    async def get_match_by_id(self, match_id: UUID) -> Union[MatchOut, dict]:
         try:
             match = self.repo.get_match_by_id(match_id)
             if match is None:
@@ -56,7 +56,7 @@ class MatchHandler:
         )
 
     async def leave_match(
-        self, player_name: str, match_id: int
+        self, player_name: str, match_id: UUID
     ) -> Union[MatchOut, str]:
         try:
             match = self.repo.delete_player(player_name, match_id)
@@ -70,7 +70,7 @@ class MatchHandler:
         )
 
     async def get_visible_data_by_player(
-        self, match_id: int, player_name: str
+        self, match_id: UUID, player_name: str
     ) -> VisibleMatchData:
         try:
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
@@ -83,7 +83,7 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def end_turn(self, match_id: int, player_name: str):
+    async def end_turn(self, match_id: UUID, player_name: str):
         try:
             match = self.repo.end_turn(match_id=match_id, player_name=player_name)
             return match

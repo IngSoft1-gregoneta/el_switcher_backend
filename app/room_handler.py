@@ -1,13 +1,12 @@
-from typing import Any, Union
+from typing import Any, Union, List
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from starlette.status import HTTP_202_ACCEPTED
-
 from manager.manager import ConnectionManager
 
 # from manager.manager import ConnectionManager
 from models.room import RoomIn, RoomOut, RoomRepository
+from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
 
@@ -18,19 +17,13 @@ class RoomHandler:
         self.repo = RoomRepository()
 
     async def get_all_rooms(self):
-        try:
-            return self.repo.get_rooms()
-        except Exception:
-            raise Exception("Error getting rooms")
+        return self.repo.get_rooms()
 
-    async def get_data_from_a_room(self, room_id: int) -> Union[RoomOut, dict]:
-        try:
-            room = self.repo.get_room_by_id(room_id)
-            if room is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-            return room
-        except Exception:
-            raise Exception("Error getting room")
+    async def get_data_from_a_room(self, room_id: UUID) -> Union[RoomOut, dict]:
+        room = self.repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return room
 
     async def create_room(self, new_room: RoomIn) -> RoomOut:
         if new_room.players_expected < 2 or new_room.players_expected > 4:
@@ -39,8 +32,7 @@ class RoomHandler:
                 detail="Wrong amount of players",
             )
 
-        existing_room = self.repo.check_for_names(new_room.room_name)
-        if existing_room:
+        if self.repo.check_for_names(new_room.room_name):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Room name already exists",
@@ -48,7 +40,7 @@ class RoomHandler:
 
         return self.repo.create_room(new_room)
 
-    async def join_room(self, room_id: int, player_name: str, user_id: UUID):
+    async def join_room(self, room_id: UUID, player_name: str, user_id: UUID):
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -73,8 +65,8 @@ class RoomHandler:
             raise http_exc
 
     async def leave_room(
-        self, room_id: int, player_name: str, user_id: UUID
-    ) -> RoomOut:
+        self, room_id: UUID, player_name: str, user_id: UUID
+    ) -> RoomOut | None:
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -87,7 +79,7 @@ class RoomHandler:
                 player_name == room.owner_name
             ):  # si el owner abandona la sala, eliminar la sala
                 self.repo.delete(room_id)
-                return {}
+                return None
 
             self.repo.update_players(room.players_names, player_name, room_id, "remove")
             return self.repo.get_room_by_id(room_id)
@@ -95,4 +87,3 @@ class RoomHandler:
         except HTTPException as http_exc:
             # si es una HTTPException, dejamos que pase como está
             raise http_exc
-

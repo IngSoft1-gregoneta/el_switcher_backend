@@ -55,7 +55,7 @@ class ConnectionManager:
         try:
             await self.active_connections[user_id].get_ws().send_text(message)
         except Exception as e:
-            print(f"Error Send_personal_message {e}")
+            return
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:
@@ -64,7 +64,7 @@ class ConnectionManager:
                 # If ws of user_id disconnect we shoulnt send a message
                 await self.send_personal_message_id(user_id, message)
             except Exception as e:
-                print(f"Error broadcast_by_room {e}")
+                return
 
     async def broadcast_not_playing(self, message: str):
         for uuid, connection in self.active_connections.items():
@@ -87,7 +87,7 @@ class ConnectionManager:
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
         except Exception as e:
-            raise Exception(f"Error: {str(e)}")
+            return
 
     async def leave(self, room_id: UUID | int, user_id: UUID):
         # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar

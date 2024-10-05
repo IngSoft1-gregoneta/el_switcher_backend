@@ -14,68 +14,69 @@ from models.room import *
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
+room1_id = uuid1()
+room2_id = uuid1()
+room3_id = uuid1()
+
 def reset():
     repo_room.delete_rooms()
     repo_match.delete_matchs()
+
 
 def generate_test_room():
     db = Session()
     try:
         roombd1 = Room(
-                room_name="Room 1",
-                room_id=1,
-                players_expected=2,
-                owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo"]),
-                is_active=True
-            )
+            room_name="Room 1",
+            room_id=str(room1_id),
+            players_expected=2,
+            owner_name="Braian",
+            players_names=json.dumps(["Braian", "Tadeo"]),
+            is_active=True,
+        )
         roombd2 = Room(
-                room_name="Room 2",
-                room_id=2,
-                players_expected=3,
-                owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo","Yamil"]),
-                is_active=True
-            )
+            room_name="Room 2",
+            room_id=str(room2_id),
+            players_expected=3,
+            owner_name="Braian",
+            players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
+            is_active=True,
+        )
         roombd3 = Room(
-                room_name="Room 3",
-                room_id=3,
-                players_expected=4,
-                owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo","Yamil","Grego"]),
-                is_active=True
-            )
+            room_name="Room 3",
+            room_id=str(room3_id),
+            players_expected=4,
+            owner_name="Braian",
+            players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Grego"]),
+            is_active=True,
+        )
         db.add(roombd1)
         db.add(roombd2)
         db.add(roombd3)
         db.commit()
     finally:
-        db.close()    
+        db.close()
+
 
 def generate_test_match():
     try:
-        match_1 = MatchOut(
-                match_id=1
-            )
-        match_2 = MatchOut(
-                match_id=2
-            )
-        match_3 = MatchOut(
-                match_id=3
-            )
+        match_1 = MatchOut(match_id=room1_id)
+        match_2 = MatchOut(match_id=room2_id)
+        match_3 = MatchOut(match_id=room3_id)
         repo_match.create_match(match_1)
         repo_match.create_match(match_2)
         repo_match.create_match(match_3)
     except:
         assert False, f"Creando mal matchs en db"
 
-def verify_test_ok(match_id, player_name):
+
+def verify_test_ok(match_id: UUID, player_name: str):
     expected_response = VisibleMatchData(match_id,player_name)
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_response.model_dump()
     match = repo_match.get_match_by_id(match_id)
-    assert expected_response.match_id == match_id
+    assert expected_response.match_id == str(match_id)
     has_turn_count = 0
     for player in match.players:
         if player.has_turn: has_turn_count = has_turn_count + 1
@@ -100,9 +101,10 @@ def verify_test_ok(match_id, player_name):
     assert expected_response.board == match.board
 
 def test_get_visible_data_in_match_of_2_players():
+    reset()
     generate_test_room()
     generate_test_match()
-    match_id = 1
+    match_id = room1_id
     player_name = "Braian"
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
@@ -110,7 +112,7 @@ def test_get_visible_data_in_match_of_2_players():
 def test_get_visible_data_in_match_of_3_players():
     generate_test_room()
     generate_test_match()
-    match_id = 2
+    match_id = room2_id
     player_name = "Tadeo"
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
@@ -118,7 +120,7 @@ def test_get_visible_data_in_match_of_3_players():
 def test_get_visible_data_in_match_of_4_players():
     generate_test_room()
     generate_test_match()
-    match_id = 3
+    match_id = room3_id
     player_name = "Yamil"
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
@@ -126,7 +128,7 @@ def test_get_visible_data_in_match_of_4_players():
 def test_get_visible_data_in_no_match():
     generate_test_room()
     generate_test_match()
-    match_id = 4
+    match_id = uuid1()
     player_name = "Yamil"
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -140,7 +142,7 @@ def test_get_visible_data_in_no_match():
 def test_get_visible_data_of_match_by_no_player():
     generate_test_room()
     generate_test_match()
-    match_id = 1
+    match_id = room1_id
     player_name = "Yamil"
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND

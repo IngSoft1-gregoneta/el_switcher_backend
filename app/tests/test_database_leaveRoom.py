@@ -8,6 +8,7 @@ from models.room import *
 client = TestClient(app)
 repo = RoomRepository()
 
+room_id = uuid1()
 
 def reset():
     repo.delete_rooms()
@@ -22,7 +23,7 @@ def generate_test_room():
         players_expected = 2
         owner_name = "Braian"
         roomOut = RoomOut(
-            room_id=1,
+            room_id=room_id,
             room_name=room_name,
             players_expected=players_expected,
             players_names=["Braian", "Yamil"],
@@ -31,7 +32,7 @@ def generate_test_room():
         )
         roombd = Room(
             room_name=roomOut.room_name,
-            room_id=roomOut.room_id,
+            room_id=str(roomOut.room_id),
             players_expected=roomOut.players_expected,
             owner_name=roomOut.owner_name,
             players_names=json.dumps(roomOut.players_names),
@@ -50,11 +51,10 @@ def generate_test_room():
 def test_leave_room1():
     reset()
     generate_test_room()
-    room_id = 1
     player_name = "Yamil"
     user_id = uuid4()
     expected_response = {
-        "room_id": 1,
+        "room_id": str(room_id),
         "room_name": "Room 1",
         "players_expected": 2,
         "players_names": ["Braian"],
@@ -76,7 +76,6 @@ def test_leave_room1():
 def test_leave_room2():
     reset()
     generate_test_room()
-    room_id = 1
     player_name = "Tadeo"
     user_id = uuid4()
 
@@ -90,7 +89,7 @@ def test_leave_room2():
 def test_leave_noroom():
     reset()
     generate_test_room()
-    room_id = 2
+    room_id = uuid1()
     player_name = "Yamil"
     user_id = uuid4()
 
@@ -103,7 +102,6 @@ def test_leave_noroom():
 def test_owner_leave():
     reset()
     generate_test_room()
-    room_id = 1
     player_name = "Braian"
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
