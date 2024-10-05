@@ -2,7 +2,7 @@ import json
 from typing import List
 from enum import Enum
 from pydantic import BaseModel
-from .board import Board
+from .board import *
 from .fig_card import FigCard, CardColor, FigType
 from .mov_card import MovCard, MovType
 from .player import Player
@@ -208,68 +208,42 @@ class MatchRepository:
 
 
     def delete_player(self, player_name: str, match_id: UUID):
-        db = Session()
-        try:
-            match = self.get_match_by_id(match_id)
-            if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
-            matchdb = db.query(Match).filter(Match.match_id == str(match_id)).one_or_none()
-            player_to_remove = None
-            for player in match.players:
-                if player.player_name == player_name:
-                    player_to_remove = player
-            if player_to_remove == None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
-            match.players.remove(player_to_remove)
-            if len(match.players) == 0:
-                self.delete(match_id)
-                return "Match destroyed"
-            players_db = []
-            tiles_db = []
-            for player in match.players:
-                for card in player.mov_cards:
-                    card.mov_type = card.mov_type
-                for card in player.fig_cards:
-                    card.card_color = card.card_color
-                    card.fig_type = card.fig_type
-                player.mov_cards = [Movcard.model_dump() for Movcard in player.mov_cards]
-                player.fig_cards = [figcard.model_dump() for figcard in player.fig_cards]
-                player = player.model_dump()
-                players_db.append(player)
-            for tile in match.board.tiles:
-                tile.tile_color = tile.tile_color
-                tile.tile_in_figure = tile.tile_in_figure 
-                tiles_db.append(tile.model_dump())
-            board_db = (tiles_db)
-            matchdb = Match(
-                match_id = str(match.match_id),
-                board = board_db,
-                players = players_db
-                )
+        match = self.get_match_by_id(match_id)
+        if match is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
+        player_to_remove = None
+        for player in match.players:
+            if player.player_name == player_name:
+                player_to_remove = player
+        if player_to_remove == None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+        match.players.remove(player_to_remove)
+        if len(match.players) == 0:
             self.delete(match_id)
-            db.add(matchdb)
-            db.commit()
-
-            return match
-        finally:
-            db.close()
+            return "Match destroyed"
+        self.update_match(match)
+        return match
 
     def end_turn(self, match_id: UUID, player_name: str):
+        match = self.get_match_by_id(match_id)
+        if match is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+        target_player = match.get_player_by_name(player_name)
+        if target_player is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+        if target_player.has_turn is False:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
+        for i in range(len(match.players)):
+            if match.players[i].player_name == player_name:
+                match.players[i].has_turn = False # this player
+                match.players[(i+1)%len(match.players)].has_turn = True # next player
+        self.update_match(match)
+        return match
+
+    def update_match(self, match: MatchOut):
         db = Session()
         try:
-            match = self.get_match_by_id(match_id)
-            if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
-            target_player = match.get_player_by_name(player_name)
-            if target_player is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
-            if target_player.has_turn is False:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
-            for i in range(len(match.players)):
-                if match.players[i].player_name == player_name:
-                    match.players[i].has_turn = False # this player
-                    match.players[(i+1)%len(match.players)].has_turn = True # next player
-            matchdb = db.query(Match).filter(Match.match_id == str(match_id)).one_or_none()
+            matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
             players_db = []
             tiles_db = []
             for player in match.players:
@@ -292,9 +266,8 @@ class MatchRepository:
                 board = board_db,
                 players = players_db
                 )
-            self.delete(match_id)
+            self.delete(match.match_id)
             db.add(matchdb)
             db.commit()
-            return match
         finally:
             db.close()

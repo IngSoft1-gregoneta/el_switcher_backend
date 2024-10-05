@@ -6,7 +6,6 @@ from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
 
-
 class MatchHandler:
     def __init__(self):
         self.repo = MatchRepository()
