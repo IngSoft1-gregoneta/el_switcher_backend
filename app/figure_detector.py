@@ -1,6 +1,6 @@
 from app.models.visible_match import VisibleMatchData
 from models.match import * 
-from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, fig01
+from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, fig01, fig02
 # primero vamos a hacer las figuras blancas
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
@@ -32,6 +32,7 @@ def get_valid_fig_types(match: MatchOut) -> List[str]:
         fig_types.append(fig_card.fig_type)
     return fig_types
 
+# las subfiguras de otras figuras no pueden tomar fichas de la superfigura
 def figures_detector(match: MatchOut):
     match_out = match
     fig_types = get_valid_fig_types(match)
@@ -41,13 +42,15 @@ def figures_detector(match: MatchOut):
                 match_out = fige01.fige01_detector(match_out, x, y)
             if FigType.fige02.value in fig_types:
                 match_out = fige02.fige02_detector(match_out, x, y)
-            if FigType.fige03.value in fig_types:
+            if FigType.fige03.value in fig_types and \
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value:
                 match_out = fige03.fige03_detector(match_out, x, y)
             if FigType.fige04.value in fig_types and \
             match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value:
                 match_out = fige04.fige04_detector(match_out, x, y)
             if FigType.fige05.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value:
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value and \
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value:
                 match_out = fige05.fige05_detector(match_out, x, y)
             if FigType.fige06.value in fig_types:
                 match_out = fige06.fige06_detector(match_out, x, y)
@@ -56,5 +59,7 @@ def figures_detector(match: MatchOut):
                 match_out = fige07.fige07_detector(match_out, x, y)
             if FigType.fig01.value in fig_types:
                 match_out = fig01.fig01_detector(match_out, x, y)
+            if FigType.fig02.value in fig_types:
+                match_out = fig02.fig02_detector(match_out, x, y)
 
     match_repo.update_match(match_out)
