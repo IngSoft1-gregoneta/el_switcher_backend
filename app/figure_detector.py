@@ -1,3 +1,4 @@
+from app.models.visible_match import VisibleMatchData
 from models.match import * 
 
 # primero vamos a hacer las figuras blancas
@@ -21,15 +22,31 @@ def index_to_coordinates(index: int) -> tuple[int, int]:
     else:
         raise ValueError("Tile index in board must be in range 0 to 35")
 
+def get_valid_fig_types(match: MatchOut) -> List[str]:
+    fig_types: List[str] = []    
+    visible_data = VisibleMatchData(match.match_id,match.players[0].player_name)
+    visible_fig_cards = visible_data.me.visible_fig_cards 
+    for other_player in visible_data.other_players: 
+        visible_fig_cards = visible_fig_cards + other_player.visible_fig_cards
+    for fig_card in visible_fig_cards:
+        fig_types.append(fig_card.fig_type)
+    return fig_types
+
 def figures_detector(match: MatchOut):
     match_out = match
+    fig_types = get_valid_fig_types(match)
     for y in range(columns):
         for x in range(columns):
-            match_out = fige01_detector(match_out, x, y)
-            match_out = fige02_detector(match_out, x, y)
-            match_out = fige03_detector(match_out, x, y)
-            match_out = fige05_detector(match_out, x, y)
-            match_out = fige07_detector(match_out, x, y)
+            if FigType.fige01.value in fig_types:
+                match_out = fige01_detector(match_out, x, y)
+            if FigType.fige02.value in fig_types:
+                match_out = fige02_detector(match_out, x, y)
+            if FigType.fige03.value in fig_types:
+                match_out = fige03_detector(match_out, x, y)
+            if FigType.fige05.value in fig_types:
+                match_out = fige05_detector(match_out, x, y)
+            if FigType.fige07.value in fig_types:
+                match_out = fige07_detector(match_out, x, y)
     match_repo.update_match(match_out)
 
 def fige01_detector(match: MatchOut, x: int, y: int) -> MatchOut:
