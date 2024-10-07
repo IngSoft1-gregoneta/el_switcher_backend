@@ -51,7 +51,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
 
 @app.get("/get_id")
 def get_id():
-    return uuid4()
+    return str(uuid4())
 
 
 @app.get("/room/{room_id}")
