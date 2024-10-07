@@ -1,49 +1,54 @@
 import figure_detector
 from utils.match_handler import *
 
-def fig04_detector(match: MatchOut, x: int, y: int) -> MatchOut:
+def fig07_detector(match: MatchOut, x: int, y: int) -> MatchOut:
     match_out = match
-    match_out = fig04_rot1_detector(match_out, x, y)
-    match_out = fig04_rot2_detector(match_out, x, y)
-    match_out = fig04_rot3_detector(match_out, x, y)
-    match_out = fig04_rot4_detector(match_out, x, y)
+    match_out = fig07_rot1_detector(match_out, x, y)
+    match_out = fig07_rot2_detector(match_out, x, y)
+    match_out = fig07_rot3_detector(match_out, x, y)
+    match_out = fig07_rot4_detector(match_out, x, y)
     return match_out
 
-def fig04_rot1_detector(match: MatchOut, x: int, y: int) -> MatchOut:
+def fig07_rot1_detector(match: MatchOut, x: int, y: int) -> MatchOut:
     center_x = x
     center_y = y
     match_out = match
     if match is None: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="match not found")
-    if (fig04_verifications(center_x, center_y)):
+    if (fig07_rot1_verifications(center_x, center_y)):
         color = match_out.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color
-        left = (center_x-1, center_y)
-        left_up = (center_x-1, center_y-1)
+        up = (center_x, center_y-1)
+        up2 = (center_x, center_y-2)
         down = (center_x, center_y+1)
-        right_down = (center_x+1, center_y+1)
-        if match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_color == color and \
+        down_left = (center_x-1, center_y+1)
+        if match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_color == color and \
+        match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_color == color and \
         match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_color == color and \
-        fig04_rot1_borders_verifications(center_x, center_y, match, color):
-            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_in_figure = FigType.fig04.value
+        match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_color == color and \
+        fig07_rot1_borders_verifications(center_x, center_y, match, color):
+            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_in_figure = FigType.fig07.value
     return match_out
 
-def fig04_rot1_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
+def fig07_rot1_verifications(center_x: int, center_y: int):
+    return center_y-2>=0 and center_y+1<figure_detector.columns and center_x-1>=0
+
+def fig07_rot1_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
     valid = True
-    border1 = (center_x, center_y-1)
-    border2 = (center_x+1, center_y)
-    border3 = (center_x+2, center_y+1)
-    border4 = (center_x+1, center_y+2)
-    border5 = (center_x, center_y+2)
-    border6 = (center_x-1, center_y+1)
-    border7 = (center_x-2, center_y)
-    border8 = (center_x-2, center_y-1)
-    border9 = (center_x-1, center_y-2)
+    border1 = (center_x, center_y-3)
+    border2 = (center_x+1, center_y-2)
+    border3 = (center_x+1, center_y-1)
+    border4 = (center_x+1, center_y)
+    border5 = (center_x+1, center_y+1)
+    border6 = (center_x, center_y+2)
+    border7 = (center_x-1, center_y+2)
+    border8 = (center_x-2, center_y+1)
+    border9 = (center_x-1, center_y)
+    border10 = (center_x-1, center_y-1)
+    border11 = (center_x-1, center_y-2)
     if border1[0] >= 0 and border1[0]<figure_detector.columns and \
     border1[1] >= 0 and border1[1]<figure_detector.columns: 
         valid = valid and \
@@ -80,45 +85,57 @@ def fig04_rot1_borders_verifications(center_x: int, center_y: int, match: MatchO
     border9[1] >= 0 and border9[1]<figure_detector.columns: 
         valid = valid and \
         match.board.tiles[figure_detector.coordinates_to_index(border9[0], border9[1])].tile_color != color
-
+    if border10[0] >= 0 and border10[0]<figure_detector.columns and \
+    border10[1] >= 0 and border10[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border10[0], border10[1])].tile_color != color
+    if border11[0] >= 0 and border11[0]<figure_detector.columns and \
+    border11[1] >= 0 and border11[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border11[0], border11[1])].tile_color != color
     return valid
 
 
-def fig04_rot2_detector(match: MatchOut, x: int, y: int) -> MatchOut:
+def fig07_rot2_detector(match: MatchOut, x: int, y: int) -> MatchOut:
     center_x = x
     center_y = y
     match_out = match
     if match is None: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="match not found")
-    if (fig04_verifications(center_x, center_y)):
+    if (fig07_rot2_verifications(center_x, center_y)):
         color = match_out.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color
-        left = (center_x, center_y+1)
-        left_up = (center_x-1, center_y+1)
+        up = (center_x-1, center_y)
+        up2 = (center_x-2, center_y)
         down = (center_x+1, center_y)
-        right_down = (center_x+1, center_y-1)
-        if match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_color == color and \
+        down_left = (center_x+1, center_y+1)
+        if match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_color == color and \
+        match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_color == color and \
         match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_color == color and \
-        fig04_rot2_borders_verifications(center_x, center_y, match, color):
-            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_in_figure = FigType.fig04.value
+        match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_color == color and \
+        fig07_rot2_borders_verifications(center_x, center_y, match, color):
+            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_in_figure = FigType.fig07.value
     return match_out
-       
-def fig04_rot2_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
+
+def fig07_rot2_verifications(center_x: int, center_y: int):
+    return center_y+1<figure_detector.columns and center_x-2>=0 and center_x+1<figure_detector.columns
+
+def fig07_rot2_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
     valid = True
-    border1 = (center_x-1, center_y)
-    border2 = (center_x, center_y-1)
-    border3 = (center_x+1, center_y-2)
-    border4 = (center_x+2, center_y-1)
-    border5 = (center_x+2, center_y)
-    border6 = (center_x+1, center_y+1)
-    border7 = (center_x, center_y+2)
-    border8 = (center_x-1, center_y+2)
-    border9 = (center_x-2, center_y+1)
+    border1 = (center_x-3, center_y)
+    border2 = (center_x-2, center_y-1)
+    border3 = (center_x-1, center_y-1)
+    border4 = (center_x, center_y-1)
+    border5 = (center_x+1, center_y-1)
+    border6 = (center_x+2, center_y)
+    border7 = (center_x+2, center_y+1)
+    border8 = (center_x+1, center_y+2)
+    border9 = (center_x, center_y+1)
+    border10 = (center_x-1, center_y+1)
+    border11 = (center_x-2, center_y+1)
     if border1[0] >= 0 and border1[0]<figure_detector.columns and \
     border1[1] >= 0 and border1[1]<figure_detector.columns: 
         valid = valid and \
@@ -155,44 +172,57 @@ def fig04_rot2_borders_verifications(center_x: int, center_y: int, match: MatchO
     border9[1] >= 0 and border9[1]<figure_detector.columns: 
         valid = valid and \
         match.board.tiles[figure_detector.coordinates_to_index(border9[0], border9[1])].tile_color != color
+    if border10[0] >= 0 and border10[0]<figure_detector.columns and \
+    border10[1] >= 0 and border10[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border10[0], border10[1])].tile_color != color
+    if border11[0] >= 0 and border11[0]<figure_detector.columns and \
+    border11[1] >= 0 and border11[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border11[0], border11[1])].tile_color != color
     return valid
 
 
-def fig04_rot3_detector(match: MatchOut, x: int, y: int) -> MatchOut:
+def fig07_rot3_detector(match: MatchOut, x: int, y: int) -> MatchOut:
     center_x = x
     center_y = y
     match_out = match
     if match is None: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="match not found")
-    if (fig04_verifications(center_x, center_y)):
+    if (fig07_rot3_verifications(center_x, center_y)):
         color = match_out.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color
-        left = (center_x+1, center_y)
-        left_up = (center_x+1, center_y+1)
+        up = (center_x, center_y+1)
+        up2 = (center_x, center_y+2)
         down = (center_x, center_y-1)
-        right_down = (center_x-1, center_y-1)
-        if match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_color == color and \
+        down_left = (center_x+1, center_y-1)
+        if match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_color == color and \
+        match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_color == color and \
         match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_color == color and \
-        fig04_rot3_borders_verifications(center_x, center_y, match, color):
-            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_in_figure = FigType.fig04.value
+        match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_color == color and \
+        fig07_rot3_borders_verifications(center_x, center_y, match, color):
+            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_in_figure = FigType.fig07.value
     return match_out
 
-def fig04_rot3_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
+def fig07_rot3_verifications(center_x: int, center_y: int):
+    return center_y-1>=0 and center_y+2<figure_detector.columns and center_x+1<figure_detector.columns
+
+def fig07_rot3_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
     valid = True
-    border1 = (center_x, center_y+1)
-    border2 = (center_x-1, center_y)
-    border3 = (center_x-2, center_y-1)
-    border4 = (center_x-1, center_y-2)
-    border5 = (center_x, center_y-2)
-    border6 = (center_x+1, center_y-1)
-    border7 = (center_x+2, center_y)
-    border8 = (center_x+2, center_y+1)
-    border9 = (center_x+1, center_y+2)
+    border1 = (center_x, center_y+3)
+    border2 = (center_x-1, center_y+2)
+    border3 = (center_x-1, center_y+1)
+    border4 = (center_x-1, center_y)
+    border5 = (center_x-1, center_y-1)
+    border6 = (center_x, center_y-2)
+    border7 = (center_x+1, center_y-2)
+    border8 = (center_x+2, center_y-1)
+    border9 = (center_x+1, center_y)
+    border10 = (center_x+1, center_y+1)
+    border11 = (center_x+1, center_y+2)
     if border1[0] >= 0 and border1[0]<figure_detector.columns and \
     border1[1] >= 0 and border1[1]<figure_detector.columns: 
         valid = valid and \
@@ -229,44 +259,56 @@ def fig04_rot3_borders_verifications(center_x: int, center_y: int, match: MatchO
     border9[1] >= 0 and border9[1]<figure_detector.columns: 
         valid = valid and \
         match.board.tiles[figure_detector.coordinates_to_index(border9[0], border9[1])].tile_color != color
+    if border10[0] >= 0 and border10[0]<figure_detector.columns and \
+    border10[1] >= 0 and border10[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border10[0], border10[1])].tile_color != color
+    if border11[0] >= 0 and border11[0]<figure_detector.columns and \
+    border11[1] >= 0 and border11[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border11[0], border11[1])].tile_color != color
     return valid
 
-
-def fig04_rot4_detector(match: MatchOut, x: int, y: int) -> MatchOut:
+def fig07_rot4_detector(match: MatchOut, x: int, y: int) -> MatchOut:
     center_x = x
     center_y = y
     match_out = match
     if match is None: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="match not found")
-    if (fig04_verifications(center_x, center_y)):
+    if (fig07_rot4_verifications(center_x, center_y)):
         color = match_out.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color
-        left = (center_x, center_y-1)
-        left_up = (center_x+1, center_y-1)
+        up = (center_x+1, center_y)
+        up2 = (center_x+2, center_y)
         down = (center_x-1, center_y)
-        right_down = (center_x-1, center_y+1)
-        if match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_color == color and \
+        down_left = (center_x-1, center_y-1)
+        if match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_color == color and \
+        match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_color == color and \
         match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_color == color and \
-        match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_color == color and \
-        fig04_rot4_borders_verifications(center_x, center_y, match, color):
-            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left[0], left[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(left_up[0], left_up[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig04.value
-            match_out.board.tiles[figure_detector.coordinates_to_index(right_down[0], right_down[1])].tile_in_figure = FigType.fig04.value
+        match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_color == color and \
+        fig07_rot4_borders_verifications(center_x, center_y, match, color):
+            match_out.board.tiles[figure_detector.coordinates_to_index(center_x, center_y)].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up[0], up[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(up2[0], up2[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down[0], down[1])].tile_in_figure = FigType.fig07.value
+            match_out.board.tiles[figure_detector.coordinates_to_index(down_left[0], down_left[1])].tile_in_figure = FigType.fig07.value
     return match_out
 
-def fig04_rot4_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
+def fig07_rot4_verifications(center_x: int, center_y: int):
+    return center_y-1>=0 and center_x-1>=0 and center_x+2<figure_detector.columns
+
+def fig07_rot4_borders_verifications(center_x: int, center_y: int, match: MatchOut, color: TileColor):
     valid = True
-    border1 = (center_x+1, center_y)
-    border2 = (center_x, center_y+1)
-    border3 = (center_x-1, center_y+2)
-    border4 = (center_x-2, center_y+1)
-    border5 = (center_x-2, center_y)
-    border6 = (center_x-1, center_y-1)
-    border7 = (center_x, center_y-2)
-    border8 = (center_x+1, center_y-2)
-    border9 = (center_x+2, center_y-1)
+    border1 = (center_x+3, center_y)
+    border2 = (center_x+2, center_y+1)
+    border3 = (center_x+1, center_y+1)
+    border4 = (center_x, center_y+1)
+    border5 = (center_x-1, center_y+1)
+    border6 = (center_x-2, center_y)
+    border7 = (center_x-2, center_y-1)
+    border8 = (center_x-1, center_y-2)
+    border9 = (center_x, center_y-1)
+    border10 = (center_x+1, center_y-1)
+    border11 = (center_x+2, center_y-1)
     if border1[0] >= 0 and border1[0]<figure_detector.columns and \
     border1[1] >= 0 and border1[1]<figure_detector.columns: 
         valid = valid and \
@@ -303,8 +345,13 @@ def fig04_rot4_borders_verifications(center_x: int, center_y: int, match: MatchO
     border9[1] >= 0 and border9[1]<figure_detector.columns: 
         valid = valid and \
         match.board.tiles[figure_detector.coordinates_to_index(border9[0], border9[1])].tile_color != color
+    if border10[0] >= 0 and border10[0]<figure_detector.columns and \
+    border10[1] >= 0 and border10[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border10[0], border10[1])].tile_color != color
+    if border11[0] >= 0 and border11[0]<figure_detector.columns and \
+    border11[1] >= 0 and border11[1]<figure_detector.columns: 
+        valid = valid and \
+        match.board.tiles[figure_detector.coordinates_to_index(border11[0], border11[1])].tile_color != color
     return valid
 
-
-def fig04_verifications(center_x: int, center_y: int):
-    return center_y-1>=0 and center_y+1<figure_detector.columns and center_x-1>=0 and center_x+1<figure_detector.columns
