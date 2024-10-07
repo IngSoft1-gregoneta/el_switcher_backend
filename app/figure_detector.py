@@ -1,7 +1,7 @@
 from app.models.visible_match import VisibleMatchData
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
-    fig01, fig02, fig03, fig04, fig05, fig06, fig07
+    fig01, fig02, fig03, fig04, fig05, fig06, fig07, fig08
 # primero vamos a hacer las figuras blancas
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
@@ -43,6 +43,7 @@ def figures_detector(match: MatchOut):
             detect_fig05(match_out, fig_types, x, y)
             detect_fig06(match_out, fig_types, x, y)
             detect_fig07(match_out, fig_types, x, y)
+            detect_fig08(match_out, fig_types, x, y)
     match_repo.update_match(match_out)
 
 def get_valid_fig_types(match: MatchOut) -> List[str]:
@@ -110,3 +111,7 @@ def detect_fig06(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> M
 def detect_fig07(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
     if FigType.fig07.value in fig_types:
         match = fig07.fig07_detector(match, x, y)
+
+def detect_fig08(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig08.value in fig_types:
+        match = fig08.fig08_detector(match, x, y)
