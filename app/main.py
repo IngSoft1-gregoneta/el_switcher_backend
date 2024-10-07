@@ -228,3 +228,19 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
+@app.get("/matchs/winner/{match_id}")
+async def check_winner(
+    match_id: UUID
+    ) -> Union[str, None]:
+    try:
+        winner = await match_handler.check_winner(match_id)
+        # await manager.broadcast_by_room(match_id, "MATCH")
+        return winner
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal Server Error: {e}",
+        ) 

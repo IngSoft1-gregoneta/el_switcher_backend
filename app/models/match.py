@@ -293,3 +293,18 @@ class MatchRepository:
             return match
         finally:
             db.close()
+
+    def check_winner(self, match_id: UUID):
+        try:
+            result = None
+            match = self.get_match_by_id(match_id)
+            if match is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+            
+            for player in match.players:
+                # No tiene mas cartas de figura
+                if len(player.fig_cards) == 0:
+                    result = player.player_name
+        finally:
+            return result
+        

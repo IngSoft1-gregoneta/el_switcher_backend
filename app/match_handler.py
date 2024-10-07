@@ -95,3 +95,14 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
+    async def check_winner(self, match_id: UUID) -> Union[str, None]:
+        try:
+            winner = self.repo.check_winner(match_id)
+            return winner
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error"
+        )
