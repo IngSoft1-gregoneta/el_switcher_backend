@@ -1,7 +1,7 @@
 from app.models.visible_match import VisibleMatchData
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
-    fig01, fig02, fig03
+    fig01, fig02, fig03, fig04
 # primero vamos a hacer las figuras blancas
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
@@ -40,12 +40,14 @@ def figures_detector(match: MatchOut):
     for y in range(columns):
         for x in range(columns):
             if FigType.fige01.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value:
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value and \
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
                 match_out = fige01.fige01_detector(match_out, x, y)
             if FigType.fige02.value in fig_types:
                 match_out = fige02.fige02_detector(match_out, x, y)
             if FigType.fige03.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value:
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value and \
+            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
                 match_out = fige03.fige03_detector(match_out, x, y)
             if FigType.fige04.value in fig_types and \
             match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value:
@@ -66,5 +68,7 @@ def figures_detector(match: MatchOut):
                 match_out = fig02.fig02_detector(match_out, x, y)
             if FigType.fig03.value in fig_types:
                 match_out = fig03.fig03_detector(match_out, x, y)
+            if FigType.fig04.value in fig_types:
+                match_out = fig04.fig04_detector(match_out, x, y)
 
     match_repo.update_match(match_out)
