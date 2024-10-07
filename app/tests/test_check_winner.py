@@ -76,17 +76,13 @@ def test_check_winner_ok():
     match1_id = room1_id
     match = repo_match.get_match_by_id(match1_id)
 
-    player_id = uuid4()
+    # Jugador sin cartas ==> winner
+    expected_response = match.players[0].player_name
 
-    with client.websocket_connect(f"/ws/{player_id}") as Clientwebsocket:
-        manager.bind_room(match1_id, player_id)
-        # Jugador sin cartas ==> winner
-        expected_response = match.players[0].player_name
+    response = client.get(f"/matchs/winner/{match1_id}")
+    assert response.status_code == status.HTTP_200_OK
 
-        response = client.get(f"/matchs/winner/{match1_id}")
-        assert response.status_code == status.HTTP_200_OK
-
-        assert response.json() == expected_response
+    assert response.json() == expected_response
     reset()
 
 def test_check_winner_nobody():
@@ -95,17 +91,12 @@ def test_check_winner_nobody():
     generate_test_match_without_winner()
 
     match2_id = room2_id
-    match = repo_match.get_match_by_id(match2_id)
 
-    player_id = uuid4()
+    expected_response = None
 
-    with client.websocket_connect(f"/ws/{player_id}") as Clientwebsocket:
-        manager.bind_room(match2_id, player_id)
+    response = client.get(f"/matchs/winner/{match2_id}")
+    assert response.status_code == status.HTTP_200_OK
 
-        expected_response = None
+    assert response.json() == expected_response
 
-        response = client.get(f"/matchs/winner/{match2_id}")
-        assert response.status_code == status.HTTP_200_OK
-
-        assert response.json() == expected_response
     reset()
