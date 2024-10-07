@@ -1,7 +1,7 @@
 from app.models.visible_match import VisibleMatchData
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
-    fig01, fig02, fig03, fig04
+    fig01, fig02, fig03, fig04, fig05
 # primero vamos a hacer las figuras blancas
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
@@ -23,16 +23,6 @@ def index_to_coordinates(index: int) -> tuple[int, int]:
     else:
         raise ValueError("Tile index in board must be in range 0 to 35")
 
-def get_valid_fig_types(match: MatchOut) -> List[str]:
-    fig_types: List[str] = []    
-    visible_data = VisibleMatchData(match.match_id,match.players[0].player_name)
-    visible_fig_cards = visible_data.me.visible_fig_cards 
-    for other_player in visible_data.other_players: 
-        visible_fig_cards = visible_fig_cards + other_player.visible_fig_cards
-    for fig_card in visible_fig_cards:
-        fig_types.append(fig_card.fig_type)
-    return fig_types
-
 # las subfiguras de otras figuras no pueden tomar fichas de la superfigura
 def figures_detector(match: MatchOut):
     match_out = match
@@ -50,8 +40,18 @@ def figures_detector(match: MatchOut):
             detect_fig02(match_out, fig_types, x, y)
             detect_fig03(match_out, fig_types, x, y)
             detect_fig04(match_out, fig_types, x, y)
-            
+            detect_fig05(match_out, fig_types, x, y)
     match_repo.update_match(match_out)
+
+def get_valid_fig_types(match: MatchOut) -> List[str]:
+    fig_types: List[str] = []    
+    visible_data = VisibleMatchData(match.match_id,match.players[0].player_name)
+    visible_fig_cards = visible_data.me.visible_fig_cards 
+    for other_player in visible_data.other_players: 
+        visible_fig_cards = visible_fig_cards + other_player.visible_fig_cards
+    for fig_card in visible_fig_cards:
+        fig_types.append(fig_card.fig_type)
+    return fig_types
 
 def detect_fige01(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
     if FigType.fige01.value in fig_types and \
@@ -81,7 +81,8 @@ def detect_fige05(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> 
         match = fige05.fige05_detector(match, x, y)
 
 def detect_fige06(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
-    if FigType.fige06.value in fig_types:
+    if FigType.fige06.value in fig_types and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig05.value:
         match = fige06.fige06_detector(match, x, y)
 
 def detect_fige07(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
@@ -105,3 +106,7 @@ def detect_fig03(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> M
 def detect_fig04(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
     if FigType.fig04.value in fig_types:
         match = fig04.fig04_detector(match, x, y)
+
+def detect_fig05(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig05.value in fig_types:
+        match = fig05.fig05_detector(match, x, y)
