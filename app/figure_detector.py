@@ -39,36 +39,69 @@ def figures_detector(match: MatchOut):
     fig_types = get_valid_fig_types(match)
     for y in range(columns):
         for x in range(columns):
-            if FigType.fige01.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
-                match_out = fige01.fige01_detector(match_out, x, y)
-            if FigType.fige02.value in fig_types:
-                match_out = fige02.fige02_detector(match_out, x, y)
-            if FigType.fige03.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
-                match_out = fige03.fige03_detector(match_out, x, y)
-            if FigType.fige04.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value:
-                match_out = fige04.fige04_detector(match_out, x, y)
-            if FigType.fige05.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value:
-                match_out = fige05.fige05_detector(match_out, x, y)
-            if FigType.fige06.value in fig_types:
-                match_out = fige06.fige06_detector(match_out, x, y)
-            if FigType.fige07.value in fig_types and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value and \
-            match_out.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value:
-                match_out = fige07.fige07_detector(match_out, x, y)
-            if FigType.fig01.value in fig_types:
-                match_out = fig01.fig01_detector(match_out, x, y)
-            if FigType.fig02.value in fig_types:
-                match_out = fig02.fig02_detector(match_out, x, y)
-            if FigType.fig03.value in fig_types:
-                match_out = fig03.fig03_detector(match_out, x, y)
-            if FigType.fig04.value in fig_types:
-                match_out = fig04.fig04_detector(match_out, x, y)
-
+            detect_fige01(match_out, fig_types, x, y)
+            detect_fige02(match_out, fig_types, x, y)
+            detect_fige03(match_out, fig_types, x, y)
+            detect_fige04(match_out, fig_types, x, y)
+            detect_fige05(match_out, fig_types, x, y)
+            detect_fige06(match_out, fig_types, x, y)
+            detect_fige07(match_out, fig_types, x, y)
+            detect_fig01(match_out, fig_types, x, y)
+            detect_fig02(match_out, fig_types, x, y)
+            detect_fig03(match_out, fig_types, x, y)
+            detect_fig04(match_out, fig_types, x, y)
+            
     match_repo.update_match(match_out)
+
+def detect_fige01(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige01.value in fig_types and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
+        match = fige01.fige01_detector(match, x, y)
+
+def detect_fige02(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige02.value in fig_types:
+        match = fige02.fige02_detector(match, x, y)
+
+def detect_fige03(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige03.value in fig_types and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig04.value:
+        match = fige03.fige03_detector(match, x, y)
+
+def detect_fige04(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige04.value in fig_types and \
+        match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value:
+        match = fige04.fige04_detector(match, x, y)
+
+def detect_fige05(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige05.value in fig_types and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig02.value:
+        match = fige05.fige05_detector(match, x, y)
+
+def detect_fige06(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige06.value in fig_types:
+        match = fige06.fige06_detector(match, x, y)
+
+def detect_fige07(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fige07.value in fig_types and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig01.value and \
+    match.board.tiles[coordinates_to_index(x, y)].tile_in_figure != FigType.fig03.value:
+        match = fige07.fige07_detector(match, x, y)
+
+def detect_fig01(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig01.value in fig_types:
+        match = fig01.fig01_detector(match, x, y)
+
+def detect_fig02(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig02.value in fig_types:
+        match = fig02.fig02_detector(match, x, y)
+    
+def detect_fig03(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig03.value in fig_types:
+        match = fig03.fig03_detector(match, x, y)
+
+def detect_fig04(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig04.value in fig_types:
+        match = fig04.fig04_detector(match, x, y)
