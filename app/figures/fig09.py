@@ -303,7 +303,6 @@ def fig09_rot4_borders_verifications(center_x: int, center_y: int, match: MatchO
         match.board.tiles[figure_detector.coordinates_to_index(border9[0], border9[1])].tile_color != color
     return valid
 
-
 def fig09_verifications(center_x: int, center_y: int):
     return center_y-1>=0 and center_y+1<figure_detector.columns and center_x+1<figure_detector.columns and center_x-1>=0
 
