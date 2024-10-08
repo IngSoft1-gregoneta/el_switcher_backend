@@ -11,12 +11,12 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, stat
 from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
-from manager.manager import ConnectionManager
-from match_handler import MatchHandler
-from models.match import *
-from models.room import *
-from models.visible_match import *
-from room_handler import RoomHandler
+from app.manager.manager import ConnectionManager
+from app.match_handler import MatchHandler
+from app.models.match import *
+from app.models.room import *
+from app.models.visible_match import *
+from app.room_handler import RoomHandler
 
 app = FastAPI()
 

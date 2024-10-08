@@ -2,7 +2,7 @@ import json
 from typing import List
 from uuid import UUID, uuid1
 
-from config.repositorymanager import Room, Session
+from app.config.repositorymanager import Room, Session
 from pydantic import BaseModel, Field
 
 

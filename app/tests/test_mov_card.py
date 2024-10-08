@@ -1,4 +1,4 @@
-from models.mov_card import MovCard, MovType
+from models.mov_card import MovCard, MovType, MovStatus
 import random
 
 def test_random_mov_card():
@@ -31,3 +31,32 @@ def test_invalid_mov_card_str():
         assert False, f"{card.mov_type} is not a mov type"
     except ValueError as e:
         assert True
+
+def test_use_mov_card():
+    try:
+        mov_card = MovCard(mov_type=MovType.mov1,mov_status=MovStatus.PLAYED)
+        mov_card.use_mov_card()
+        assert mov_card.is_used == True, "mov_card should be marked as used"
+        assert mov_card.mov_status == MovStatus.PLAYED, f"mov status should be {MovStatus.PLAYED}, but got {mov_card.mov_status}"
+    except ValueError as e:
+        assert False, f"Error: {e}"
+
+def test_confirm_mov_card():
+    try:
+        mov_card = MovCard(mov_type=MovType.mov1)
+        mov_card.use_mov_card()
+        mov_card.confirm_mov_card()
+        assert mov_card.is_used == True, "mov_card should be marked as used"
+        assert mov_card.mov_status == MovStatus.CONFIRMED, f"mov status should be {MovStatus.CONFIRMED}, but got {mov_card.mov_status}"
+    except ValueError as e:
+        assert False, f"Error: {e}"
+
+
+def test_held_mov_card():
+    try:
+        mov_card = MovCard(mov_type=MovType.mov1, mov_status=MovStatus.HELD)
+        mov_card.held_mov_card()
+        assert mov_card.is_used == False, "mov_card should be marked as not used"
+        assert mov_card.mov_status == MovStatus.HELD, f"mov status should be {MovStatus.HELD}, but got {mov_card.mov_status}"
+    except ValueError as e:
+        assert False, f"Error: {e}"

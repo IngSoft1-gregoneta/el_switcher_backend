@@ -2,9 +2,9 @@ from typing import Any, Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from models.match import MatchOut, MatchRepository
-from models.room import RoomRepository
-from models.visible_match import *
+from app.models.match import MatchOut, MatchRepository
+from app.models.room import RoomRepository
+from app.models.visible_match import *
 
 
 class MatchHandler:

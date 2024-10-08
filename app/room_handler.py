@@ -2,10 +2,10 @@ from typing import Any, Union, List
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from manager.manager import ConnectionManager
+from app.manager.manager import ConnectionManager
 
 # from manager.manager import ConnectionManager
-from models.room import RoomIn, RoomOut, RoomRepository
+from app.models.room import RoomIn, RoomOut, RoomRepository
 from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
