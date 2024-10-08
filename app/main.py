@@ -89,7 +89,7 @@ async def get_rooms():
 )
 async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
     try:
-        result = await room_handler.create_room(new_room)
+        result = await room_handler.create_room(new_room,user_id)
         # TODO: Sacar esto hacer mock
         try:
             await manager.create(result["room_id"], user_id)

@@ -25,7 +25,7 @@ class RoomHandler:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         return room
 
-    async def create_room(self, new_room: RoomIn) -> RoomOut:
+    async def create_room(self, new_room: RoomIn, user_id: UUID) -> RoomOut:
         if new_room.players_expected < 2 or new_room.players_expected > 4:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -38,7 +38,7 @@ class RoomHandler:
                 detail="Room name already exists",
             )
 
-        return self.repo.create_room(new_room)
+        return self.repo.create_room(new_room,user_id)
 
     async def join_room(self, room_id: UUID, player_name: str, user_id: UUID):
         try:
