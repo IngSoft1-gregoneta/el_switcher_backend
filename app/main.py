@@ -184,7 +184,7 @@ async def leave_match(
     try:
         result = await match_handler.leave_match(player_name, match_id)
         try:
-            await manager.leave(match_id, user_id)
+            await manager.leave_match(match_id, user_id)
         except Exception as e:
             print(e)
         return result
