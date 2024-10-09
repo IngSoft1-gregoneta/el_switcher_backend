@@ -1,4 +1,3 @@
-from app.models.visible_match import VisibleMatchData
 import copy
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
@@ -53,7 +52,7 @@ def get_valid_fig_types(match: MatchOut) -> List[str]:
     fig_types: List[str] = []    
     for player in match.players:
         for i in range(len(player.fig_cards)):
-            if player.fig_cards[i].is_visible:
+            # if player.fig_cards[i].is_visible:
                 fig_types.append(player.fig_cards[i].fig_type)
     return fig_types
 

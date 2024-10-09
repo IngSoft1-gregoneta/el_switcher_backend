@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
+import figure_detector
 
 class MatchHandler:
     def __init__(self):
@@ -25,8 +26,10 @@ class MatchHandler:
                 )
             match = MatchOut(match_id)
             self.repo.create_match(match)
-            match_repo = self.repo.get_match_by_id(match.match_id).model_dump(mode="json")
-            return match_repo
+            match = self.repo.get_match_by_id(match.match_id)
+            match.board = figure_detector.figures_detector(match)
+            self.repo.update_match(match)
+            return match.model_dump(mode="json")
 
         except ValueError as ve:
             raise HTTPException(
