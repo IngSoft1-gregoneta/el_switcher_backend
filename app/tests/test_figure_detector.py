@@ -56,6 +56,7 @@ def test_none_fig_detector():
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
+            match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_in_figure = random.choice(list(FigType)).value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
@@ -63,10 +64,9 @@ def test_none_fig_detector():
 
     board = figure_detector.figures_detector(match)
     
-    assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.none.value
-    assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.none.value
-    assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.none.value
-    assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.none.value
+    for x in range(figure_detector.columns):
+        for y in range(figure_detector.columns):
+            assert board.tiles[figure_detector.coordinates_to_index(x, y)].tile_in_figure == FigType.none.value
 
 def test_fige01_rot_1_detector():
     reset()

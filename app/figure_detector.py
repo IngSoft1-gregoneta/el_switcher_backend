@@ -16,17 +16,10 @@ def coordinates_to_index(x: int, y: int) -> int:
     else:
         raise ValueError("coordinates must be in range 0 to 5")
 
-def index_to_coordinates(index: int) -> tuple[int, int]:
-    if 0 <= index < columns * columns:
-        y = index // columns
-        x = index % columns
-        return (x, y)
-    else:
-        raise ValueError("Tile index in board must be in range 0 to 35")
-
 def figures_detector(match: MatchOut):
     match_out = copy.deepcopy(match)
     fig_types = get_valid_fig_types(match)
+    disarm_figs(match_out)
     for y in range(columns):
         for x in range(columns):
             detect_fige01(match_out, fig_types, x, y)
@@ -51,6 +44,7 @@ def figures_detector(match: MatchOut):
             detect_fig13(match_out, fig_types, x, y)
             detect_fig14(match_out, fig_types, x, y)
     return copy.deepcopy(match_out.board)
+
 def get_valid_fig_types(match: MatchOut) -> List[str]:
     fig_types: List[str] = []    
     for player in match.players:
@@ -58,6 +52,10 @@ def get_valid_fig_types(match: MatchOut) -> List[str]:
             if player.fig_cards[i].is_visible:
                 fig_types.append(player.fig_cards[i].fig_type)
     return fig_types
+
+def disarm_figs(match: MatchOut):
+    for tile in match.board.tiles:
+        tile.tile_in_figure = FigType.none.value
 
 def detect_fige01(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
     if FigType.fige01.value in fig_types:
