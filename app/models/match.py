@@ -108,6 +108,13 @@ class MatchOut(BaseModel):
             if player.player_name == player_name:
                 return player
         return None
+    
+    def next_turn(self, player_name: str):
+        for i in range(len(self.players)):
+            if self.players[i].player_name == player_name:
+                self.players[i].has_turn = False # this player
+                self.players[(i+1)%len(self.players)].has_turn = True # next player
+        return self
 
 class MatchRepository:
     def create_match(self, new_match: MatchOut):
@@ -217,6 +224,10 @@ class MatchRepository:
                     player_to_remove = player
             if player_to_remove == None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+            # Pasa el turno antes de borrar
+            if player_to_remove.has_turn:
+                match.next_turn(player_name)
+            # Borrado ahora si
             match.players.remove(player_to_remove)
             if len(match.players) == 0:
                 self.delete(match_id)
@@ -261,10 +272,8 @@ class MatchRepository:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
             if target_player.has_turn is False:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
-            for i in range(len(match.players)):
-                if match.players[i].player_name == player_name:
-                    match.players[i].has_turn = False # this player
-                    match.players[(i+1)%len(match.players)].has_turn = True # next player
+            # Pasa el turno al siguiente jugador
+            match.next_turn(player_name)
             matchdb = db.query(Match).filter(Match.match_id == str(match_id)).one_or_none()
             players_db = []
             tiles_db = []
