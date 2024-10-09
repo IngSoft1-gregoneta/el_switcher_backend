@@ -17,9 +17,17 @@ class MovStatus(Enum):
     PLAYED = 'Played'
     CONFIRMED = 'Confirmed'
     
+
+class MovStatus(Enum):
+    HELD = 'Held'
+    PLAYED = 'Played'
+    CONFIRMED = 'Confirmed'
+    
 # Define the Pydantic model
 class MovCard(BaseModel):
     mov_type: MovType
+    mov_status: MovStatus = MovStatus.HELD
+    is_used: bool = False
     mov_status: MovStatus = MovStatus.HELD
     is_used: bool = False
 

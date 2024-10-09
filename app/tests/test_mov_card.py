@@ -1,4 +1,5 @@
 from models.mov_card import MovCard, MovType, MovStatus
+from models.mov_card import MovCard, MovType, MovStatus
 import random
 
 def test_random_mov_card():
