@@ -3,7 +3,7 @@ import copy
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
     fig01, fig02, fig03, fig04, fig05, fig06, fig07, fig08, fig09, fig10, \
-    fig11, fig12, fig13, fig14, fig15, fig16, fig17
+    fig11, fig12, fig13, fig14, fig15, fig16, fig17, fig18
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
 
@@ -46,6 +46,7 @@ def figures_detector(match: MatchOut):
             detect_fig15(match_out, fig_types, x, y)
             detect_fig16(match_out, fig_types, x, y)
             detect_fig17(match_out, fig_types, x, y)
+            detect_fig18(match_out, fig_types, x, y)
     return copy.deepcopy(match_out.board)
 
 def get_valid_fig_types(match: MatchOut) -> List[str]:
@@ -155,3 +156,7 @@ def detect_fig16(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> M
 def detect_fig17(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
     if FigType.fig17.value in fig_types:
         match = fig17.fig17_detector(match, x, y)
+
+def detect_fig18(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
+    if FigType.fig18.value in fig_types:
+        match = fig18.fig18_detector(match, x, y)
