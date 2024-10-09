@@ -100,3 +100,55 @@ def test_check_winner_nobody():
     assert response.json() == expected_response
 
     reset()
+
+def test_check_winner_fullmatch_to_alone():
+    reset()
+    generate_test_room()
+    generate_test_match_without_winner()
+
+    match3_id = room2_id
+    match = repo_match.get_match_by_id(match3_id)
+
+
+    player2_name = "Tadeo"
+    player3_name = "Yamil"
+    player4_name = "Grego"
+
+    # Sacamos a los 3 ultimos jugadores
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room2_id, user_id)
+        response = client.put(f"/matchs/leave_match/{match3_id}/{player4_name}/{user_id}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        updated_match = repo_match.get_match_by_id(match3_id)
+        assert updated_match.get_player_by_name(player4_name) == None
+        data = Clientwebsocket.receive_text()
+        assert data == "LISTA"
+    
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room2_id, user_id)
+        response = client.put(f"/matchs/leave_match/{match3_id}/{player3_name}/{user_id}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        updated_match = repo_match.get_match_by_id(match3_id)
+        assert updated_match.get_player_by_name(player3_name) == None
+        data = Clientwebsocket.receive_text()
+        assert data == "LISTA"
+
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room2_id, user_id)
+        response = client.put(f"/matchs/leave_match/{match3_id}/{player2_name}/{user_id}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        updated_match = repo_match.get_match_by_id(match3_id)
+        assert updated_match.get_player_by_name(player2_name) == None
+        data = Clientwebsocket.receive_text()
+        assert data == "LISTA"
+
+    # Victoria por abandono
+    expected_response = match.players[0].player_name # == 'Braian'
+
+    last_response = client.get(f"/matchs/winner/{match3_id}")
+    assert last_response.status_code == status.HTTP_200_OK
+
+    assert last_response.json() == expected_response
