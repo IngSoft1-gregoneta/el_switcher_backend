@@ -1,5 +1,5 @@
 from models.player import Player
-from models.mov_card import MovCard, MovType
+from models.mov_card import MovCard, MovType, MovStatus
 from models.fig_card import FigCard, CardColor, FigType
 import random
 
@@ -64,4 +64,3 @@ def test_invalid_fig_cards():
         
     except ValueError as e:
         assert True
-

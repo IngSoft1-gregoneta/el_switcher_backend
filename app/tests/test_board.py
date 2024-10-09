@@ -1,6 +1,6 @@
 from collections import Counter
-from models.board import Board
-from models.tile import TileColor 
+from app.models.board import Board
+from app.models.tile import TileColor 
 from uuid import uuid1
 
 try:
