@@ -1,5 +1,5 @@
 import figure_detector
-from utils.match_handler import *
+from match_handler import *
 
 def fig01_detector(board: Board, x: int, y: int) -> Board:
     board_out = board

@@ -52,7 +52,7 @@ def disarm_figs(board: Board):
     for tile in board.tiles:
         tile.tile_in_figure = FigType.none.value
 
-def detect_fige01(board: Board, fig_types: List[str], x: int, y: int) -> Board:
+def detect_fige01(board: Board, fig_types: List[FigType], x: int, y: int) -> Board:
     if FigType.fige01.value in fig_types:
         board = fige01.fige01_detector(board, x, y)
 

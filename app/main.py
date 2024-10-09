@@ -12,11 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
 from manager.manager import ConnectionManager
-from utils.match_handler import MatchHandler
+from match_handler import MatchHandler
 from models.match import *
 from models.room import *
 from models.visible_match import *
-from utils.room_handler import RoomHandler
+from room_handler import RoomHandler
 
 app = FastAPI()
 
