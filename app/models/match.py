@@ -2,7 +2,7 @@ import json
 from typing import List
 from enum import Enum
 from pydantic import BaseModel
-from .board import Board
+from .board import *
 from .fig_card import FigCard, CardColor, FigType
 from .mov_card import MovCard, MovType
 from .player import Player

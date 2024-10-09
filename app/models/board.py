@@ -1,7 +1,7 @@
 import random
 from typing import List
 from pydantic import BaseModel
-from .tile import Tile, TileColor
+from .tile import *
 from uuid import UUID 
 
 AMOUNT_OF_TILES = 36
