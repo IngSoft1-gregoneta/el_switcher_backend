@@ -1,9 +1,9 @@
 from app.models.visible_match import VisibleMatchData
+import copy
 from models.match import * 
 from figures import fige01, fige02, fige03, fige04, fige05, fige06, fige07, \
     fig01, fig02, fig03, fig04, fig05, fig06, fig07, fig08, fig09, fig10, \
     fig11, fig12, fig13, fig14
-# primero vamos a hacer las figuras blancas
 match_repo = MatchRepository()
 columns = int(AMOUNT_OF_TILES ** 0.5)
 
@@ -24,9 +24,8 @@ def index_to_coordinates(index: int) -> tuple[int, int]:
     else:
         raise ValueError("Tile index in board must be in range 0 to 35")
 
-# las subfiguras de otras figuras no pueden tomar fichas de la superfigura
 def figures_detector(match: MatchOut):
-    match_out = match
+    match_out = copy.deepcopy(match)
     fig_types = get_valid_fig_types(match)
     for y in range(columns):
         for x in range(columns):
@@ -51,16 +50,13 @@ def figures_detector(match: MatchOut):
             detect_fig12(match_out, fig_types, x, y)
             detect_fig13(match_out, fig_types, x, y)
             detect_fig14(match_out, fig_types, x, y)
-    match_repo.update_match(match_out)
-
+    return copy.deepcopy(match_out.board)
 def get_valid_fig_types(match: MatchOut) -> List[str]:
     fig_types: List[str] = []    
-    visible_data = VisibleMatchData(match.match_id,match.players[0].player_name)
-    visible_fig_cards = visible_data.me.visible_fig_cards 
-    for other_player in visible_data.other_players: 
-        visible_fig_cards = visible_fig_cards + other_player.visible_fig_cards
-    for fig_card in visible_fig_cards:
-        fig_types.append(fig_card.fig_type)
+    for player in match.players:
+        for i in range(len(player.fig_cards)):
+            if player.fig_cards[i].is_visible:
+                fig_types.append(player.fig_cards[i].fig_type)
     return fig_types
 
 def detect_fige01(match: MatchOut, fig_types: List[FigType], x: int, y: int) -> MatchOut:
