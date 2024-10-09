@@ -62,7 +62,7 @@ def test_none_fig_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
 
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board,['None'])
     
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
@@ -74,7 +74,6 @@ def test_fige01_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige01'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -83,7 +82,7 @@ def test_fige01_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
 
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, 'fige01')
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige01.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige01.value
@@ -96,7 +95,6 @@ def test_fige01_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige01'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -105,7 +103,7 @@ def test_fige01_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.RED.value
 
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige01'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige01.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige01.value
@@ -118,7 +116,6 @@ def test_fige02_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige02'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -127,7 +124,7 @@ def test_fige02_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige02'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige02.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige02.value
@@ -140,7 +137,6 @@ def test_fige03_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige03'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -149,7 +145,7 @@ def test_fige03_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige03.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige03.value
@@ -162,7 +158,6 @@ def test_fige03_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige03'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -171,7 +166,7 @@ def test_fige03_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fige03.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige03.value
@@ -184,7 +179,6 @@ def test_fige04_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige04'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -193,7 +187,7 @@ def test_fige04_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige04'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige04.value
@@ -206,7 +200,6 @@ def test_fige04_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige04'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -215,7 +208,7 @@ def test_fige04_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige04'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fige04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige04.value
@@ -228,7 +221,6 @@ def test_fige04_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige04'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -237,7 +229,7 @@ def test_fige04_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.YELLOW.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.YELLOW.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige04'])
 
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fige04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige04.value
@@ -250,7 +242,6 @@ def test_fige04_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige04'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -259,7 +250,7 @@ def test_fige04_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.GREEN.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.GREEN.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige04'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige04.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige04.value
@@ -274,7 +265,6 @@ def test_fige05_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -283,7 +273,7 @@ def test_fige05_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige05.value
@@ -296,7 +286,6 @@ def test_fige05_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -305,8 +294,8 @@ def test_fige05_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fige05'])
+
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fige05.value
@@ -318,7 +307,6 @@ def test_fige05_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -327,7 +315,7 @@ def test_fige05_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.YELLOW.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.YELLOW.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige05'])
 
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige05.value
@@ -340,7 +328,6 @@ def test_fige05_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -349,8 +336,8 @@ def test_fige05_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.GREEN.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.GREEN.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fige05'])
+
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige05.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige05.value
@@ -364,7 +351,6 @@ def test_fige06_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -373,7 +359,7 @@ def test_fige06_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige06.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige06.value
@@ -386,7 +372,6 @@ def test_fige06_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -394,8 +379,8 @@ def test_fige06_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.RED.value
-    
-    board = figure_detector.figures_detector(match)
+        
+    board = figure_detector.figures_detector(match.board, ['fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_in_figure == FigType.fige06.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fige06.value
@@ -408,7 +393,6 @@ def test_fige07_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -417,7 +401,7 @@ def test_fige07_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige07.value
@@ -430,7 +414,6 @@ def test_fige07_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -439,8 +422,8 @@ def test_fige07_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fige07'])
+
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fige07.value
@@ -452,7 +435,6 @@ def test_fige07_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -461,8 +443,8 @@ def test_fige07_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.YELLOW.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.YELLOW.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fige07'])
+
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige07.value
@@ -474,7 +456,6 @@ def test_fige07_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -483,8 +464,8 @@ def test_fige07_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.GREEN.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.GREEN.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fige07'])
+
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fige07.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fige07.value
@@ -495,10 +476,6 @@ def test_fig01_rot_1_detector():
     generate_test_room()
     generate_test_match()
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig01'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
-    match.players[1].fig_cards[0].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -508,7 +485,7 @@ def test_fig01_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig01','fige04','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig01.value
@@ -522,10 +499,6 @@ def test_fig01_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig01'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
-    match.players[1].fig_cards[0].fig_type = 'fige07'   
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -535,8 +508,8 @@ def test_fig01_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig01','fige04','fige05','fige07'])
+
     assert board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig01.value
@@ -549,10 +522,6 @@ def test_fig01_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig01'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
-    match.players[1].fig_cards[0].fig_type = 'fige07'   
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -562,8 +531,8 @@ def test_fig01_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.YELLOW.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.YELLOW.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig01','fige04','fige05','fige07'])
+
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig01.value
@@ -576,10 +545,6 @@ def test_fig01_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig01'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
-    match.players[1].fig_cards[0].fig_type = 'fige07'   
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -589,7 +554,7 @@ def test_fig01_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.GREEN.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.GREEN.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig01','fige04','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig01.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig01.value
@@ -605,9 +570,6 @@ def test_fig02_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig02'
-    match.players[0].fig_cards[1].fig_type = 'fige03'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -617,7 +579,7 @@ def test_fig02_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig02','fige03','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig02.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig02.value
@@ -631,10 +593,6 @@ def test_fig02_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig02'
-    match.players[0].fig_cards[1].fig_type = 'fige03'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
-
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -644,7 +602,7 @@ def test_fig02_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig02','fige03','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig02.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig02.value
@@ -658,9 +616,6 @@ def test_fig03_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig03'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -670,7 +625,7 @@ def test_fig03_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig03','fige01','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig03.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig03.value
@@ -684,9 +639,6 @@ def test_fig03_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig03'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
 
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
@@ -697,7 +649,7 @@ def test_fig03_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig03','fige01','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig03.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig03.value
@@ -711,9 +663,6 @@ def test_fig04_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig04'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige03'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -723,7 +672,7 @@ def test_fig04_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig04','fige01','fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig04.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig04.value
@@ -737,10 +686,6 @@ def test_fig04_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig04'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige03'
-
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.BLUE.value
@@ -750,7 +695,7 @@ def test_fig04_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig04','fige01','fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig04.value
@@ -764,9 +709,6 @@ def test_fig04_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig04'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige03'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -776,7 +718,7 @@ def test_fig04_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig04','fige01','fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig04.value
@@ -790,9 +732,6 @@ def test_fig04_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig04'
-    match.players[0].fig_cards[1].fig_type = 'fige01'
-    match.players[0].fig_cards[2].fig_type = 'fige03'
 
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
@@ -803,7 +742,7 @@ def test_fig04_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.RED.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.RED.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig04','fige01','fige03'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig04.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig04.value
@@ -817,8 +756,6 @@ def test_fig05_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig05'
-    match.players[0].fig_cards[1].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -828,7 +765,7 @@ def test_fig05_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(4, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig05.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig05.value
@@ -842,8 +779,6 @@ def test_fig05_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig05'
-    match.players[0].fig_cards[1].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -853,7 +788,7 @@ def test_fig05_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 4)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig05.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig05.value
@@ -867,9 +802,6 @@ def test_fig06_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig06'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -879,7 +811,7 @@ def test_fig06_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig06','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig06.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig06.value
@@ -893,9 +825,6 @@ def test_fig06_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig06'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -905,7 +834,7 @@ def test_fig06_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig06','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig06.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig06.value
@@ -919,9 +848,6 @@ def test_fig06_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig06'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -931,7 +857,7 @@ def test_fig06_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig06','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig06.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig06.value
@@ -945,9 +871,6 @@ def test_fig06_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig06'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -957,7 +880,7 @@ def test_fig06_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig06','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig06.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig06.value
@@ -971,9 +894,6 @@ def test_fig07_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig07'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -983,7 +903,7 @@ def test_fig07_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig07','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig07.value
@@ -997,9 +917,6 @@ def test_fig07_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig07'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1009,7 +926,7 @@ def test_fig07_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig07','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig07.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig07.value
@@ -1023,9 +940,6 @@ def test_fig07_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig07'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1035,7 +949,7 @@ def test_fig07_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig07','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_in_figure == FigType.fig07.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig07.value
@@ -1049,9 +963,6 @@ def test_fig07_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig07'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1061,7 +972,7 @@ def test_fig07_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig07','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_in_figure == FigType.fig07.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig07.value
@@ -1075,9 +986,6 @@ def test_fig08_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig08'
-    match.players[0].fig_cards[1].fig_type = 'fige07'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1087,8 +995,8 @@ def test_fig08_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig08','fige07','fige06'])
+ 
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig08.value
@@ -1101,9 +1009,6 @@ def test_fig08_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig08'
-    match.players[0].fig_cards[1].fig_type = 'fige07'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1113,8 +1018,8 @@ def test_fig08_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig08','fige07','fige06'])
+ 
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig08.value
@@ -1127,9 +1032,6 @@ def test_fig08_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig08'
-    match.players[0].fig_cards[1].fig_type = 'fige07'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1139,8 +1041,8 @@ def test_fig08_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig08','fige07','fige06'])
+ 
     assert board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig08.value
@@ -1153,9 +1055,6 @@ def test_fig08_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig08'
-    match.players[0].fig_cards[1].fig_type = 'fige07'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1165,7 +1064,7 @@ def test_fig08_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig08','fige07','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_in_figure == FigType.fig08.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig08.value
@@ -1179,9 +1078,6 @@ def test_fig09_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig09'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1191,7 +1087,7 @@ def test_fig09_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig09','fige04','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig09.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig09.value
@@ -1205,9 +1101,6 @@ def test_fig09_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig09'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1217,7 +1110,7 @@ def test_fig09_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig09','fige04','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig09.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig09.value
@@ -1231,9 +1124,6 @@ def test_fig09_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig09'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1243,7 +1133,7 @@ def test_fig09_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig09','fige04','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig09.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig09.value
@@ -1257,9 +1147,6 @@ def test_fig09_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig09'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1269,7 +1156,7 @@ def test_fig09_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig09','fige04','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig09.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig09.value
@@ -1283,9 +1170,6 @@ def test_fig10_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig10'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1295,7 +1179,7 @@ def test_fig10_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig10','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig10.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig10.value
@@ -1309,9 +1193,6 @@ def test_fig10_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig10'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1321,7 +1202,7 @@ def test_fig10_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig10','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig10.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig10.value
@@ -1335,9 +1216,6 @@ def test_fig11_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig11'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1347,8 +1225,8 @@ def test_fig11_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig11','fige04','fige05'])
+     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig11.value
@@ -1361,9 +1239,6 @@ def test_fig11_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig11'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1373,8 +1248,8 @@ def test_fig11_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
-    
+    board = figure_detector.figures_detector(match.board, ['fig11','fige04','fige05'])
+     
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig11.value
@@ -1387,9 +1262,6 @@ def test_fig11_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig11'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1399,7 +1271,7 @@ def test_fig11_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig11','fige04','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig11.value
@@ -1413,9 +1285,6 @@ def test_fig11_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig11'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1425,7 +1294,7 @@ def test_fig11_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig11','fige04','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig11.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig11.value
@@ -1439,9 +1308,6 @@ def test_fig12_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig12'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1451,7 +1317,7 @@ def test_fig12_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig12','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig12.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig12.value
@@ -1465,9 +1331,6 @@ def test_fig12_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig12'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1477,7 +1340,7 @@ def test_fig12_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig12','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 2)].tile_in_figure == FigType.fig12.value
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig12.value
@@ -1491,9 +1354,6 @@ def test_fig13_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig13'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1503,7 +1363,7 @@ def test_fig13_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig13','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig13.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig13.value
@@ -1518,9 +1378,6 @@ def test_fig13_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig13'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1530,7 +1387,7 @@ def test_fig13_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig13','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig13.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig13.value
@@ -1544,9 +1401,6 @@ def test_fig13_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig13'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1556,7 +1410,7 @@ def test_fig13_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig13','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig13.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig13.value
@@ -1570,9 +1424,6 @@ def test_fig13_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig13'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige06'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1582,7 +1433,7 @@ def test_fig13_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig13','fige05','fige06'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_in_figure == FigType.fig13.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig13.value
@@ -1596,9 +1447,6 @@ def test_fig14_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig14'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1608,7 +1456,7 @@ def test_fig14_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig14','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig14.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig14.value
@@ -1623,9 +1471,6 @@ def test_fig14_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig14'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1635,7 +1480,7 @@ def test_fig14_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 3)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig14','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig14.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig14.value
@@ -1649,9 +1494,6 @@ def test_fig14_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig14'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1661,7 +1503,7 @@ def test_fig14_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(3, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig14','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig14.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig14.value
@@ -1675,9 +1517,6 @@ def test_fig14_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig14'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1687,7 +1526,7 @@ def test_fig14_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig14','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 3)].tile_in_figure == FigType.fig14.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig14.value
@@ -1701,9 +1540,6 @@ def test_fig15_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig15'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1713,7 +1549,7 @@ def test_fig15_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig15','fige02','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig15.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig15.value
@@ -1727,9 +1563,6 @@ def test_fig15_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig15'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1739,7 +1572,7 @@ def test_fig15_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig15','fige02','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig15.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig15.value
@@ -1753,9 +1586,6 @@ def test_fig15_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig15'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1765,7 +1595,7 @@ def test_fig15_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig15','fige02','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_in_figure == FigType.fig15.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig15.value
@@ -1779,9 +1609,6 @@ def test_fig15_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig15'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1791,7 +1618,7 @@ def test_fig15_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig15','fige02','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig15.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig15.value
@@ -1805,9 +1632,6 @@ def test_fig16_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig16'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1817,7 +1641,7 @@ def test_fig16_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig16','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig16.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig16.value
@@ -1831,9 +1655,6 @@ def test_fig16_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig16'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1843,7 +1664,7 @@ def test_fig16_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig16','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig16.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig16.value
@@ -1857,9 +1678,6 @@ def test_fig16_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig16'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1869,7 +1687,7 @@ def test_fig16_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig16','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_in_figure == FigType.fig16.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig16.value
@@ -1883,9 +1701,6 @@ def test_fig16_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig16'
-    match.players[0].fig_cards[1].fig_type = 'fige05'
-    match.players[0].fig_cards[2].fig_type = 'fige07'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1895,7 +1710,7 @@ def test_fig16_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 2)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig16','fige05','fige07'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig16.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig16.value
@@ -1909,8 +1724,6 @@ def test_fig17_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig17'
-    match.players[0].fig_cards[1].fig_type = 'fige04'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1920,7 +1733,7 @@ def test_fig17_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig17','fige04'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig17.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig17.value
@@ -1934,9 +1747,6 @@ def test_fig18_rot_1_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig18'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1946,7 +1756,7 @@ def test_fig18_rot_1_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig18','fige02','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_in_figure == FigType.fig18.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig18.value
@@ -1960,9 +1770,6 @@ def test_fig18_rot_2_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig18'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1972,7 +1779,7 @@ def test_fig18_rot_2_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig18','fige02','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_in_figure == FigType.fig18.value
     assert board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_in_figure == FigType.fig18.value
@@ -1986,9 +1793,6 @@ def test_fig18_rot_3_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig18'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -1998,7 +1802,7 @@ def test_fig18_rot_3_detector():
     match.board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 0)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig18','fige02','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(2, 1)].tile_in_figure == FigType.fig18.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig18.value
@@ -2012,9 +1816,6 @@ def test_fig18_rot_4_detector():
     generate_test_match()
 
     match = repo_match.get_match_by_id(room_id)
-    match.players[0].fig_cards[0].fig_type = 'fig18'
-    match.players[0].fig_cards[1].fig_type = 'fige02'
-    match.players[0].fig_cards[2].fig_type = 'fige05'
     for x in range(figure_detector.columns):
         for y in range(figure_detector.columns):
             match.board.tiles[figure_detector.coordinates_to_index(x, y)].tile_color = TileColor.RED.value
@@ -2024,7 +1825,7 @@ def test_fig18_rot_4_detector():
     match.board.tiles[figure_detector.coordinates_to_index(0, 1)].tile_color = TileColor.BLUE.value
     match.board.tiles[figure_detector.coordinates_to_index(0, 2)].tile_color = TileColor.BLUE.value
     
-    board = figure_detector.figures_detector(match)
+    board = figure_detector.figures_detector(match.board, ['fig18','fige02','fige05'])
     
     assert board.tiles[figure_detector.coordinates_to_index(1, 0)].tile_in_figure == FigType.fig18.value
     assert board.tiles[figure_detector.coordinates_to_index(1, 1)].tile_in_figure == FigType.fig18.value

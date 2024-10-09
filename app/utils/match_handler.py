@@ -27,7 +27,8 @@ class MatchHandler:
             match = MatchOut(match_id)
             self.repo.create_match(match)
             match = self.repo.get_match_by_id(match.match_id)
-            match.board = figure_detector.figures_detector(match)
+            fig_types = self.get_valid_fig_types(match)
+            match.board = figure_detector.figures_detector(match.board, fig_types)
             self.repo.update_match(match)
             return match.model_dump(mode="json")
 
@@ -43,6 +44,14 @@ class MatchHandler:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
+    def get_valid_fig_types(self, match: MatchOut) -> List[str]:
+        fig_types: List[str] = []    
+        for player in match.players:
+            for i in range(len(player.fig_cards)):
+                if player.fig_cards[i].is_visible:
+                    fig_types.append(player.fig_cards[i].fig_type)
+        return fig_types
 
     async def get_match_by_id(self, match_id: UUID) -> Union[MatchOut, dict]:
         try:
