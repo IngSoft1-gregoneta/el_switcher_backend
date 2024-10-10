@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from app.main import app, manager
+from main import app, manager
 from models.match import MatchRepository
 from models.room import *
 

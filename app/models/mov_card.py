@@ -1,8 +1,6 @@
 from pydantic import BaseModel, validator
 from enum import Enum
 import random
-from models.match import *
-from models.visible_match import *
 
 # Define the Enum for movement card types
 class MovType(Enum):

@@ -231,41 +231,37 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
     
 @app.post("/use_movement_card/{match_id}/{player_name}")
 async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
-    match = match_repository.get_match_by_id(match_id)
-    player = match.get_player_by_name(player_name)
-    
-    if card_index < 0 or card_index >= len(player.mov_cards):
-        raise HTTPException(status_code=400, detail="Invalid card index")
-    
-    me = Me(match_id=match_id, player_name=player_name)
-    
-    card = player.mov_cards[card_index]
-    
     try:
-        played_card = me.play_movement_card(match_id, player_name, card)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        visible_movement = await match_handler.use_mov_card(match_id, player_name, card_index)
+        return visible_movement
     
-    return me
-
-@app.post("/confirm_movement/{match_id}/{player_name}/{card_index}")
-async def confirm_movement(match_id: UUID, player_name: str, card_index: int):
-    match = match_repository.get_match_by_id(match_id)
-    player = match.get_player_by_name(player_name)
-
-    if card_index < 0 or card_index >= len(player.mov_cards):
-        raise HTTPException(status_code=400, detail="Invalid card index")
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
     
-    card = player.mov_cards[card_index]
 
-    if not card.is_used:
-        raise HTTPException(status_code=400, detail="Cannot confirm a card that has not been used.")
-
-    me = Me(match_id=match_id, player_name=player_name)
-
-    try:
-        confirmed_card = me.confirm_movement_card(match_id, player_name, card)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    return me
+# @app.post("/confirm_movement/{match_id}/{player_name}/{card_index}")
+# async def confirm_movement(match_id: UUID, player_name: str, card_index: int):
+#     match = match_repository.get_match_by_id(match_id)
+#     player = match.get_player_by_name(player_name)
+# 
+#     if card_index < 0 or card_index >= len(player.mov_cards):
+#         raise HTTPException(status_code=400, detail="Invalid card index")
+#     
+#     card = player.mov_cards[card_index]
+# 
+#     if not card.is_used:
+#         raise HTTPException(status_code=400, detail="Cannot confirm a card that has not been used.")
+# 
+#     me = Me(match_id=match_id, player_name=player_name)
+# 
+#     try:
+#         confirmed_card = me.confirm_movement_card(match_id, player_name, card)
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+# 
+#     return me
