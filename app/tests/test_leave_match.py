@@ -108,3 +108,5 @@ def test_leave_and_destroy_match_of_a_player():
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert repo_match.get_match_by_id(room_id) is None
+
+reset()

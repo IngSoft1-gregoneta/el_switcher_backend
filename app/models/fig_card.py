@@ -8,6 +8,8 @@ class CardColor(Enum):
 
     
 class FigType(Enum):
+    #None
+    none = "None"
     # White figs (Tetris figs)
     fige01 = "fige01"
     fige02 = "fige02"
@@ -61,8 +63,8 @@ class FigCard(BaseModel):
         return self.fig_type in FigType
     
     def is_valid_card(self):
-        white_figs = list(FigType)[:7]
-        blue_figs = list(FigType)[7:]
+        white_figs = list(FigType)[1:8]
+        blue_figs = list(FigType)[8:]
         is_white_fig = self.fig_type in white_figs
         is_blue_fig = self.fig_type in blue_figs
 
