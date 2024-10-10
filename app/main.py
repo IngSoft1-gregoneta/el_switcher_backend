@@ -229,7 +229,7 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
             detail="Internal Server Error",
         )
     
-@app.post("/use_movement_card/{match_id}/{player_name}")
+@app.put("/use_movement_card/{match_id}/{player_name}")
 async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
     try:
         visible_movement = await match_handler.use_mov_card(match_id, player_name, card_index)

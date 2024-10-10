@@ -97,20 +97,30 @@ class MatchHandler:
         )
     
     async def use_mov_card(self, match_id: UUID, player_name: str, card_index: int):
-            match = self.repo.get_match_by_id(match_id)
-            player = match.get_player_by_name(player_name)
-            if card_index < 0 or card_index >= len(player.mov_cards):
-                raise HTTPException(status_code=400, detail="Invalid card index")
-            card = player.mov_cards[card_index]
-            visible = visiblematchs.get(match_id)
-            if not visible:
-             visible = VisibleMatchData(match_id,player_name)
-             visiblematchs[match_id] = visible
-            try:
-                visible.use_movement_card(player_name, card)
-                visiblematchs[match_id] = visible
-                return visible
-            except Exception as e:
-                raise HTTPException(status_code=400, detail=str(e))
-            
+     match = self.repo.get_match_by_id(match_id)
+     player = match.get_player_by_name(player_name)
+ 
+     if player.has_turn is True:
+         if player.mov_cards:
+             if card_index < 0 or card_index >= len(player.mov_cards):
+                 raise HTTPException(status_code=400, detail="Invalid card index")
+             
+             card = player.mov_cards[card_index]
+             
+             visible = visiblematchs.get(match_id)
+             if not visible:
+                 visible = VisibleMatchData(match_id, player_name)
+                 visiblematchs[match_id] = visible
+ 
+             try:
+                 visible.use_movement_card(player_name, card)
+                 visiblematchs[match_id] = visible 
+                 return visible
+             except Exception as e:
+                 raise HTTPException(status_code=400, detail=str(e))
+         else:
+             raise HTTPException(status_code=400, detail="No cards to use")
+     else:
+         raise HTTPException(status_code=400, detail="It's not the player's turn")
+
          

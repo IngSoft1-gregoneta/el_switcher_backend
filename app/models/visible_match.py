@@ -136,15 +136,6 @@ class VisibleMatchData(BaseModel):
             return card
         raise Exception(f"La carta seleccionada no está en la lista de mov_cards del jugador {player_name}.")
 
-    #def confirm_movement_card(self,match_id: UUID, player_name: str , card: MovCard):
-    #    match = match_repository.get_match_by_id(match_id)
-    #    player = match.get_player_by_name(player_name)
-
-    #    if card in self.played_mov_cards:
-    #        card.confirm_mov_card()
-    #        self.played_mov_cards.remove(card)
-    #        return card
-    #    raise Exception("No puedes confirmar esta carta.")
         
     def get_other_players(self, match_id, player_name) -> List[VisiblePlayer]:
         try:
@@ -158,23 +149,6 @@ class VisibleMatchData(BaseModel):
         except Exception as e:
             raise e
             
-    #def get_visible_mov_cards(self, match_id, player_name) -> List[MovCard]:
-    #    try:
-    #        match = match_repository.get_match_by_id(match_id)
-    #        player = match.get_player_by_name(player_name)
-
-    #        visible_mov_cards = []
-    #        if player.has_turn is True:
-    #         for mov_card in player.mov_cards:
-    #             visible_mov_cards.append(mov_card)
-    #        else:
-    #            visible_mov_cards = []
-    #        return visible_mov_cards
-
-    #    except Exception as e:
-    #        raise e
-
-
     def validate_player(self, match_id, player_name):
         match = match_repository.get_match_by_id(match_id)    
         if match is None:
