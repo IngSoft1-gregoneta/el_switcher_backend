@@ -2,13 +2,13 @@ import json
 from typing import List
 from enum import Enum
 from pydantic import BaseModel
-from app.models.board import Board
-from app.models.fig_card import FigCard, CardColor, FigType
-from app.models.mov_card import MovCard, MovType, MovStatus
-from app.models.player import Player
-from app.models.room import *
-from app.config.repositorymanager import Session,Match
-from app.models.tile import Tile, TileColor
+from models.board import Board
+from models.fig_card import FigCard, CardColor, FigType
+from models.mov_card import MovCard, MovType, MovStatus
+from models.player import Player
+from models.room import *
+from config.repositorymanager import Session,Match
+from models.tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
 from typing import Tuple

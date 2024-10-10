@@ -1,7 +1,7 @@
 from typing import List
 from pydantic import BaseModel
-from app.models.mov_card import MovCard
-from app.models.fig_card import FigCard
+from models.mov_card import MovCard
+from models.fig_card import FigCard
 
 class Player(BaseModel):
     player_name: str

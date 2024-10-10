@@ -11,12 +11,12 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, stat
 from fastapi.middleware.cors import CORSMiddleware
 
 # data, methods and classes of a room
-from app.manager.manager import ConnectionManager
-from app.match_handler import MatchHandler
-from app.models.match import *
-from app.models.room import *
-from app.models.visible_match import *
-from app.room_handler import RoomHandler
+from manager.manager import ConnectionManager
+from match_handler import MatchHandler
+from models.match import *
+from models.room import *
+from models.visible_match import *
+from room_handler import RoomHandler
 
 app = FastAPI()
 
@@ -229,35 +229,43 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
             detail="Internal Server Error",
         )
     
-
 @app.post("/use_movement_card/{match_id}/{player_name}")
-def use_movement_card(match_id: str, player_name: str, card_index: int):
+async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
     match = match_repository.get_match_by_id(match_id)
     player = match.get_player_by_name(player_name)
     
-    # Verificar que el índice de la carta sea válido
     if card_index < 0 or card_index >= len(player.mov_cards):
         raise HTTPException(status_code=400, detail="Invalid card index")
-
-    # Usar la carta
-    player.mov_cards[card_index].use_mov_card()
     
-    return match
+    me = Me(match_id=match_id, player_name=player_name)
+    
+    card = player.mov_cards[card_index]
+    
+    try:
+        played_card = me.play_movement_card(match_id, player_name, card)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    return me
 
 @app.post("/confirm_movement/{match_id}/{player_name}/{card_index}")
-def confirm_movement(match_id: str, player_name: str, card_index: int):
+async def confirm_movement(match_id: UUID, player_name: str, card_index: int):
     match = match_repository.get_match_by_id(match_id)
     player = match.get_player_by_name(player_name)
 
-    # Verificar que el índice de la carta sea válido
     if card_index < 0 or card_index >= len(player.mov_cards):
         raise HTTPException(status_code=400, detail="Invalid card index")
-
-    # Confirmar el uso de la carta
+    
     card = player.mov_cards[card_index]
+
     if not card.is_used:
         raise HTTPException(status_code=400, detail="Cannot confirm a card that has not been used.")
 
-    card.confirm_mov_card()
+    me = Me(match_id=match_id, player_name=player_name)
 
-    return match 
+    try:
+        confirmed_card = me.confirm_movement_card(match_id, player_name, card)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return me
