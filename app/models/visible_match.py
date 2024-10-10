@@ -149,6 +149,7 @@ class VisibleMatchData(BaseModel):
         except Exception as e:
             raise e
             
+
     def validate_player(self, match_id, player_name):
         match = match_repository.get_match_by_id(match_id)    
         if match is None:
