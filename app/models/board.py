@@ -1,7 +1,7 @@
 import random
 from typing import List
 from pydantic import BaseModel
-from .tile import Tile, TileColor
+from .tile import *
 from uuid import UUID 
 
 AMOUNT_OF_TILES = 36
@@ -25,6 +25,7 @@ class Board(BaseModel):
             color = color_list[i]
             tile = Tile(
                 tile_color=color,
+                tile_in_figure=FigType.none,
                 tile_pos_x=i % AMOUNT_OF_TILES ** 0.5,
                 tile_pos_y=i // AMOUNT_OF_TILES ** 0.5
             )

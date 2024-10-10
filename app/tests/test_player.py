@@ -3,8 +3,8 @@ from models.mov_card import MovCard, MovType
 from models.fig_card import FigCard, CardColor, FigType
 import random
 
-white_figs = list(FigType)[:7]
-blue_figs = list(FigType)[7:]
+white_figs = list(FigType)[1:8]
+blue_figs = list(FigType)[8:]
 
 def test_valid_player():
     try:
