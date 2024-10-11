@@ -83,6 +83,7 @@ def test_use_mov_correct():
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["visible_mov_cards"][0]["mov_status"] == "Played"
+    reset()
 
 def test_use_card_not_player_turn():
     reset()
@@ -98,6 +99,7 @@ def test_use_card_not_player_turn():
     
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "It's not the player's turn"
+    reset()
 
 def test_use_card_invalid_index():
     reset()
@@ -112,6 +114,7 @@ def test_use_card_invalid_index():
     
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid card index"
+    reset()
 
 
 def test_use_card_no_cards_available():
@@ -125,3 +128,4 @@ def test_use_card_no_cards_available():
     response = client.put(f"/use_movement_card/{match_id}/{player_name}?card_index=0")
     
     assert response.json()["detail"] == f"La carta seleccionada no está en la lista de mov_cards del jugador {player_name}."
+    reset()
