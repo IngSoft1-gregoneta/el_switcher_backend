@@ -187,10 +187,13 @@ class MatchRepository:
                         is_visible = fig_card["is_visible"]))
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
-                    mov_cards_db.append(MovCard.model_construct(
-                        mov_type = MovType(mov_card["mov_type"]).value,
-                        mov_status=MovStatus(mov_card["mov_status"]).value,
-                        is_used=mov_card["is_used"]))
+                    card = MovCard(
+                        mov_type = MovType(mov_card["mov_type"]),
+                        mov_status=MovStatus(mov_card["mov_status"]),
+                        is_used=mov_card["is_used"])
+                    card.mov_status = card.mov_status.value
+                    card.mov_type = card.mov_type.value
+                    mov_cards_db.append(card)
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
             match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)

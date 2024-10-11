@@ -61,3 +61,19 @@ def test_held_mov_card():
         assert mov_card.mov_status == MovStatus.HELD, f"mov status should be {MovStatus.HELD}, but got {mov_card.mov_status}"
     except ValueError as e:
         assert False, f"Error: {e}"
+        
+def test_coords_mov_card():
+    mov_card = MovCard(mov_type=MovType.mov1, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-2,-2),(2,-2),(-2,2),(2,2)])
+    mov_card = MovCard(mov_type=MovType.mov2, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-2,0),(0,-2),(2,0),(0,2)])
+    mov_card = MovCard(mov_type=MovType.mov3, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-1,0),(0,-1),(1,0),(0,1)])
+    mov_card = MovCard(mov_type=MovType.mov4, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-1,-1),(1,-1),(-1,1),(1,1)])
+    mov_card = MovCard(mov_type=MovType.mov5, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-2,-1),(1,-2),(2,1),(-1,2)])
+    mov_card = MovCard(mov_type=MovType.mov6, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-2,1),(-1,-2),(2,-1),(1,2)])
+    mov_card = MovCard(mov_type=MovType.mov7, mov_status=MovStatus.HELD)
+    assert(mov_card.vectors == [(-4,0),(0,-4),(4,0),(0,4)])
