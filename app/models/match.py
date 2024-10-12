@@ -15,13 +15,13 @@ from typing import Tuple
     
 class MatchOut(BaseModel):
     match_id: UUID
+    state: int
     board: Board
     players: List[Player]
-
     def __init__(self, match_id: UUID):
         board = self.create_board()
         players = self.create_players(match_id)
-        super().__init__(match_id=match_id, board=board, players=players)
+        super().__init__(match_id=match_id, board=board, players=players, state=0)
         self.validate_match()
 
     def validate_room(self, match_id: UUID) -> List[str]:

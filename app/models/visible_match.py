@@ -107,7 +107,6 @@ class VisibleMatchData(BaseModel):
     match_id: str
     me: Me
     other_players: List[VisiblePlayer]
-    visible_mov_cards: List[MovCard]
     board: Board
 
     def __init__(self, match_id: UUID, player_name: str):
@@ -124,14 +123,12 @@ class VisibleMatchData(BaseModel):
                         board=board)
         
     def use_movement_card(self, player_name: str , card: MovCard):
-
+        # actualizar estado del match correspondiente
         cardp = next((c for c in self.me.mov_cards if c.mov_type == card.mov_type 
                                   and c.mov_status == card.mov_status), None)
         
         if card in self.me.mov_cards: 
             cardp.use_mov_card()
-            self.visible_mov_cards.append(cardp)
-            self.me.mov_cards.remove(cardp)
 
             return card
         raise Exception(f"La carta seleccionada no está en la lista de mov_cards del jugador {player_name}.")
@@ -159,5 +156,3 @@ class VisibleMatchData(BaseModel):
         if player is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                                 detail=f"Player {player_name} not found")
-
-visiblematchs = {}

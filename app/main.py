@@ -245,19 +245,19 @@ async def check_winner(
         ) 
         
     
-@app.put("/use_movement_card/{match_id}/{player_name}")
-async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
-    try:
-        visible_movement = await match_handler.use_mov_card(match_id, player_name, card_index)
-        return visible_movement
+# @app.put("/use_movement_card/{match_id}/{player_name}")
+# async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
+#     try:
+#         visible_movement = await match_handler.use_mov_card(match_id, player_name, card_index)
+#         return visible_movement
     
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
-        )
+#     except HTTPException as http_exc:
+#         raise http_exc
+#     except Exception:
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail="Internal Server Error",
+#         )
     
 
 # @app.post("/confirm_movement/{match_id}/{player_name}/{card_index}")

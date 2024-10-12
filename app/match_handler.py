@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, Dict
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -6,6 +6,7 @@ from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
 import figure_detector
+
 
 class MatchHandler:
     def __init__(self):
@@ -30,6 +31,7 @@ class MatchHandler:
             fig_types = self.get_valid_fig_types(match)
             match.board = figure_detector.figures_detector(match.board, fig_types)
             self.repo.update_match(match)
+            # PARCIAL_MATCHES.
             return match.model_dump(mode="json")
 
         except ValueError as ve:
@@ -109,32 +111,32 @@ class MatchHandler:
             detail="Internal Server Error",
         )
     
-    async def use_mov_card(self, match_id: UUID, player_name: str, card_index: int):
-     match = self.repo.get_match_by_id(match_id)
-     player = match.get_player_by_name(player_name)
+    # async def use_mov_card(self, match_id: UUID, player_name: str, card_index: int):
+    #  match = self.repo.get_match_by_id(match_id)
+    #  player = match.get_player_by_name(player_name)
  
-     if player.has_turn is True:
-         if player.mov_cards:
-             if card_index < 0 or card_index >= len(player.mov_cards):
-                 raise HTTPException(status_code=400, detail="Invalid card index")
+    #  if player.has_turn is True:
+    #      if player.mov_cards:
+    #          if card_index < 0 or card_index >= len(player.mov_cards):
+    #              raise HTTPException(status_code=400, detail="Invalid card index")
              
-             card = player.mov_cards[card_index]
+    #          card = player.mov_cards[card_index]
              
-             visible = visiblematchs.get(match_id)
-             if not visible:
-                 visible = VisibleMatchData(match_id, player_name)
-                 visiblematchs[match_id] = visible
+    #          visible = visiblematchs.get(match_id)
+    #          if not visible:
+    #              visible = VisibleMatchData(match_id, player_name)
+    #              visiblematchs[match_id] = visible
  
-             try:
-                 visible.use_movement_card(player_name, card)
-                 visiblematchs[match_id] = visible 
-                 return visible
-             except Exception as e:
-                 raise HTTPException(status_code=400, detail=str(e))
-         else:
-             raise HTTPException(status_code=400, detail="No cards to use")
-     else:
-         raise HTTPException(status_code=400, detail="It's not the player's turn")
+    #          try:
+    #              visible.use_movement_card(player_name, card)
+    #              visiblematchs[match_id] = visible 
+    #              return visible
+    #          except Exception as e:
+    #              raise HTTPException(status_code=400, detail=str(e))
+    #      else:
+    #          raise HTTPException(status_code=400, detail="No cards to use")
+    #  else:
+    #      raise HTTPException(status_code=400, detail="It's not the player's turn")
 
          
     async def check_winner(self, match_id: UUID):
