@@ -196,7 +196,7 @@ class MatchRepository:
                     mov_cards_db.append(card)
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
-            match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)
+            match = MatchOut.model_construct(match_id = str(match_id_selected), state = 0, board=board_db, players = players_db)
             return match
         finally:
             db.close()

@@ -6,7 +6,7 @@ from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.visible_match import *
 import figure_detector
-
+import state_handler
 
 class MatchHandler:
     def __init__(self):
@@ -30,8 +30,8 @@ class MatchHandler:
             match = self.repo.get_match_by_id(match.match_id)
             fig_types = self.get_valid_fig_types(match)
             match.board = figure_detector.figures_detector(match.board, fig_types)
+            state_handler.PARCIAL_MATCHES.append(match)
             self.repo.update_match(match)
-            # PARCIAL_MATCHES.
             return match.model_dump(mode="json")
 
         except ValueError as ve:

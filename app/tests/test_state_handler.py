@@ -53,7 +53,7 @@ def generate_test_room():
     finally:
         db.close()    
 
-def generate_test_match() -> List[MatchOut]:
+def generate_test_match():
     try:
         match_1 = MatchOut(
                 match_id=room1_id
@@ -64,35 +64,56 @@ def generate_test_match() -> List[MatchOut]:
         match_3 = MatchOut(
                 match_id=room3_id
             )
+        repo_match.create_match(match_1)
+        repo_match.create_match(match_2)
+        repo_match.create_match(match_3)
     except:
         assert False, f"Creando mal matchs en db"
-    return [match_1, match_2, match_3]
 
-def test_add_states_of_differents_matches():
+def test_add_get_remove_states_of_differents_matches():
     reset()
     generate_test_room()
-    matches = generate_test_match()
-    add_parcial_match(matches[0])
-    add_parcial_match(matches[0])
-    add_parcial_match(matches[0])
-    add_parcial_match(matches[1])
-    add_parcial_match(matches[1])
-    add_parcial_match(matches[0])
-    add_parcial_match(matches[2])
+    generate_test_match()
+    
+    match1 = repo_match.get_match_by_id(room1_id)
+    match2 = repo_match.get_match_by_id(room2_id)
+    match3 = repo_match.get_match_by_id(room3_id)
+    
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match2)
+    add_parcial_match(match2)
+    add_parcial_match(match1)
+    add_parcial_match(match3)
 
-    last_parcial_match1 = get_parcial_match(matches[0].match_id)
+    last_parcial_match1 = get_parcial_match(match1.match_id)
     assert last_parcial_match1.state == 3
 
-    last_parcial_match2 = get_parcial_match(matches[1].match_id)
+    last_parcial_match2 = get_parcial_match(match2.match_id)
     assert last_parcial_match2.state == 1
 
-    last_parcial_match3 = get_parcial_match(matches[2].match_id)
+    last_parcial_match3 = get_parcial_match(match3.match_id)
     assert last_parcial_match3.state == 0
 
-    remove_last_parcial_match(matches[0].match_id)
-    last_parcial_match1 = get_parcial_match(matches[0].match_id)
+    remove_last_parcial_match(match1.match_id)
+    last_parcial_match1 = get_parcial_match(match1.match_id)
     assert last_parcial_match1.state == 2
 
-    remove_last_parcial_match(matches[2].match_id)
-    last_parcial_match2 = get_parcial_match(matches[2].match_id)
+    remove_last_parcial_match(match3.match_id)
+    last_parcial_match2 = get_parcial_match(match3.match_id)
     assert last_parcial_match2 == None
+
+def test_no_more_of_4_states_in_a_match():
+    reset()
+    generate_test_room()
+    generate_test_match()
+    match1 = repo_match.get_match_by_id(room1_id)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    last_parcial_match1 = get_parcial_match(match1.match_id)
+    assert last_parcial_match1.state == 3
+

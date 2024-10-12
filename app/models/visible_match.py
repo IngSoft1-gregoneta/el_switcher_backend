@@ -1,4 +1,5 @@
 from .match import *
+from match_handler import *
 
 match_repository = MatchRepository()
 
@@ -122,18 +123,7 @@ class VisibleMatchData(BaseModel):
                         visible_mov_cards=visible_mov_cards,
                         board=board)
         
-    def use_movement_card(self, player_name: str , card: MovCard):
-        # actualizar estado del match correspondiente
-        cardp = next((c for c in self.me.mov_cards if c.mov_type == card.mov_type 
-                                  and c.mov_status == card.mov_status), None)
-        
-        if card in self.me.mov_cards: 
-            cardp.use_mov_card()
-
-            return card
-        raise Exception(f"La carta seleccionada no está en la lista de mov_cards del jugador {player_name}.")
-
-        
+   
     def get_other_players(self, match_id, player_name) -> List[VisiblePlayer]:
         try:
             match = match_repository.get_match_by_id(match_id)    
@@ -156,3 +146,4 @@ class VisibleMatchData(BaseModel):
         if player is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                                 detail=f"Player {player_name} not found")
+

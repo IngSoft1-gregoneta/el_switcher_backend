@@ -9,11 +9,13 @@ def add_parcial_match(match_: MatchOut):
 
     if matches_by_id:
         new_state = max(match.state for match in matches_by_id) + 1
-        match_out.state = new_state
+        if new_state != 4:
+            match_out.state = new_state
+            PARCIAL_MATCHES.append(match_out)
     else:
         match_out.state = 0
+        PARCIAL_MATCHES.append(match_out)
 
-    PARCIAL_MATCHES.append(match_out)
     
 def get_parcial_match(match_id: UUID) -> MatchOut:
     matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == match_id]
