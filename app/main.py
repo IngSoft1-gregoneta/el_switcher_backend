@@ -229,13 +229,12 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
             detail="Internal Server Error",
         )
     
-@app.get("/matchs/winner/{match_id}")
+@app.get("/matchs/winner/{match_id}", response_model=Union[Player, None])
 async def check_winner(
     match_id: UUID
-    ) -> Union[str, None]:
+    ) -> Union[Player, None]:
     try:
         winner = await match_handler.check_winner(match_id)
-        # await manager.broadcast_by_room(match_id, "MATCH")
         return winner
     except HTTPException as http_exc:
         raise http_exc
