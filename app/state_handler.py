@@ -42,5 +42,6 @@ def remove_last_parcial_match(match_id: UUID) -> bool:
     else:
         return False
 
-def empty_parcial_states():
-    PARCIAL_MATCHES.clear()
+def empty_parcial_states(match_id: UUID):
+    global PARCIAL_MATCHES
+    PARCIAL_MATCHES = [match for match in PARCIAL_MATCHES if match.match_id != match_id]
