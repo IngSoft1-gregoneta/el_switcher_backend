@@ -108,25 +108,11 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def check_winner(self, match_id: UUID):
+    async def check_winner(self, match_id: UUID) -> Union[Player, None]:
         try:
             match = self.repo.get_match_by_id(match_id)
-            if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
-            
-            winner = None
-            # Caso 1: jugador sin cartas de figura
-            # Caso 2: ultimo jugador en partida
-            for player in match.players:
-                # No tiene mas cartas de figura
-                if len(player.fig_cards) == 0:
-                    winner = player.player_name
-
-            if len(match.players) == 1:
-                winner = match.players[0].player_name
-
-            # Si !caso1 & !caso2 => winner is None
-            return winner
+            self.repo.update_match(match)
+            return match.winner          
         except Exception as e:
             if isinstance(e, HTTPException):
                 raise e
@@ -134,4 +120,3 @@ class MatchHandler:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error"
         )
-    

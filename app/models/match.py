@@ -17,11 +17,13 @@ class MatchOut(BaseModel):
     match_id: UUID
     board: Board
     players: List[Player]
+    winner: Union[Player, None]
 
     def __init__(self, match_id: UUID):
         board = self.create_board()
         players = self.create_players(match_id)
-        super().__init__(match_id=match_id, board=board, players=players)
+        initwinner = None
+        super().__init__(match_id=match_id, board=board, players=players, winner=initwinner)
         self.validate_match()
 
     def validate_room(self, match_id: UUID) -> List[str]:
@@ -42,7 +44,9 @@ class MatchOut(BaseModel):
     def validate_match(self):
         turns_count = sum(player.has_turn for player in self.players)
         if turns_count != 1:
-            raise ValueError("There must be exactly one player with the turn")      
+            raise ValueError("There must be exactly one player with the turn")
+        if self.winner != None:
+            raise ValueError("There can't be a winner at start of match")
 
     def create_board(self) -> Board:
         return Board()
@@ -135,7 +139,8 @@ class MatchRepository:
             matchdb = Match(
                 match_id = str(new_match.match_id),
                 board = board_db,
-                players = players_db
+                players = players_db,
+                winner = new_match.winner
                 )
             db.add(matchdb)
             db.commit()
@@ -161,7 +166,6 @@ class MatchRepository:
                     tile_pos_y=tile["tile_pos_y"]
                 )) 
 
-
             board_db = Board.model_construct(tiles = tileslist)
 
             # Deserializar jugadores
@@ -183,8 +187,30 @@ class MatchRepository:
                     mov_cards_db.append(MovCard.model_construct(
                         mov_type = MovType(mov_card["mov_type"]).value))
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
+            # Deserializar individualmente al ganador
+            if matchdb.winner is not None:
+                winner_data_name = matchdb.winner["player_name"]
+                winner_data_has_turn = matchdb.winner["has_turn"]
+                winner_data_mov_cards = matchdb.winner["mov_cards"]
+                winner_data_fig_cards = matchdb.winner["fig_cards"]
+                fig_cards = []
+                mov_cards = []
+                for card in winner_data_fig_cards:
+                    fig_cards.append(FigCard.model_construct(
+                            card_color=CardColor(card["card_color"]).value,
+                            fig_type=FigType(card["fig_type"]).value,
+                            is_visible=card["is_visible"]
+                    ))
+                for card in winner_data_mov_cards:
+                    mov_cards.append(MovCard.model_construct(
+                            mov_type=MovType(mov_card["mov_type"]).value))
+                winner_db = Player.model_construct(player_name=winner_data_name,
+                                                   mov_cards=mov_cards,
+                                                   fig_cards=fig_cards,
+                                                   has_turn=winner_data_has_turn)     
+            else: winner_db = None
             # Devolver la instancia de MatchOut
-            match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)
+            match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db, winner=winner_db)
             return match
         finally:
             db.close()
@@ -244,6 +270,9 @@ class MatchRepository:
         db = Session()
         try:
             matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
+
+            self.set_winner(match)
+
             players_db = []
             tiles_db = []
             for player in match.players:
@@ -261,13 +290,25 @@ class MatchRepository:
                 tile.tile_in_figure = tile.tile_in_figure 
                 tiles_db.append(tile.model_dump())
             board_db = (tiles_db)
+            winner_db = None
+            if match.winner is not None:
+                winner_db = match.winner.model_dump()
             matchdb = Match(
                 match_id = str(match.match_id),
                 board = board_db,
-                players = players_db
+                players = players_db,
+                winner = winner_db
                 )
             self.delete(match.match_id)
             db.add(matchdb)
             db.commit()
         finally:
             db.close()
+
+    def set_winner(self, match: MatchOut):     
+        if len(match.players) == 1:
+            match.winner = match.players[0]
+        
+        for player in match.players:
+            if len(player.fig_cards) == 0:
+                match.winner = player
