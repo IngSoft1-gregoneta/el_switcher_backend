@@ -4,11 +4,11 @@ from enum import Enum
 from pydantic import BaseModel
 from .board import *
 from .fig_card import FigCard, CardColor, FigType
-from .mov_card import MovCard, MovType
+from .mov_card import MovCard, MovType, MovStatus
 from .player import Player
 from .room import *
 from config.repositorymanager import Session,Match
-from .tile import Tile, TileColor
+from models.tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
 from typing import Tuple
@@ -99,7 +99,11 @@ class MatchOut(BaseModel):
     def create_mov_cards() -> List[MovCard]:
         mov_cards = []
         for i in range(3):
-            new_mov_card = MovCard(mov_type=random.choice(list(MovType)))
+            new_mov_card = MovCard(
+            mov_type=random.choice(list(MovType)),
+            mov_status=(MovStatus.HELD),
+            is_used=False  # Por defecto, las cartas no están usadas
+        )
             mov_cards.append(new_mov_card)
         return mov_cards
 
@@ -127,6 +131,8 @@ class MatchRepository:
             for player in new_match.players:
                 for card in player.mov_cards:
                     card.mov_type = card.mov_type.value
+                    card.mov_status = card.mov_status.value
+                    card.is_used = card.is_used
                 for card in player.fig_cards:
                     card.card_color = card.card_color.value
                     card.fig_type = card.fig_type.value
@@ -179,6 +185,7 @@ class MatchRepository:
                 player_data_mov_cards = player_data["mov_cards"]
                 player_data_fig_cards = player_data["fig_cards"]
                 player_data_has_turn = player_data["has_turn"]
+
                 fig_cards_db = []
                 for fig_card in player_data_fig_cards:
                     fig_cards_db.append(FigCard.model_construct(
@@ -187,8 +194,13 @@ class MatchRepository:
                         is_visible = fig_card["is_visible"]))
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
-                    mov_cards_db.append(MovCard.model_construct(
-                        mov_type = MovType(mov_card["mov_type"]).value))
+                    card = MovCard(
+                        mov_type = MovType(mov_card["mov_type"]),
+                        mov_status=MovStatus(mov_card["mov_status"]),
+                        is_used=mov_card["is_used"])
+                    card.mov_status = card.mov_status.value
+                    card.mov_type = card.mov_type.value
+                    mov_cards_db.append(card)
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
             match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)

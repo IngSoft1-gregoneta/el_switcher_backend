@@ -11,16 +11,31 @@ class MovType(Enum):
     mov5 = "mov5"
     mov6 = "mov6"
     mov7 = "mov7"
+
+class MovStatus(Enum):
+    HELD = 'Held'
+    PLAYED = 'Played'
+    CONFIRMED = 'Confirmed'
+    
+
+class MovStatus(Enum):
+    HELD = 'Held'
+    PLAYED = 'Played'
+    CONFIRMED = 'Confirmed'
     
 # Define the Pydantic model
 class MovCard(BaseModel):
     mov_type: MovType
+    mov_status: MovStatus = MovStatus.HELD
+    is_used: bool = False
+    vectors: list[tuple] = []
 
-    def __init__(self, mov_type: MovType = None):
+    def __init__(self, mov_type: MovType = None, mov_status: MovStatus = MovStatus.HELD, is_used: bool = False):
         if mov_type is None:
             mov_type = self.create_random_mov()
-        super().__init__(mov_type=mov_type)
+        super().__init__(mov_type=mov_type, mov_status=mov_status, is_used=is_used)
         self.validate_mov_type()
+        self.init_vectors()
 
     def validate_mov_type(self):
         if self.mov_type not in MovType:
@@ -28,3 +43,32 @@ class MovCard(BaseModel):
 
     def create_random_mov(self) -> MovType:
         return random.choice(list(MovType))
+    
+    def use_mov_card(self):
+        self.is_used = True
+        self.mov_status = MovStatus.PLAYED
+
+    def confirm_mov_card(self):
+        self.is_used = True
+        self.mov_status = MovStatus.CONFIRMED
+     
+    def held_mov_card(self):
+        self.is_used = False
+        self.mov_status = MovStatus.HELD 
+
+    def init_vectors(self):
+        match self.mov_type:
+            case MovType.mov1:
+                self.vectors = [(-2,-2),(2,-2),(-2,2),(2,2)]
+            case MovType.mov2:
+                self.vectors = [(-2,0),(0,-2),(2,0),(0,2)]
+            case MovType.mov3:
+                self.vectors = [(-1,0),(0,-1),(1,0),(0,1)]
+            case MovType.mov4:
+                self.vectors = [(-1,-1),(1,-1),(-1,1),(1,1)]
+            case MovType.mov5:
+                self.vectors = [(-2,-1),(1,-2),(2,1),(-1,2)]
+            case MovType.mov6:
+                self.vectors = [(-2,1),(-1,-2),(2,-1),(1,2)]
+            case MovType.mov7:
+                self.vectors = [(-4,0),(0,-4),(4,0),(0,4)]

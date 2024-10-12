@@ -76,7 +76,7 @@ def test_get_match_1():
     generate_test_room()
     generate_test_match()
     room_id = room1_id
-    expected_match = repo_match.get_match_by_id(room_id).model_dump()
+    expected_match = repo_match.get_match_by_id(room_id).model_dump(mode="json")
     response = client.get(f"/matchs/{room_id}")    
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_match
@@ -86,7 +86,7 @@ def test_get_match_2():
     generate_test_room()
     generate_test_match()
     room_id = room2_id
-    expected_match = repo_match.get_match_by_id(room_id).model_dump()
+    expected_match = repo_match.get_match_by_id(room_id).model_dump(mode="json")
     response = client.get(f"/matchs/{room_id}")    
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_match
@@ -96,7 +96,7 @@ def test_get_match_3():
     generate_test_room()
     generate_test_match()
     room_id = room3_id
-    expected_match = repo_match.get_match_by_id(room_id).model_dump()
+    expected_match = repo_match.get_match_by_id(room_id).model_dump(mode="json")
     response = client.get(f"/matchs/{room_id}")    
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_match
