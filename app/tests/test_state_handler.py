@@ -78,14 +78,14 @@ def test_add_get_remove_states_of_differents_matches():
     match1 = repo_match.get_match_by_id(room1_id)
     match2 = repo_match.get_match_by_id(room2_id)
     match3 = repo_match.get_match_by_id(room3_id)
-    
-    add_parcial_match(match1)
-    add_parcial_match(match1)
-    add_parcial_match(match1)
-    add_parcial_match(match2)
-    add_parcial_match(match2)
-    add_parcial_match(match1)
+
     add_parcial_match(match3)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match1)
+    add_parcial_match(match2)
+    add_parcial_match(match2)
+    add_parcial_match(match1)
 
     last_parcial_match1 = get_parcial_match(match1.match_id)
     assert last_parcial_match1.state == 3

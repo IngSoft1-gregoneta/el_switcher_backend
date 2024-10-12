@@ -10,7 +10,6 @@ client = TestClient(app)
 
 from models.match import *
 from models.room import *
-
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
@@ -74,6 +73,7 @@ def generate_test_match():
 
 def verify_test_ok(match_id):
     match = repo_match.get_match_by_id(match_id)
+
     assert match.players[0].has_turn
     assert not match.players[1].has_turn
     players_len = len(match.players)

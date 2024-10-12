@@ -10,6 +10,7 @@ repo = RoomRepository()
 
 from models.match import *
 from models.room import * 
+from state_handler import *
 
 repo_room = RoomRepository()
 repo_match = MatchRepository()
@@ -75,7 +76,8 @@ def verify_test_ok(match_id: UUID, player_name: str):
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_response.model_dump(mode="json")
-    match = repo_match.get_match_by_id(match_id)
+    # match = repo_match.get_match_by_id(match_id)
+    match = get_parcial_match(match_id)
     assert expected_response.match_id == str(match_id)
     has_turn_count = 0
     for player in match.players:

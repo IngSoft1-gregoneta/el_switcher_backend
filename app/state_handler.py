@@ -1,5 +1,7 @@
-from match_handler import *
+# from match_handler import *
+from models.match import *
 import copy 
+from typing import List
 
 PARCIAL_MATCHES: List[MatchOut] = []
 
@@ -18,12 +20,12 @@ def add_parcial_match(match_: MatchOut):
 
     
 def get_parcial_match(match_id: UUID) -> MatchOut:
-    matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == match_id]
-    
+    matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == str(match_id)]
     if matches_by_id:
         max_state = max(match.state for match in matches_by_id)
-        last_parcial_match = next(match for match in matches_by_id if match.state == max_state)
-        return last_parcial_match
+        for match in matches_by_id:
+            if match.state == max_state:
+                return match
     else:
         return None
     
@@ -40,3 +42,5 @@ def remove_last_parcial_match(match_id: UUID) -> bool:
     else:
         return False
 
+def empty_parcial_states():
+    PARCIAL_MATCHES.clear()

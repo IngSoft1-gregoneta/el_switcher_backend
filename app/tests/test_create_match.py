@@ -90,7 +90,7 @@ def generate_test_room():
 
 
 # test: para asegurarse que un jugador puede unirse a una partida, devuelve HTTP200OK y mensaje advirtiendo
-
+from state_handler import *
 
 def test_match_2_players():
     reset()
