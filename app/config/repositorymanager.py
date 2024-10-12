@@ -32,6 +32,7 @@ class Match(Base):
     match_id = Column(String(36), primary_key=True, index=True)
     board = Column(JSON)
     players = Column(JSON)
+    winner = Column(JSON, nullable=True)
 
 
 class Room(Base):
