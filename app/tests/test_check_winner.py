@@ -77,7 +77,7 @@ def test_check_winner_ok():
     match = repo_match.get_match_by_id(match1_id)
 
     # Jugador sin cartas ==> winner
-    expected_response = match.players[0].player_name
+    expected_response = match.get_player_by_name("Braian")
 
     response = client.get(f"/matchs/winner/{match1_id}")
     assert response.status_code == status.HTTP_200_OK
@@ -101,7 +101,7 @@ def test_check_winner_nobody():
 
     reset()
 
-def test_check_winner_fullmatch_to_alone():
+def test_check_winner_by_quitting():
     reset()
     generate_test_room()
     generate_test_match_without_winner()
@@ -146,7 +146,7 @@ def test_check_winner_fullmatch_to_alone():
         assert data == "LISTA"
 
     # Victoria por abandono
-    expected_response = match.players[0].player_name # == 'Braian'
+    expected_response = match.get_player_by_name("Braian")
 
     last_response = client.get(f"/matchs/winner/{match3_id}")
     assert last_response.status_code == status.HTTP_200_OK
