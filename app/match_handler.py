@@ -102,7 +102,20 @@ class MatchHandler:
 
     async def end_turn(self, match_id: UUID, player_name: str):
         try:
-            match = self.repo.end_turn(match_id=match_id, player_name=player_name)
+            match = state_handler.get_parcial_match(match_id)
+            if match is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+            target_player = match.get_player_by_name(player_name)
+            if target_player is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+            if target_player.has_turn is False:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
+            self.repo.end_turn(match=match, player_name=player_name)
+            print("vaciando estados")
+            state_handler.empty_parcial_states(match_id)
+            print("creando estado 0")
+            state_handler.add_parcial_match(match)
+            print("0k")
             return match
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -125,6 +138,8 @@ class MatchHandler:
         if card_index < 0 or card_index >= len(player.mov_cards):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")   
         mov_card = player.mov_cards[card_index]
+        if mov_card.is_used:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is used")   
         if switcher.is_valid_movement(mov_card.mov_type, x1, y1, x2, y2):
             switcher.switch(new_match.board, mov_card.mov_type, x1, y1, x2, y2)
             fig_types = self.get_valid_fig_types(new_match)

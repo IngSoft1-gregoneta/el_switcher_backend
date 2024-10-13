@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from main import app, manager
 from models.match import *
 from models.room import *
+from state_handler import *
 
 client = TestClient(app)
 
@@ -73,7 +74,8 @@ def generate_test_match():
 
 def verify_test_ok(match_id):
     match = repo_match.get_match_by_id(match_id)
-
+    add_parcial_match(match)
+    match = get_parcial_match(match_id)
     assert match.players[0].has_turn
     assert not match.players[1].has_turn
     players_len = len(match.players)
@@ -86,7 +88,7 @@ def verify_test_ok(match_id):
                 f"/matchs/end_turn/{match_id}/{match.players[i].player_name}"
             )
             assert response.status_code == status.HTTP_200_OK
-            match = repo_match.get_match_by_id(match_id)
+            match = get_parcial_match(match_id)
             for j in range(players_len):
                 if match.players[index].player_name != match.players[j].player_name:
                     assert not match.players[j].has_turn

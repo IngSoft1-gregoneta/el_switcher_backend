@@ -215,9 +215,8 @@ async def get_match_data_by_player(
             detail="Internal Server Error",
         )
     
-
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
-async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
+async def end_turn(match_id: UUID, player_name: str):
     try:
         match = await match_handler.end_turn(match_id, player_name)
         await manager.broadcast_by_room(match_id, "MATCH")
@@ -229,6 +228,7 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
 @app.get("/matchs/winner/{match_id}")
 async def check_winner(
     match_id: UUID

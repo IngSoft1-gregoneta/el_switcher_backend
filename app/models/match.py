@@ -12,7 +12,8 @@ from models.tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
 from typing import Tuple
-    
+import copy 
+
 class MatchOut(BaseModel):
     match_id: UUID
     state: int
@@ -102,7 +103,7 @@ class MatchOut(BaseModel):
             new_mov_card = MovCard(
             mov_type=random.choice(list(MovType)),
             mov_status=(MovStatus.HELD),
-            is_used=False  # Por defecto, las cartas no están usadas
+            is_used=False
         )
             mov_cards.append(new_mov_card)
         return mov_cards
@@ -236,50 +237,41 @@ class MatchRepository:
         self.update_match(match)
         return match
 
-    def end_turn(self, match_id: UUID, player_name: str):
-        match = self.get_match_by_id(match_id)
-        if match is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
-        target_player = match.get_player_by_name(player_name)
-        if target_player is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
-        if target_player.has_turn is False:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
+    def end_turn(self, match: MatchOut, player_name: str):
         for i in range(len(match.players)):
             if match.players[i].player_name == player_name:
+                match.players[i].hand_mov_cards()
                 match.players[i].has_turn = False # this player
                 match.players[(i+1)%len(match.players)].has_turn = True # next player
         self.update_match(match)
-        return match
 
-    def update_match(self, match: MatchOut):
-        db = Session()
-        try:
-            matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
-            players_db = []
-            tiles_db = []
-            for player in match.players:
-                for card in player.mov_cards:
-                    card.mov_type = card.mov_type
-                for card in player.fig_cards:
-                    card.card_color = card.card_color
-                    card.fig_type = card.fig_type
-                player.mov_cards = [Movcard.model_dump() for Movcard in player.mov_cards]
-                player.fig_cards = [figcard.model_dump() for figcard in player.fig_cards]
-                player = player.model_dump()
-                players_db.append(player)
-            for tile in match.board.tiles:
-                tile.tile_color = tile.tile_color
-                tile.tile_in_figure = tile.tile_in_figure 
-                tiles_db.append(tile.model_dump())
-            board_db = (tiles_db)
-            matchdb = Match(
-                match_id = str(match.match_id),
-                board = board_db,
-                players = players_db
-                )
-            self.delete(match.match_id)
-            db.add(matchdb)
-            db.commit()
-        finally:
-            db.close()
+    def update_match(self, match_: MatchOut):
+            match = copy.deepcopy(match_)
+            db = Session()
+            try:
+                print("buscando match")
+                matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
+                players_db = []
+                tiles_db = []
+                print("serializando board")
+                for tile in match.board.tiles:
+                    tiles_db.append(tile.model_dump())
+                board_db = (tiles_db)
+                print("serializando players")
+                for player in match.players:
+                    player = player.model_dump()
+                    players_db.append(player)
+
+                matchdb = Match(
+                    match_id = str(match.match_id),
+                    board = board_db,
+                    players = players_db
+                    )
+                self.delete(match.match_id)
+                print("añadiendo match")
+                db.add(matchdb)
+                print("commitenado match")
+                db.commit()
+                print("ok")
+            finally:
+                db.close()
