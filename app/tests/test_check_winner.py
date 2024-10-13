@@ -82,7 +82,7 @@ def test_check_winner_ok():
     response = client.get(f"/matchs/winner/{match1_id}")
     assert response.status_code == status.HTTP_200_OK
 
-    assert response.json() == expected_response
+    assert response.json() == expected_response.model_dump()
     reset()
 
 def test_check_winner_nobody():
@@ -151,4 +151,4 @@ def test_check_winner_by_quitting():
     last_response = client.get(f"/matchs/winner/{match3_id}")
     assert last_response.status_code == status.HTTP_200_OK
 
-    assert last_response.json() == expected_response
+    assert last_response.json() == expected_response.model_dump()
