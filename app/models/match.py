@@ -243,21 +243,19 @@ class MatchRepository:
                 match.players[i].hand_mov_cards()
                 match.players[i].has_turn = False # this player
                 match.players[(i+1)%len(match.players)].has_turn = True # next player
+                match.state = 0
         self.update_match(match)
 
     def update_match(self, match_: MatchOut):
             match = copy.deepcopy(match_)
             db = Session()
             try:
-                print("buscando match")
                 matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
                 players_db = []
                 tiles_db = []
-                print("serializando board")
                 for tile in match.board.tiles:
                     tiles_db.append(tile.model_dump())
                 board_db = (tiles_db)
-                print("serializando players")
                 for player in match.players:
                     player = player.model_dump()
                     players_db.append(player)
@@ -268,10 +266,10 @@ class MatchRepository:
                     players = players_db
                     )
                 self.delete(match.match_id)
-                print("añadiendo match")
                 db.add(matchdb)
-                print("commitenado match")
                 db.commit()
-                print("ok")
+            except Exception as e:
+                db.rollback()
+                raise
             finally:
                 db.close()

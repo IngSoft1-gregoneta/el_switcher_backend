@@ -78,6 +78,7 @@ def verify_test_ok(match_id):
     match = get_parcial_match(match_id)
     assert match.players[0].has_turn
     assert not match.players[1].has_turn
+    assert match.state == 0
     players_len = len(match.players)
     player_id = uuid4()
     with client.websocket_connect(f"/ws/{player_id}") as Clientwebsocket:
@@ -88,13 +89,15 @@ def verify_test_ok(match_id):
                 f"/matchs/end_turn/{match_id}/{match.players[i].player_name}"
             )
             assert response.status_code == status.HTTP_200_OK
-            match = get_parcial_match(match_id)
+            match = repo_match.get_match_by_id(match_id)
+            assert match.state == 0
             for j in range(players_len):
                 if match.players[index].player_name != match.players[j].player_name:
                     assert not match.players[j].has_turn
             assert match.players[index].has_turn
         data = Clientwebsocket.receive_text()
         assert data == "MATCH"
+
 
 
 def test_endturn_in_match_of_2_players():

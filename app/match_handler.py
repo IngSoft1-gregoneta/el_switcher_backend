@@ -111,11 +111,9 @@ class MatchHandler:
             if target_player.has_turn is False:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
             self.repo.end_turn(match=match, player_name=player_name)
-            print("vaciando estados")
             state_handler.empty_parcial_states(match_id)
-            print("creando estado 0")
+            match = self.repo.get_match_by_id(match_id)
             state_handler.add_parcial_match(match)
-            print("0k")
             return match
         except Exception as e:
             if isinstance(e, HTTPException):

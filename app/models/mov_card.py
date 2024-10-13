@@ -36,7 +36,7 @@ class MovCard(BaseModel):
             raise ValueError(f"Invalid mov type, {self.mov_type} is not a MovType")
 
     def create_random_mov(self):
-        self.mov_type =  random.choice(list(MovType))
+        self.mov_type =  random.choice(list(MovType)).value
     
     def use_mov_card(self):
         self.is_used = True

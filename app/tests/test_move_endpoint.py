@@ -68,6 +68,7 @@ def test_move_ok():
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
+        match = get_parcial_match(room_id)
         assert response.status_code == status.HTTP_200_OK
-        assert get_parcial_match(room_id).state == 1
+        assert match.state == 1
       
