@@ -27,6 +27,7 @@ class MatchHandler:
                     detail="Only the owner can create a match",
                 )
             match = MatchOut(match_id)
+            repo_room.delete(match_id)
             self.repo.create_match(match)
             match = self.repo.get_match_by_id(match.match_id)
             fig_types = self.get_valid_fig_types(match)
@@ -75,7 +76,8 @@ class MatchHandler:
         self, player_name: str, match_id: UUID
     ) -> Union[MatchOut, str]:
         try:
-            match = self.repo.delete_player(player_name, match_id)
+            match = self.repo.delete_player(match_id, player_name)
+            state_handler.remove_player(match_id, player_name)
             return match
         except Exception as e:
             if isinstance(e, HTTPException):

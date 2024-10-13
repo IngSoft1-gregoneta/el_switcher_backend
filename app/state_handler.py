@@ -30,7 +30,7 @@ def get_parcial_match(match_id: UUID) -> MatchOut:
         return None
     
 def remove_last_parcial_match(match_id: UUID) -> bool:
-    matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == match_id]
+    matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == str(match_id)]
 
     if matches_by_id:
         max_state = max(match.state for match in matches_by_id)
@@ -44,4 +44,11 @@ def remove_last_parcial_match(match_id: UUID) -> bool:
 
 def empty_parcial_states(match_id: UUID):
     global PARCIAL_MATCHES
-    PARCIAL_MATCHES = [match for match in PARCIAL_MATCHES if match.match_id != match_id]
+    PARCIAL_MATCHES = [match for match in PARCIAL_MATCHES if match.match_id != str(match_id)]
+
+def remove_player(match_id: UUID, player_name: str):
+    matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == str(match_id)]
+    for match in matches_by_id:
+        for player in match.players:
+            if player.player_name == player_name:
+                match.players.remove(player)

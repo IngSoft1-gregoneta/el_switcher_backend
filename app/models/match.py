@@ -220,7 +220,7 @@ class MatchRepository:
          db.close()
 
 
-    def delete_player(self, player_name: str, match_id: UUID):
+    def delete_player(self, match_id: UUID, player_name: str):
         match = self.get_match_by_id(match_id)
         if match is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
