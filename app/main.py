@@ -250,6 +250,7 @@ async def check_winner(
 async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int, y1: int, x2: int, y2:int):
     try:
         await match_handler.do_parcial_mov(match_id, player_name, card_index, x1, y1, x2, y2)
+        await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
     except Exception:
