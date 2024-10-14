@@ -147,7 +147,26 @@ class MatchHandler:
             mov_card.use_mov_card()
             state_handler.add_parcial_match(new_match)
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid movement")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid movement")
+
+    async def revert_mov(self, match_id: UUID, player_name: str, card_index: int):
+        match = state_handler.get_parcial_match(match_id)
+        if match is None: 
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found") 
+        new_match = copy.deepcopy(match)
+        player = new_match.get_player_by_name(player_name)
+        if player is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+        if not player.has_turn:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+        if card_index < 0 or card_index >= len(player.mov_cards):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found") 
+        if new_match.state == 0:
+            print("Attempting to revert at initial state.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot go back beyond the initial state")
+        mov_card = player.mov_cards[card_index]
+        mov_card.held_mov_card()
+        state_handler.go_back_state(new_match)   
          
     async def check_winner(self, match_id: UUID):
         try:

@@ -258,3 +258,15 @@ async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int
             detail="Internal Server Error",
         )
     
+
+@app.put("/revert_movement/{match_id}/{player_name}/{card_index}")
+async def revert_movement(match_id: UUID, player_name: str, card_index: int):
+    try:
+        await match_handler.revert_mov(match_id, player_name, card_index)
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
