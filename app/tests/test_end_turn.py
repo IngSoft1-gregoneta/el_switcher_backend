@@ -162,3 +162,29 @@ def test_end_turn_player_has_no_turn():
     assert response.json() == {"detail": "Player has not the turn"}
     reset()
 
+# Si un jugador abandona la partida con turno, no deberia perderse
+def test_end_turn_rotation_at_leaving_match():
+    reset()
+    generate_test_room()
+    generate_test_match()
+
+    match_id = room2_id
+    player_name = "Braian"
+    user_id = uuid4()
+
+    # Eliminamos al primer jugador (ya que siempre posee el primer turno)
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room2_id, user_id)
+        response = client.put(f"/matchs/leave_match/{match_id}/{player_name}/{user_id}")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        updated_match = repo_match.get_match_by_id(match_id)
+        assert updated_match.get_player_by_name(player_name) == None
+        data = Clientwebsocket.receive_text()
+        assert data == "LISTA"
+
+    match = repo_match.get_match_by_id(match_id)
+
+    player_with_turn = match.get_player_by_name("Tadeo")
+    assert player_with_turn.has_turn
+    reset()
+
