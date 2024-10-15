@@ -12,22 +12,17 @@ class MovType(Enum):
     mov6 = "mov6"
     mov7 = "mov7"
 
-class MovStatus(Enum):
-    HELD = 'Held'
-    PLAYED = 'Played'
-    CONFIRMED = 'Confirmed'
     
 # Define the Pydantic model
 class MovCard(BaseModel):
     mov_type: MovType
-    mov_status: MovStatus = MovStatus.HELD
     is_used: bool = False
     vectors: list[tuple] = []
 
-    def __init__(self, mov_type: MovType = None, mov_status: MovStatus = MovStatus.HELD, is_used: bool = False):
+    def __init__(self, mov_type: MovType = None, is_used: bool = False):
         if mov_type is None:
             self.create_random_mov()
-        super().__init__(mov_type=mov_type, mov_status=mov_status, is_used=is_used)
+        super().__init__(mov_type=mov_type, is_used=is_used)
         self.validate_mov_type()
         self.init_vectors()
 
@@ -40,15 +35,9 @@ class MovCard(BaseModel):
     
     def use_mov_card(self):
         self.is_used = True
-        self.mov_status = MovStatus.PLAYED.value
-
-    def confirm_mov_card(self):
-        self.is_used = True
-        self.mov_status = MovStatus.CONFIRMED.value
      
     def held_mov_card(self):
         self.is_used = False
-        self.mov_status = MovStatus.HELD.value
 
     def init_vectors(self):
         match self.mov_type:
