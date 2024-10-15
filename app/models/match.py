@@ -230,6 +230,9 @@ class MatchRepository:
                 player_to_remove = player
         if player_to_remove == None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+        # Pasa el turno antes de borrar
+        if player_to_remove.has_turn:
+            self.end_turn(match=match, player_name=player_to_remove.player_name)
         match.players.remove(player_to_remove)
         if len(match.players) == 0:
             self.delete(match_id)

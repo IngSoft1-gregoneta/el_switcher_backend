@@ -119,3 +119,6 @@ def test_no_more_of_4_states_in_a_match():
     last_parcial_match1 = get_parcial_match(match1.match_id)
     matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == match1.match_id]
     assert(len(matches_by_id) < 4)
+    assert last_parcial_match1.state == 3
+    reset()
+
