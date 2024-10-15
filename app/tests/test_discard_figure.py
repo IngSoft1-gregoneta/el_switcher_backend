@@ -77,6 +77,7 @@ def test_discard_fig():
     match.board.tiles[2].tile_color = TileColor.BLUE.value
     match.board.tiles[3].tile_color = TileColor.BLUE.value
     match.board = figures_detector(match.board, [FigType.fige06.value])
+    init_board = match.board
     player = match.get_player_by_name(match.players[0].player_name)
     player.fig_cards[0].fig_type = FigType.fige06.value
     card_index = 0
@@ -101,6 +102,21 @@ def test_discard_fig():
         visible_match = VisibleMatchData(room_id, player.player_name)
         assert visible_match.me.deck_len == 24
         assert len(visible_match.me.visible_fig_cards) == 2 
+        # these changes should be not confirmed
+        after_discard_match.board = Board()
+        # check player got a new fig card of his deck
+        response = client.put(f"/matchs/end_turn/{room_id}/{player.player_name}")
+        assert response.status_code == status.HTTP_200_OK
+        after_end_turn_match = get_parcial_match(room_id)
+        assert after_end_turn_match.state == 0
+        visible_fig_cards_count = 0
+        for card in after_end_turn_match.players[0].fig_cards:
+            if card.is_visible: 
+                visible_fig_cards_count += 1
+        assert visible_fig_cards_count == 3
+        assert len(after_end_turn_match.players[0].fig_cards) == 24
+        # check changes after discard fig are not confirmed
+        assert init_board == after_end_turn_match.board
 
 def test_match_not_found():
     reset()
