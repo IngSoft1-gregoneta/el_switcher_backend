@@ -259,10 +259,10 @@ async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int
         )
     
 
-@app.put("/revert_movement/{match_id}/{player_name}/{card_index}")
-async def revert_movement(match_id: UUID, player_name: str, card_index: int):
+@app.put("/revert_movement/{match_id}/{player_name}")
+async def revert_movement(match_id: UUID, player_name: str):
     try:
-        await match_handler.revert_mov(match_id, player_name, card_index)
+        await match_handler.revert_mov(match_id, player_name)
     except HTTPException as http_exc:
         raise http_exc
     except Exception:

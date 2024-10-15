@@ -18,7 +18,8 @@ room_id2 = uuid1()
 def reset():
     repo_room.delete_rooms()
     repo_match.delete_matchs()
-    PARCIAL_MATCHES.clear()
+    empty_parcial_states(room_id)
+    empty_parcial_states(room_id2)
 
 def generate_test_room():
     db = Session()
@@ -82,14 +83,14 @@ def test_revert_mov():
         x2 = x1 + card.vectors[0][0]
         y2 = y1 + card.vectors[0][1]
     
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
         match = get_parcial_match(room_id)
         assert response.status_code == status.HTTP_200_OK
         assert match.state == 1
     
-    revert_response = client.put(f"/revert_movement/{room_id}/{player.player_name}/{card_index}")
+    revert_response = client.put(f"/revert_movement/{room_id}/{player.player_name}")
     reverted_match = get_parcial_match(room_id)
     
     assert revert_response.status_code == status.HTTP_200_OK
@@ -106,9 +107,8 @@ def test_revert_without_previous_move():
 
     match = get_parcial_match(room_id2)
     player = match.get_player_by_name(match.players[0].player_name)
-    card_index = 0
 
-    revert_response = client.put(f"/revert_movement/{room_id2}/{player.player_name}/{card_index}")
+    revert_response = client.put(f"/revert_movement/{room_id2}/{player.player_name}")
 
     assert revert_response.status_code == 400
     assert revert_response.json() == {'detail': 'Cannot go back beyond the initial state'}
@@ -139,15 +139,16 @@ def test_revert_not_turn():
         x2 = x1 + card.vectors[0][0]
         y2 = y1 + card.vectors[0][1]
     
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
         match = get_parcial_match(room_id)
         assert response.status_code == status.HTTP_200_OK
-        assert match.state == 2
+        assert match.state == 1
     
-    revert_response = client.put(f"/revert_movement/{room_id}/{player_without_turn}/{card_index}")
-    reverted_match = get_parcial_match(room_id)
-
+    revert_response = client.put(f"/revert_movement/{room_id}/{player_without_turn}")
     assert revert_response.status_code == 400
     assert revert_response.json() == {'detail': 'Player has not turn'}
+
+
+reset()
