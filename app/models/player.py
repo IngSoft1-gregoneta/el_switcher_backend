@@ -25,3 +25,12 @@ class Player(BaseModel):
                 mov_card.held_mov_card()
                 mov_card.create_random_mov()
                 mov_card.init_vectors()
+
+    def hand_fig_cards(self):
+        fig_cards_amount = len(self.fig_cards)
+        if fig_cards_amount >= 3:
+            for i in range(3):
+                self.fig_cards[i].is_visible = True
+        else:
+            for i in range(fig_cards_amount):
+                self.fig_cards[i].is_visible = True

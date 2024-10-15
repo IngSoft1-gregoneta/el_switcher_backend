@@ -240,6 +240,7 @@ class MatchRepository:
         for i in range(len(match.players)):
             if match.players[i].player_name == player_name:
                 match.players[i].hand_mov_cards()
+                match.players[i].hand_fig_cards()
                 match.players[i].has_turn = False # this player
                 match.players[(i+1)%len(match.players)].has_turn = True # next player
                 match.state = 0
