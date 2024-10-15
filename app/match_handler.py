@@ -104,7 +104,8 @@ class MatchHandler:
 
     async def end_turn(self, match_id: UUID, player_name: str):
         try:
-            match = state_handler.get_parcial_match(match_id)
+            state_handler.empty_parcial_states(match_id)
+            match = self.repo.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
             target_player = match.get_player_by_name(player_name)
@@ -113,8 +114,6 @@ class MatchHandler:
             if target_player.has_turn is False:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
             self.repo.end_turn(match=match, player_name=player_name)
-            state_handler.empty_parcial_states(match_id)
-            match = self.repo.get_match_by_id(match_id)
             state_handler.add_parcial_match(match)
             return match
         except Exception as e:
