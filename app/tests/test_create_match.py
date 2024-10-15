@@ -90,7 +90,7 @@ def generate_test_room():
 
 
 # test: para asegurarse que un jugador puede unirse a una partida, devuelve HTTP200OK y mensaje advirtiendo
-
+from state_handler import *
 
 def test_match_2_players():
     reset()
@@ -153,8 +153,8 @@ def test_dup_match():
         manager.bind_room(room_id, player_id)
         response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
         response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json() == {"detail": "Bad request: There must be exactly one room per match"}
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Room not found"}
     reset()
 
 

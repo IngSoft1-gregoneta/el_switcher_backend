@@ -484,4 +484,3 @@ def test_valid_switch_mov7():
     assert tile_.tile_color == tile4_color and tile4.tile_color == tile_color_
     switcher.switch(board, MovType.mov7.value, x4, y4, x_, y_)
     assert tile_.tile_color == tile_color_ and tile4.tile_color == tile4_color
-

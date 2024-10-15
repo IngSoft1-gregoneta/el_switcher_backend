@@ -3,7 +3,7 @@ from fastapi import status
 from models.room import *
 from main import app,manager
 from uuid import uuid4
-
+import state_handler
 
 client = TestClient(app)
 repo = RoomRepository()
@@ -50,6 +50,7 @@ def test_leave_from_match_of_4_players():
     player_name = "Braian"
     user_id = uuid4()
     match = repo_match.get_match_by_id(room_id)
+    state_handler.add_parcial_match(match)
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
@@ -58,11 +59,16 @@ def test_leave_from_match_of_4_players():
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert player_deleted not in repo_match.get_match_by_id(room_id)
-
+        matches_by_id: List[MatchOut] = [match for match in state_handler.PARCIAL_MATCHES if match.match_id == str(room_id)]
+        for match in matches_by_id:
+            for player in match.players:
+                assert player.player_name != player_name
+                
 def test_leave_from_match_of_3_players():
     player_name = "Tadeo"
     user_id = uuid4()
     match = repo_match.get_match_by_id(room_id)
+    state_handler.add_parcial_match(match)
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
@@ -71,11 +77,16 @@ def test_leave_from_match_of_3_players():
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert player_deleted not in repo_match.get_match_by_id(room_id)
+        matches_by_id: List[MatchOut] = [match for match in state_handler.PARCIAL_MATCHES if match.match_id == str(room_id)]
+        for match in matches_by_id:
+            for player in match.players:
+                assert player.player_name != player_name
 
 def test_leave_from_match_of_2_players():
     player_name = "Yamil"
     user_id = uuid4()
     match = repo_match.get_match_by_id(room_id)
+    state_handler.add_parcial_match(match)
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
@@ -84,6 +95,10 @@ def test_leave_from_match_of_2_players():
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert player_deleted not in repo_match.get_match_by_id(room_id)
+        matches_by_id: List[MatchOut] = [match for match in state_handler.PARCIAL_MATCHES if match.match_id == str(room_id)]
+        for match in matches_by_id:
+            for player in match.players:
+                assert player.player_name != player_name
 
 def test_no_player_leave_from_match():
     player_name = "Tadeo" 

@@ -12,16 +12,17 @@ from models.tile import Tile, TileColor
 import random
 from fastapi import HTTPException, status
 from typing import Tuple
-    
+import copy 
+
 class MatchOut(BaseModel):
     match_id: UUID
+    state: int
     board: Board
     players: List[Player]
-
     def __init__(self, match_id: UUID):
         board = self.create_board()
         players = self.create_players(match_id)
-        super().__init__(match_id=match_id, board=board, players=players)
+        super().__init__(match_id=match_id, board=board, players=players, state=0)
         self.validate_match()
 
     def validate_room(self, match_id: UUID) -> List[str]:
@@ -102,7 +103,7 @@ class MatchOut(BaseModel):
             new_mov_card = MovCard(
             mov_type=random.choice(list(MovType)),
             mov_status=(MovStatus.HELD),
-            is_used=False  # Por defecto, las cartas no están usadas
+            is_used=False
         )
             mov_cards.append(new_mov_card)
         return mov_cards
@@ -112,13 +113,6 @@ class MatchOut(BaseModel):
             if player.player_name == player_name:
                 return player
         return None
-    
-    def next_turn(self, player_name: str):
-        for i in range(len(self.players)):
-            if self.players[i].player_name == player_name:
-                self.players[i].has_turn = False # this player
-                self.players[(i+1)%len(self.players)].has_turn = True # next player
-        return self
 
 class MatchRepository:
     def create_match(self, new_match: MatchOut):
@@ -203,7 +197,7 @@ class MatchRepository:
                     mov_cards_db.append(card)
                 players_db.append(Player.model_construct(player_name= player_data_name,mov_cards =mov_cards_db,fig_cards = fig_cards_db,has_turn =player_data_has_turn))
             # Devolver la instancia de MatchOut
-            match = MatchOut.model_construct(match_id = str(match_id_selected), board=board_db, players = players_db)
+            match = MatchOut.model_construct(match_id = str(match_id_selected), state = 0, board=board_db, players = players_db)
             return match
         finally:
             db.close()
@@ -226,7 +220,7 @@ class MatchRepository:
          db.close()
 
 
-    def delete_player(self, player_name: str, match_id: UUID):
+    def delete_player(self, match_id: UUID, player_name: str):
         match = self.get_match_by_id(match_id)
         if match is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
@@ -238,7 +232,7 @@ class MatchRepository:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
         # Pasa el turno antes de borrar
         if player_to_remove.has_turn:
-            match.next_turn(player_name)
+            self.end_turn(match=match, player_name=player_to_remove.player_name)
         match.players.remove(player_to_remove)
         if len(match.players) == 0:
             self.delete(match_id)
@@ -246,48 +240,39 @@ class MatchRepository:
         self.update_match(match)
         return match
 
-    def end_turn(self, match_id: UUID, player_name: str):
-        match = self.get_match_by_id(match_id)
-        if match is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
-        target_player = match.get_player_by_name(player_name)
-        if target_player is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
-        if target_player.has_turn is False:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
-        # Pasa el turno al siguiente jugador
-        match.next_turn(player_name)
+    def end_turn(self, match: MatchOut, player_name: str):
+        for i in range(len(match.players)):
+            if match.players[i].player_name == player_name:
+                match.players[i].hand_mov_cards()
+                match.players[i].has_turn = False # this player
+                match.players[(i+1)%len(match.players)].has_turn = True # next player
+                match.state = 0
         self.update_match(match)
-        return match
 
-    def update_match(self, match: MatchOut):
-        db = Session()
-        try:
-            matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
-            players_db = []
-            tiles_db = []
-            for player in match.players:
-                for card in player.mov_cards:
-                    card.mov_type = card.mov_type
-                for card in player.fig_cards:
-                    card.card_color = card.card_color
-                    card.fig_type = card.fig_type
-                player.mov_cards = [Movcard.model_dump() for Movcard in player.mov_cards]
-                player.fig_cards = [figcard.model_dump() for figcard in player.fig_cards]
-                player = player.model_dump()
-                players_db.append(player)
-            for tile in match.board.tiles:
-                tile.tile_color = tile.tile_color
-                tile.tile_in_figure = tile.tile_in_figure 
-                tiles_db.append(tile.model_dump())
-            board_db = (tiles_db)
-            matchdb = Match(
-                match_id = str(match.match_id),
-                board = board_db,
-                players = players_db
-                )
-            self.delete(match.match_id)
-            db.add(matchdb)
-            db.commit()
-        finally:
-            db.close()
+    def update_match(self, match_: MatchOut):
+            match = copy.deepcopy(match_)
+            db = Session()
+            try:
+                matchdb = db.query(Match).filter(Match.match_id == str(match.match_id)).one_or_none()
+                players_db = []
+                tiles_db = []
+                for tile in match.board.tiles:
+                    tiles_db.append(tile.model_dump())
+                board_db = (tiles_db)
+                for player in match.players:
+                    player = player.model_dump()
+                    players_db.append(player)
+
+                matchdb = Match(
+                    match_id = str(match.match_id),
+                    board = board_db,
+                    players = players_db
+                    )
+                self.delete(match.match_id)
+                db.add(matchdb)
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                raise
+            finally:
+                db.close()

@@ -5,12 +5,12 @@ from fastapi.testclient import TestClient
 from main import app, manager
 from models.match import *
 from models.room import *
+from state_handler import *
 
 client = TestClient(app)
 
 from models.match import *
 from models.room import *
-
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
@@ -74,8 +74,11 @@ def generate_test_match():
 
 def verify_test_ok(match_id):
     match = repo_match.get_match_by_id(match_id)
+    add_parcial_match(match)
+    match = get_parcial_match(match_id)
     assert match.players[0].has_turn
     assert not match.players[1].has_turn
+    assert match.state == 0
     players_len = len(match.players)
     player_id = uuid4()
     with client.websocket_connect(f"/ws/{player_id}") as Clientwebsocket:
@@ -87,12 +90,14 @@ def verify_test_ok(match_id):
             )
             assert response.status_code == status.HTTP_200_OK
             match = repo_match.get_match_by_id(match_id)
+            assert match.state == 0
             for j in range(players_len):
                 if match.players[index].player_name != match.players[j].player_name:
                     assert not match.players[j].has_turn
             assert match.players[index].has_turn
         data = Clientwebsocket.receive_text()
         assert data == "MATCH"
+
 
 
 def test_endturn_in_match_of_2_players():
@@ -181,4 +186,5 @@ def test_end_turn_rotation_at_leaving_match():
 
     player_with_turn = match.get_player_by_name("Tadeo")
     assert player_with_turn.has_turn
+    reset()
 
