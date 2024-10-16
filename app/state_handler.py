@@ -6,24 +6,17 @@ from typing import List
 PARCIAL_MATCHES: List[MatchOut] = []
 
 def add_parcial_match(match_: MatchOut):
-    print("añadiendo match")
     match_out = copy.deepcopy(match_)
     matches_by_id: List[MatchOut] = [match for match in PARCIAL_MATCHES if match.match_id == match_out.match_id]
 
     if matches_by_id:
-        print("parcial matches by id encontrados")
         new_state = max(match.state for match in matches_by_id) + 1
         if new_state < 4:
             match_out.state = new_state
-            print("añadiendo nuevo estado")
             PARCIAL_MATCHES.append(match_out)
     else:
-        print("parcial matches by NO id encontrados")
-        print("añadiendo estado inicial")
         match_out.state = 0
-        print(match_out)
         PARCIAL_MATCHES.append(match_out)
-        print("ok")
 
     
 def get_parcial_match(match_id: UUID) -> MatchOut:
