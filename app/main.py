@@ -254,3 +254,16 @@ async def revert_movement(match_id: UUID, player_name: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
+    
+@app.put("/discard_figure/{match_id}/{player_name}/{card_index}/{x}/{y}")
+async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: int, y: int):
+    try:
+        await match_handler.discard_fig(match_id, player_name, card_index, x, y)
+        await manager.broadcast_by_room(match_id, "MATCH")
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )

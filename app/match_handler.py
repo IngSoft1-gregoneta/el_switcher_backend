@@ -104,7 +104,8 @@ class MatchHandler:
 
     async def end_turn(self, match_id: UUID, player_name: str):
         try:
-            match = state_handler.get_parcial_match(match_id)
+            state_handler.empty_parcial_states(match_id)
+            match = self.repo.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
             target_player = match.get_player_by_name(player_name)
@@ -113,8 +114,6 @@ class MatchHandler:
             if target_player.has_turn is False:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
             self.repo.end_turn(match=match, player_name=player_name)
-            state_handler.empty_parcial_states(match_id)
-            match = self.repo.get_match_by_id(match_id)
             state_handler.add_parcial_match(match)
             return match
         except Exception as e:
@@ -163,4 +162,31 @@ class MatchHandler:
             print("Attempting to revert at initial state.")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot go back beyond the initial state")
         state_handler.remove_last_parcial_match(match_id)   
-        
+         
+    async def discard_fig(self, match_id: UUID, player_name: str, card_index: int, x: int, y: int):
+        match = state_handler.get_parcial_match(match_id)
+        if match is None: 
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")   
+        new_match = copy.deepcopy(match)
+        player = new_match.get_player_by_name(player_name)
+        if player is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+        if not player.has_turn:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+        if card_index < 0 or card_index >= len(player.fig_cards):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")   
+        fig_card = player.fig_cards[card_index]
+        if not fig_card.is_visible:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not visible")   
+        if switcher.pos_in_range(x, y):
+            tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
+            if tile.tile_in_figure == fig_card.fig_type:
+                player.fig_cards.remove(fig_card)
+                self.repo.update_match(new_match)
+                state_handler.empty_parcial_states(match_id)
+                state_handler.add_parcial_match(new_match)
+            else:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fig card not match with figure")
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid positions")
+    
