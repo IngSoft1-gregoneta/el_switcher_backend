@@ -105,7 +105,7 @@ def test_no_player_leave_from_match():
     user_id = uuid4()
     response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "user not found"}
+    assert response.json() == {"detail": "Player not found"}
 
 def test_leave_from_no_match():
     room_id = uuid1()
@@ -113,7 +113,7 @@ def test_leave_from_no_match():
     user_id = uuid4()
     response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "match not found"}
+    assert response.json() == {"detail": "Match not found"}
 
 def test_leave_and_destroy_match_of_a_player():
     player_name = "Facu"
@@ -121,7 +121,7 @@ def test_leave_and_destroy_match_of_a_player():
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
-        assert response.status_code == status.HTTP_202_ACCEPTED
         assert repo_match.get_match_by_id(room_id) is None
+        assert response.status_code == status.HTTP_202_ACCEPTED
 
 reset()

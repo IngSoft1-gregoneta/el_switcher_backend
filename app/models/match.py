@@ -219,13 +219,13 @@ class MatchRepository:
     def delete_player(self, match_id: UUID, player_name: str):
         match = self.get_match_by_id(match_id)
         if match is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
         player_to_remove = None
         for player in match.players:
             if player.player_name == player_name:
                 player_to_remove = player
         if player_to_remove == None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
         # Pasa el turno antes de borrar
         if player_to_remove.has_turn:
             self.end_turn(match=match, player_name=player_to_remove.player_name)
