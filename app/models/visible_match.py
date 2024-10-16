@@ -131,7 +131,7 @@ class VisibleMatchData(BaseModel):
         match = get_parcial_match(match_id)
         me = Me(match_id=match_id, player_name=player_name)
         other_players = self.get_other_players(match_id, player_name)
-        visible_mov_cards = self.get_visible_mov_cards(match_id, player_name)
+        visible_mov_cards = self.get_visible_mov_cards(match_id)
         state_number = self.get_state_number(match_id)
         board = match.board
         super().__init__(match_id=str(match_id),
@@ -154,16 +154,15 @@ class VisibleMatchData(BaseModel):
         except Exception as e:
             raise e
 
-    def get_visible_mov_cards(self, match_id, player_name) -> List[MovCard]:
+    def get_visible_mov_cards(self, match_id) -> List[MovCard]:
         try:
             visible_mov_cards = []
             match = get_parcial_match(match_id)
-            player = match.get_player_by_name(player_name)
-
-            if player.has_turn is True:
-                for mov_card in player.mov_cards:
-                    if mov_card.is_used:
-                        visible_mov_cards.append(mov_card)
+            for player in match.players:
+                if player.has_turn is True:
+                    for mov_card in player.mov_cards:
+                        if mov_card.is_used:
+                            visible_mov_cards.append(mov_card)
             return visible_mov_cards
 
         except Exception as e:
