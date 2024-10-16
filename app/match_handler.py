@@ -159,7 +159,6 @@ class MatchHandler:
         if not player.has_turn:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
         if new_match.state == 0:
-            print("Attempting to revert at initial state.")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot go back beyond the initial state")
         state_handler.remove_last_parcial_match(match_id)   
          
