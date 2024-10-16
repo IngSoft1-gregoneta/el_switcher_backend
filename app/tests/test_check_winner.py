@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from main import app, manager
 from models.match import *
 from models.room import *
+from models.visible_match import *
 
 client = TestClient(app)
 
@@ -73,16 +74,23 @@ def test_check_winner_ok():
     generate_test_room()
     generate_test_match_with_winner()
 
-    match1_id = room1_id
-    match = repo_match.get_match_by_id(match1_id)
+    match_id = room1_id
+    player_name = "Braian"
 
-    # Jugador sin cartas ==> winner
-    expected_response = match.get_player_by_name("Braian")
+    match = repo_match.get_match_by_id(match_id)
+    add_parcial_match(match)
 
-    response = client.get(f"/matchs/winner/{match1_id}")
-    assert response.status_code == status.HTTP_200_OK
+    expected_response = VisibleMatchData(match_id, player_name)
+        
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}"):
+        manager.bind_room(room1_id, user_id)
+        response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
+        assert response.status_code == status.HTTP_200_OK
 
-    assert response.json() == expected_response.model_dump()
+    assert response.json() == expected_response.model_dump(mode="json")
+    winner = match.get_player_by_name("Braian")
+    assert expected_response.winner != winner
     reset()
 
 def test_check_winner_nobody():
@@ -90,15 +98,22 @@ def test_check_winner_nobody():
     generate_test_room()
     generate_test_match_without_winner()
 
-    match2_id = room2_id
+    match_id = room2_id
+    player_name = "Braian"
 
-    expected_response = None
+    match = repo_match.get_match_by_id(match_id)
+    add_parcial_match(match)
 
-    response = client.get(f"/matchs/winner/{match2_id}")
-    assert response.status_code == status.HTTP_200_OK
+    expected_response = VisibleMatchData(match_id, player_name)
 
-    assert response.json() == expected_response
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}"):
+        manager.bind_room(room1_id, user_id)
+        response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
+        assert response.status_code == status.HTTP_200_OK
 
+    assert response.json() == expected_response.model_dump(mode="json")
+    assert expected_response != None
     reset()
 
 def test_check_winner_by_quitting():
@@ -106,9 +121,10 @@ def test_check_winner_by_quitting():
     generate_test_room()
     generate_test_match_without_winner()
 
-    match3_id = room2_id
-    match = repo_match.get_match_by_id(match3_id)
+    match_id = room2_id
+    player_name = "Braian"
 
+    match = repo_match.get_match_by_id(match_id)
 
     player2_name = "Tadeo"
     player3_name = "Yamil"
@@ -118,9 +134,9 @@ def test_check_winner_by_quitting():
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room2_id, user_id)
-        response = client.put(f"/matchs/leave_match/{match3_id}/{player4_name}/{user_id}")
+        response = client.put(f"/matchs/leave_match/{match_id}/{player4_name}/{user_id}")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        updated_match = repo_match.get_match_by_id(match3_id)
+        updated_match = repo_match.get_match_by_id(match_id)
         assert updated_match.get_player_by_name(player4_name) == None
         data = Clientwebsocket.receive_text()
         assert data == "LISTA"
@@ -128,9 +144,9 @@ def test_check_winner_by_quitting():
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room2_id, user_id)
-        response = client.put(f"/matchs/leave_match/{match3_id}/{player3_name}/{user_id}")
+        response = client.put(f"/matchs/leave_match/{match_id}/{player3_name}/{user_id}")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        updated_match = repo_match.get_match_by_id(match3_id)
+        updated_match = repo_match.get_match_by_id(match_id)
         assert updated_match.get_player_by_name(player3_name) == None
         data = Clientwebsocket.receive_text()
         assert data == "LISTA"
@@ -138,17 +154,25 @@ def test_check_winner_by_quitting():
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room2_id, user_id)
-        response = client.put(f"/matchs/leave_match/{match3_id}/{player2_name}/{user_id}")
+        response = client.put(f"/matchs/leave_match/{match_id}/{player2_name}/{user_id}")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        updated_match = repo_match.get_match_by_id(match3_id)
+        updated_match = repo_match.get_match_by_id(match_id)
         assert updated_match.get_player_by_name(player2_name) == None
         data = Clientwebsocket.receive_text()
         assert data == "LISTA"
 
     # Victoria por abandono
-    expected_response = match.get_player_by_name("Braian")
+    add_parcial_match(match)
+    expected_response = VisibleMatchData(match_id, player_name)
 
-    last_response = client.get(f"/matchs/winner/{match3_id}")
-    assert last_response.status_code == status.HTTP_200_OK
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}"):
+        manager.bind_room(room2_id, user_id)
+        response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
+        assert response.status_code == status.HTTP_200_OK
 
-    assert last_response.json() == expected_response.model_dump()
+
+    assert response.json() == expected_response.model_dump(mode="json")
+    winner = match.get_player_by_name(player_name)
+    assert expected_response.winner != winner
+    reset()

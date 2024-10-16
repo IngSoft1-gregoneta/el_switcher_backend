@@ -18,6 +18,7 @@ from models.room import *
 from models.visible_match import *
 from room_handler import RoomHandler
 
+
 app = FastAPI()
 
 origins = ["http://localhost:5173", "localhost:5173"]
@@ -184,7 +185,7 @@ async def leave_match(
     try:
         result = await match_handler.leave_match(player_name, match_id)
         try:
-            await manager.leave(match_id, user_id)
+            await manager.leave_match(match_id, user_id)
         except Exception as e:
             print(e)
         return result
@@ -214,9 +215,8 @@ async def get_match_data_by_player(
             detail="Internal Server Error",
         )
     
-
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
-async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
+async def end_turn(match_id: UUID, player_name: str):
     try:
         match = await match_handler.end_turn(match_id, player_name)
         await manager.broadcast_by_room(match_id, "MATCH")
@@ -227,30 +227,13 @@ async def end_turn(match_id: UUID, player_name: str) -> MatchOut:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
-        )
+        )     
     
-@app.get("/matchs/winner/{match_id}", response_model=Union[Player, None])
-async def check_winner(
-    match_id: UUID
-    ) -> Union[Player, None]:
+@app.put("/parcial_move/{match_id}/{player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
+async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int, y1: int, x2: int, y2:int):
     try:
-        winner = await match_handler.check_winner(match_id)
-        return winner
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal Server Error: {e}",
-        ) 
-        
-    
-@app.put("/use_movement_card/{match_id}/{player_name}")
-async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
-    try:
-        visible_movement = await match_handler.use_mov_card(match_id, player_name, card_index)
-        return visible_movement
-    
+        await match_handler.do_parcial_mov(match_id, player_name, card_index, x1, y1, x2, y2)
+        await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
     except Exception:
@@ -260,24 +243,14 @@ async def use_movement_card(match_id: UUID, player_name: str, card_index: int):
         )
     
 
-# @app.post("/confirm_movement/{match_id}/{player_name}/{card_index}")
-# async def confirm_movement(match_id: UUID, player_name: str, card_index: int):
-#     match = match_repository.get_match_by_id(match_id)
-#     player = match.get_player_by_name(player_name)
-# 
-#     if card_index < 0 or card_index >= len(player.mov_cards):
-#         raise HTTPException(status_code=400, detail="Invalid card index")
-#     
-#     card = player.mov_cards[card_index]
-# 
-#     if not card.is_used:
-#         raise HTTPException(status_code=400, detail="Cannot confirm a card that has not been used.")
-# 
-#     me = Me(match_id=match_id, player_name=player_name)
-# 
-#     try:
-#         confirmed_card = me.confirm_movement_card(match_id, player_name, card)
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=str(e))
-# 
-#     return me
+@app.put("/revert_movement/{match_id}/{player_name}")
+async def revert_movement(match_id: UUID, player_name: str):
+    try:
+        await match_handler.revert_mov(match_id, player_name)
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
