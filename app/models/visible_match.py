@@ -190,16 +190,14 @@ class VisibleMatchData(BaseModel):
                                 detail=f"Player {player_name} not found")
         
     def get_winner(self, match_id):
-        try:
-            winner = None
-            match = get_parcial_match(match_id=match_id)
-            if len(match.players) == 1:
-                winner = match.players[0]
-            for player in match.players:
-                if len(player.mov_cards) == 0:
-                    winner = player
-            return winner
-        except Exception as e:
-            raise e
-
+        match = get_parcial_match(match_id=match_id)
+        if match is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                                detail=f"Match not found")
+        if len(match.players) == 1:
+            return match.players[0]
+        for player in match.players:
+            if len(player.mov_cards) == 0:
+                return player
+        return None
 
