@@ -76,9 +76,30 @@ class MatchHandler:
         self, player_name: str, match_id: UUID
     ) -> Union[MatchOut, str]:
         try:
-            match = self.repo.delete_player(match_id, player_name)
-            state_handler.remove_player(match_id, player_name)
-            return match
+            match = self.repo.get_match_by_id(match_id)
+            if match is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Match not found')
+            player = match.get_player_by_name(player_name)    
+            if player is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Player not found')
+            if player.has_turn: # parcial match must be reinit
+                self.repo.delete_player(match_id, player_name)
+                match = self.repo.get_match_by_id(match_id)
+                state_handler.empty_parcial_states(match_id)
+                if match:
+                    state_handler.add_parcial_match(match)
+            else: # the turned player continue playing
+                self.repo.delete_player(match_id, player_name)
+                match = self.repo.get_match_by_id(match_id)
+                if match:
+                    state_handler.remove_player(match_id, player_name)
+                else: 
+                    state_handler.empty_parcial_states(match_id)
+            if match:
+                response = match
+            else: response = "None"
+            return response
+
         except Exception as e:
             if isinstance(e, HTTPException):
                 raise e
@@ -159,7 +180,6 @@ class MatchHandler:
         if not player.has_turn:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
         if new_match.state == 0:
-            print("Attempting to revert at initial state.")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot go back beyond the initial state")
         state_handler.remove_last_parcial_match(match_id)   
          

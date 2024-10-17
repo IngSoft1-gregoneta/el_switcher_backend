@@ -247,6 +247,7 @@ async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int
 async def revert_movement(match_id: UUID, player_name: str):
     try:
         await match_handler.revert_mov(match_id, player_name)
+        await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
     except Exception:
