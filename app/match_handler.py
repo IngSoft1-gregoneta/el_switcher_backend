@@ -202,6 +202,8 @@ class MatchHandler:
             tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
             if tile.tile_in_figure == fig_card.fig_type:
                 player.fig_cards.remove(fig_card)
+                fig_types = self.get_valid_fig_types(new_match)
+                new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
                 self.repo.update_match(new_match)
                 state_handler.empty_parcial_states(match_id)
                 state_handler.add_parcial_match(new_match)

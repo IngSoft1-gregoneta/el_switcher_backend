@@ -115,8 +115,9 @@ def test_discard_fig():
                 visible_fig_cards_count += 1
         assert visible_fig_cards_count == 3
         assert len(after_end_turn_match.players[0].fig_cards) == 24
-        # check changes after discard fig are not confirmed
-        assert init_board == after_end_turn_match.board
+        # check tiles after discard fig are the same color
+        for i in range(36):
+            assert init_board.tiles[i].tile_color == after_end_turn_match.board.tiles[i].tile_color
 
 def test_match_not_found():
     reset()
