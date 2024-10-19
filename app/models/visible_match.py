@@ -197,7 +197,7 @@ class VisibleMatchData(BaseModel):
         if len(match.players) == 1:
             return match.players[0]
         for player in match.players:
-            if len(player.mov_cards) == 0:
+            if len(player.fig_cards) == 0:
                 return player
         return None
 
