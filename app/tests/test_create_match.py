@@ -149,12 +149,12 @@ def test_dup_match():
     room_id = room3_id
     owner_name = "Braian"
     player_id = uuid4()
-    with client.websocket_connect(f"/ws/{player_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{player_id}"):
         manager.bind_room(room_id, player_id)
         response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
         response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"detail": "Room not found"}
+        assert response.json() == {"detail": "Sala no encontrada"}
     reset()
 
 
@@ -166,7 +166,7 @@ def test_no_full_match():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
-        "detail": "Bad request: There must be exactly players expected amount of players"}
+        "detail": "Debe haber una cantidad exacta de jugadores con respecto a la esperada"}
     reset()
 
 
@@ -178,7 +178,7 @@ def test_match_5_player():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
-        "detail": "Bad request: There are not between 2 and 4 players"
+        "detail": "Debe haber una cantidad de jugadores en el rango (2,4)"
     }
     reset()
 
@@ -191,7 +191,7 @@ def test_match_a_player():
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
-        "detail": "Bad request: There are not between 2 and 4 players"
+        "detail": "Debe haber una cantidad de jugadores en el rango (2,4)"
     }
     reset()
 
@@ -203,7 +203,7 @@ def test_match_without_room():
     owner_name = "Braian"
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Room not found"}
+    assert response.json() == {"detail": "Sala no encontrada"}
     reset()
 
 
@@ -214,5 +214,5 @@ def test_create_match_not_owner():
     owner_name = "Tadeo"
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json() == {"detail": "Only the owner can create a match"}
+    assert response.json() == {"detail": "Solo el dueño de la sala puede crear la partida"}
     reset()

@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from fastapi import status
 from models.room import *
-from main import app, room_handler
+from main import app
 
 
 client = TestClient(app)
@@ -52,7 +52,6 @@ def generate_test_room():
     finally:
         db.close()    
 
-# room 1
 
 # test: para asegurarse de que no hay salas, devuelve HTTP200OK y lista vacia
 def test_empty_rooms():
@@ -67,7 +66,7 @@ def test_basic_get():
     generate_test_room()
     response = client.get("/rooms")
     assert response.status_code == status.HTTP_200_OK
-    # Check if room is correctly 
+    # Verificamos correctitud de la sala 
     for i in range(2):
         assert str(repo.get_rooms()[i]["room_id"]) == response.json()[i]["room_id"]
         assert repo.get_rooms()[i]["players_expected"] == response.json()[i]["players_expected"]

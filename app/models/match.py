@@ -1,6 +1,5 @@
 import json
 from typing import List
-from enum import Enum
 from pydantic import BaseModel
 from .board import *
 from .fig_card import FigCard, CardColor, FigType
@@ -34,17 +33,17 @@ class MatchOut(BaseModel):
                  room_of_match = room
                  rooms_whit_match_id = rooms_whit_match_id + 1
         if rooms_whit_match_id != 1:
-            raise ValueError("There must be exactly one room per match")  
+            raise ValueError("Debe haber exactamente 1 sala por partida")  
         if not len(room_of_match["players_names"]) in range(2, 5):
-            raise ValueError("There are not between 2 and 4 players") 
+            raise ValueError("Cantidad de jugadores invalida: Rango: 2-4") 
         if room_of_match["players_expected"] != len(room_of_match["players_names"]):
-            raise ValueError("There must be exactly players expected amount of players")  
+            raise ValueError("Debe haber una cantidad exacta de jugadores con respecto a la esperada")  
         return room_of_match["players_names"]
  
     def validate_match(self):
         turns_count = sum(player.has_turn for player in self.players)
         if turns_count != 1:
-            raise ValueError("There must be exactly one player with the turn")
+            raise ValueError("Debe haber 1 solo jugador poseedor del turno")
 
     def create_board(self) -> Board:
         return Board()
@@ -119,7 +118,7 @@ class MatchRepository:
         db = Session()
         try:
             matchdb = db.query(Match).filter(Match.match_id == str(new_match.match_id)).one_or_none()
-            if matchdb: raise ValueError("There must be exactly one room per match")
+            if matchdb: raise ValueError("Debe haber exactamente 1 sala por partida")
             players_db = []
             tiles_db = []
             for player in new_match.players:
@@ -219,13 +218,13 @@ class MatchRepository:
     def delete_player(self, match_id: UUID, player_name: str):
         match = self.get_match_by_id(match_id)
         if match is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada")
         player_to_remove = None
         for player in match.players:
             if player.player_name == player_name:
                 player_to_remove = player
         if player_to_remove == None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")
         # Pasa el turno antes de borrar
         if player_to_remove.has_turn:
             self.end_turn(match=match, player_name=player_to_remove.player_name)
@@ -241,8 +240,8 @@ class MatchRepository:
             if match.players[i].player_name == player_name:
                 match.players[i].hand_mov_cards()
                 match.players[i].hand_fig_cards()
-                match.players[i].has_turn = False # this player
-                match.players[(i+1)%len(match.players)].has_turn = True # next player
+                match.players[i].has_turn = False # Jugador actual
+                match.players[(i+1)%len(match.players)].has_turn = True # Proximo jugador
                 match.state = 0
         self.update_match(match)
 
@@ -269,7 +268,7 @@ class MatchRepository:
                 self.delete(match.match_id)
                 db.add(matchdb)
                 db.commit()
-            except Exception as e:
+            except Exception:
                 db.rollback()
                 raise
             finally:

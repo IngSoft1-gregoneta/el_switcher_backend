@@ -10,9 +10,9 @@ def test_valid_player():
     try:
         mov_cards = []
         fig_cards = []
-        for i in range(3):
+        for _ in range(3):
             mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
-        for i in range(25):
+        for _ in range(25):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
            player_name="Player1",
@@ -21,7 +21,7 @@ def test_valid_player():
            has_turn=True
         )
         
-    except ValueError as e:
+    except ValueError:
         assert True
 
 
@@ -29,9 +29,9 @@ def test_invalid_mov_cards():
     try:
         mov_cards = []
         fig_cards = []
-        for i in range(4):
+        for _ in range(4):
             mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
-        for i in range(25):
+        for _ in range(25):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
             player_name="Player1",
@@ -42,7 +42,7 @@ def test_invalid_mov_cards():
 
         assert False
         
-    except ValueError as e:
+    except ValueError:
         assert True
 
 
@@ -50,9 +50,9 @@ def test_invalid_fig_cards():
     try:
         mov_cards = []
         fig_cards = []
-        for i in range(3):
+        for _ in range(3):
             mov_cards.append(MovCard(mov_type=random.choice(list(MovType))))
-        for i in range(26):
+        for _ in range(26):
             fig_cards.append(FigCard(card_color=CardColor.WHITE, fig_type=random.choice(white_figs), is_visible=False))
         Player(
             player_name="Player1",
@@ -62,5 +62,5 @@ def test_invalid_fig_cards():
         )
         assert False
         
-    except ValueError as e:
+    except ValueError:
         assert True

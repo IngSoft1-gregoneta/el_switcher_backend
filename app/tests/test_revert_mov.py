@@ -57,7 +57,7 @@ def generate_test_match():
         repo_match.create_match(match_1)
         repo_match.create_match(match_2)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Error al crear partidas en BD"
 
 def test_revert_mov():
     reset()
@@ -111,7 +111,7 @@ def test_revert_without_previous_move():
     revert_response = client.put(f"/revert_movement/{room_id2}/{player.player_name}")
 
     assert revert_response.status_code == 400
-    assert revert_response.json() == {'detail': 'Cannot go back beyond the initial state'}
+    assert revert_response.json() == {'detail': 'No se puede retroceder mas del estado inicial'}
 
 
 def test_revert_not_turn():
@@ -148,7 +148,7 @@ def test_revert_not_turn():
     
     revert_response = client.put(f"/revert_movement/{room_id}/{player_without_turn}")
     assert revert_response.status_code == 400
-    assert revert_response.json() == {'detail': 'Player has not turn'}
+    assert revert_response.json() == {'detail': 'El jugador no tiene el turno'}
 
 
 reset()

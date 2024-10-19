@@ -49,7 +49,7 @@ def test_join_room1():
     generate_test_room()
     player_name = "Tito"
     user_id = uuid4()
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
         expected_response = {
             "room_id": str(room_id),
@@ -73,7 +73,7 @@ def test_same_name():
     user_id = uuid4()
     response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
     expected_response = {
-        "detail": "Player name is already on the room, choose another name"
+        "detail": "Jugador con dicho nombre ya existente en la sala, elija otro"
     }
 
     assert player_name in repo.get_room_by_id(room_id).players_names
@@ -86,7 +86,7 @@ def test_same_name():
 def test_join_room2():
     player_name = "Tadeo"
     user_id = uuid4()
-    with client.websocket_connect(f"/ws/{user_id}") as clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
         expected_response = expected_response = {
             "room_id": str(room_id),
@@ -108,7 +108,7 @@ def test_join_full_room():
     player_name = "Mou"
     user_id = uuid4()
 
-    expected_response = {"detail": "Room is full"}
+    expected_response = {"detail": "Sala llena"}
     response = client.put(f"/rooms/join/{room_id}/{player_name}/{user_id}")
 
     assert repo.get_room_by_id(room_id).players_names == ["Yamil", "Tito", "Tadeo"]

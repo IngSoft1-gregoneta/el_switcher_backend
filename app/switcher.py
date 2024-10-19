@@ -1,6 +1,5 @@
 from models.board import *
 from models.mov_card import *
-import copy 
 
 dim = int(AMOUNT_OF_TILES**0.5)
 
@@ -69,4 +68,4 @@ def coordinates_to_index(x: int, y: int) -> int:
     if 0 <= x < dim and 0 <= y < dim:
         return y * dim + x
     else:
-        raise ValueError("coordinates must be in range 0 to 5")
+        raise ValueError("Coordenadas deben estar en el rango 0-5")

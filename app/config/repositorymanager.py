@@ -1,14 +1,10 @@
 import os
-import uuid
 
 from sqlalchemy import (
     JSON,
-    UUID,
     Boolean,
     Column,
-    ForeignKey,
     Integer,
-    MetaData,
     String,
     create_engine,
 )

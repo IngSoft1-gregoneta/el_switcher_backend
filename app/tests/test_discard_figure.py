@@ -8,7 +8,6 @@ repo = RoomRepository()
 from models.match import *
 from models.room import * 
 from models.visible_match import *
-import switcher 
 
 client = TestClient(app)
 
@@ -59,7 +58,7 @@ def generate_test_match():
         repo_match.create_match(match_1)
         repo_match.create_match(match_2)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Error al crear partidas en BD"
 
 def test_discard_fig():
     reset()
@@ -88,7 +87,7 @@ def test_discard_fig():
         response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == None
-        # check db update
+        # Verificar actualizacion en BD
         after_discard_db_match = repo_match.get_match_by_id(room_id)
         assert len(after_discard_db_match.players[0].fig_cards) == 24 
         visible_fig_cards_count = 0
@@ -96,15 +95,15 @@ def test_discard_fig():
             if card.is_visible: 
                 visible_fig_cards_count += 1
         assert visible_fig_cards_count == 2
-        # check reinit parcial states
+        # Verificar re-inicialización de estados
         after_discard_match = get_parcial_match(room_id)
         assert after_discard_match.state == 0
         visible_match = VisibleMatchData(room_id, player.player_name)
         assert visible_match.me.deck_len == 24
         assert len(visible_match.me.visible_fig_cards) == 2 
-        # these changes should be not confirmed
+        # Estos cambios no deberian confirmarse
         after_discard_match.board = Board()
-        # check player got a new fig card of his deck
+        # Verificar que el jugador obtenga una nueva carta de figura
         response = client.put(f"/matchs/end_turn/{room_id}/{player.player_name}")
         assert response.status_code == status.HTTP_200_OK
         after_end_turn_match = get_parcial_match(room_id)
@@ -115,7 +114,7 @@ def test_discard_fig():
                 visible_fig_cards_count += 1
         assert visible_fig_cards_count == 3
         assert len(after_end_turn_match.players[0].fig_cards) == 24
-        # check tiles after discard fig are the same color
+        # Verificar que el color de las fichas se mantiene luego de descartar figura
         for i in range(36):
             assert init_board.tiles[i].tile_color == after_end_turn_match.board.tiles[i].tile_color
 
@@ -133,7 +132,7 @@ def test_match_not_found():
     y = 0
     response = client.put(f"/discard_figure/{room_id2}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail' : 'Match not found'}
+    assert response.json() == {'detail' : 'Partida no encontrada'}
 
 def test_player_not_found():
     reset()
@@ -142,14 +141,13 @@ def test_player_not_found():
     match1 = repo_match.get_match_by_id(room_id)
     add_parcial_match(match1)
     
-    match = get_parcial_match(room_id)
     card_index = 0
     x = 0
     y = 0
     no_player_name = 'Grego'
     response = client.put(f"/discard_figure/{room_id}/{no_player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail' : 'Player not found'}
+    assert response.json() == {'detail' : 'Jugador no encontrado'}
 
 def test_player_no_turn():
     reset()
@@ -165,7 +163,7 @@ def test_player_no_turn():
     y = 0
     response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail' : 'Player has not turn'}
+    assert response.json() == {'detail' : 'El jugador no tiene el turno'}
 
 def test_card_not_found():
     reset()
@@ -181,7 +179,7 @@ def test_card_not_found():
     y = 0
     response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail' : 'Card not found'}
+    assert response.json() == {'detail' : 'Carta de figura no encontrada'}
 
 def test_card_not_visible():
     reset()
@@ -197,7 +195,7 @@ def test_card_not_visible():
     y = 0
     response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail' : 'Card is not visible'}
+    assert response.json() == {'detail' : 'Carta de figura no es visible'}
 
 def test_fig_no_match():
     reset()
@@ -221,7 +219,7 @@ def test_fig_no_match():
     y = 0
     response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail' : 'Fig card not match with figure'}
+    assert response.json() == {'detail' : 'Carta de figura no empareja con la figura'}
 
 def test_invalid_positions():
     reset()
@@ -237,4 +235,4 @@ def test_invalid_positions():
     y = 6
     response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail' : 'Invalid positions'}
+    assert response.json() == {'detail' : 'Posiciones invalidas'}

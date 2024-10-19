@@ -71,7 +71,7 @@ def generate_test_match():
     except:
         assert False, f"Creando mal matchs en db"
 
-
+# Fin de turno para partidas de 2-3-4 jugadores
 def verify_test_ok(match_id):
     match = repo_match.get_match_by_id(match_id)
     add_parcial_match(match)
@@ -126,7 +126,7 @@ def test_endturn_in_match_of_4_players():
     verify_test_ok(match_id=match_id)
     reset()
 
-
+# Finalizar turno para partida no encontrada
 def test_end_turn_no_match():
     reset()
     generate_test_room()
@@ -135,10 +135,10 @@ def test_end_turn_no_match():
     player_name = "Braian"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Match not found"}
+    assert response.json() == {"detail": "Partida no encontrada"}
     reset()
 
-
+# Finalizar turno para jugador no encontrado
 def test_end_turn_no_player():
     reset()
     generate_test_room()
@@ -147,10 +147,10 @@ def test_end_turn_no_player():
     player_name = "Yamil"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Player not found"}
+    assert response.json() == {"detail": "Jugador no encontrado"}
     reset()
 
-
+# Finalizar turno para jugador sin turno
 def test_end_turn_player_has_no_turn():
     reset()
     generate_test_room()
@@ -159,7 +159,7 @@ def test_end_turn_player_has_no_turn():
     player_name = "Tadeo"
     response = client.put(f"/matchs/end_turn/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Player has not the turn"}
+    assert response.json() == {"detail": "El jugador no posee el turno"}
     reset()
 
 # Si un jugador abandona la partida con turno, no deberia perderse

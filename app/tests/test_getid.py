@@ -1,8 +1,7 @@
 from uuid import *
 
-from fastapi import status
 from fastapi.testclient import TestClient
-from main import app, manager
+from main import app
 from models.room import *
 
 client = TestClient(app)

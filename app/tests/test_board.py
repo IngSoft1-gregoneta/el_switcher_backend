@@ -10,24 +10,24 @@ except ValueError as e:
     print(f"Error: {e}")
 
 def test_board_size():
-    # Verify there are 36 tiles
-    assert len(board.tiles) == 36, f"Expected 36 tiles, found {len(board.tiles)}"
+    # Verificamos que hayan 36 fichas
+    assert len(board.tiles) == 36, f"Se esperaban 36 fichas, cantidad actual: {len(board.tiles)}"
 
 def test_dup_tiles():            
-    # Verify any tile has a same position
+    # Verificamos que cada ficha tenga una unica posicion
     positions = [(tile.tile_pos_x, tile.tile_pos_y) for tile in board.tiles]
     unique_positions = set(positions)
-    assert len(positions) == len(unique_positions), "Found tiles with duplicate positions (both x and y)"
+    assert len(positions) == len(unique_positions), "Se encontraron fichas con posiciones iguales (en x & en y)"
 
 def test_range_tiles(): 
-    # Verify all tile positions are in range [0,6)
+    # Verificamos que todas las posiciones sean del rango [0,6)
     positions = [(tile.tile_pos_x, tile.tile_pos_y) for tile in board.tiles]    
     for pos_x, pos_y in positions:
         assert 0 <= pos_x <= 5, f"Tile pos_x {pos_x} out of range"
         assert 0 <= pos_y <= 5, f"Tile pos_y {pos_y} out of range"
             
 def test_board_colors():
-    # Verify there are 9 tiles for each color
+    # Verificamos que haya 9 fichas por color
     color_counts = Counter(tile.tile_color for tile in board.tiles)
     assert color_counts[TileColor.RED] == 9, f"Expected 9 red tiles, found {color_counts[TileColor.RED]}"
     assert color_counts[TileColor.YELLOW] == 9, f"Expected 9 yellow tiles, found {color_counts[TileColor.YELLOW]}"

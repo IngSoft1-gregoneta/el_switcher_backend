@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID, uuid1
 
 from config.repositorymanager import Room, Session
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class RoomIn(BaseModel):
@@ -50,7 +50,7 @@ class RoomRepository:
         finally:
             db.close()
 
-    # Fetch room by id or return None if the room was not found
+    # Extrae sala por id o devuelve None si no encuentra la sala
     def get_room_by_id(self, room_id: UUID) -> RoomOut | None:
         db = Session()
         try:
@@ -69,7 +69,7 @@ class RoomRepository:
         finally:
             db.close()
 
-    # Methods are: add, remove
+    # Metodos posibles: add, remove
     def update_players(
         self, players: List[str], player_name: str, room_id: UUID, method: str
     ):

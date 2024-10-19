@@ -68,7 +68,7 @@ def generate_test_match_without_winner():
     except:
         assert False, f"Partida no creada en db"
 
-
+# Ganador por descarte de mazo de cartas de figura
 def test_check_winner_ok():
     reset()
     generate_test_room()
@@ -81,7 +81,7 @@ def test_check_winner_ok():
     add_parcial_match(match)
 
     expected_response = VisibleMatchData(match_id, player_name)
-        
+    
     user_id = uuid4()
     with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room1_id, user_id)
@@ -93,6 +93,7 @@ def test_check_winner_ok():
     assert expected_response.winner != winner
     reset()
 
+# Ningun ganador
 def test_check_winner_nobody():
     reset()
     generate_test_room()
@@ -116,6 +117,7 @@ def test_check_winner_nobody():
     assert expected_response != None
     reset()
 
+# Ganador por abandono del resto de jugadores
 def test_check_winner_by_quitting():
     reset()
     generate_test_room()
@@ -161,7 +163,6 @@ def test_check_winner_by_quitting():
         data = Clientwebsocket.receive_text()
         assert data == "LISTA"
 
-    # Victoria por abandono
     add_parcial_match(match)
     expected_response = VisibleMatchData(match_id, player_name)
 

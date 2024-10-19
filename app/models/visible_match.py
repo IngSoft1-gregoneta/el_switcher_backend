@@ -183,17 +183,17 @@ class VisibleMatchData(BaseModel):
         match = get_parcial_match(match_id)
         if match is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                                detail=f"Match not found")
+                                detail=f"Partida no encontrada")
         player = match.get_player_by_name(player_name)
         if player is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                                detail=f"Player {player_name} not found")
+                                detail=f"Jugador {player_name} no encontrado")
         
     def get_winner(self, match_id):
         match = get_parcial_match(match_id=match_id)
         if match is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                                detail=f"Match not found")
+                                detail=f"Partida no encontrada")
         if len(match.players) == 1:
             return match.players[0]
         for player in match.players:

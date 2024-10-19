@@ -1,4 +1,4 @@
-from typing import Any, Union, Dict, List
+from typing import Union, List
 from uuid import UUID
 import copy
 from fastapi import HTTPException, status
@@ -19,12 +19,12 @@ class MatchHandler:
             room = repo_room.get_room_by_id(match_id)
             if room is None:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Sala no encontrada"
                 )
             if room.owner_name != owner_name:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only the owner can create a match",
+                    detail="Solo el creador de la sala puede crear la partida",
                 )
             match = MatchOut(match_id)
             repo_room.delete(match_id)
@@ -78,17 +78,17 @@ class MatchHandler:
         try:
             match = self.repo.get_match_by_id(match_id)
             if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Match not found')
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada")
             player = match.get_player_by_name(player_name)    
             if player is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Player not found')
-            if player.has_turn: # parcial match must be reinit
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")
+            if player.has_turn: # Estado parcial debe ser reinicializado
                 self.repo.delete_player(match_id, player_name)
                 match = self.repo.get_match_by_id(match_id)
                 state_handler.empty_parcial_states(match_id)
                 if match:
                     state_handler.add_parcial_match(match)
-            else: # the turned player continue playing
+            else: # Jugador con turno debe seguir jugando
                 self.repo.delete_player(match_id, player_name)
                 match = self.repo.get_match_by_id(match_id)
                 if match:
@@ -128,12 +128,12 @@ class MatchHandler:
             state_handler.empty_parcial_states(match_id)
             match = self.repo.get_match_by_id(match_id)
             if match is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada")
             target_player = match.get_player_by_name(player_name)
             if target_player is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")
             if target_player.has_turn is False:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player has not the turn")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El jugador no posee el turno")
             self.repo.end_turn(match=match, player_name=player_name)
             state_handler.add_parcial_match(match)
             return match
@@ -148,18 +148,18 @@ class MatchHandler:
     async def do_parcial_mov(self, match_id: UUID, player_name: str, card_index: int, x1: int, y1: int, x2: int, y2:int):
         match = state_handler.get_parcial_match(match_id)
         if match is None: 
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada")   
         new_match = copy.deepcopy(match)
         player = new_match.get_player_by_name(player_name)
         if player is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")   
         if not player.has_turn:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El jugador no posee el turno")   
         if card_index < 0 or card_index >= len(player.mov_cards):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Carta de figura no encontrada")   
         mov_card = player.mov_cards[card_index]
         if mov_card.is_used:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is used")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Carta de movimiento en uso")   
         if switcher.is_valid_movement(mov_card.mov_type, x1, y1, x2, y2):
             switcher.switch(new_match.board, mov_card.mov_type, x1, y1, x2, y2)
             fig_types = self.get_valid_fig_types(new_match)
@@ -167,37 +167,37 @@ class MatchHandler:
             mov_card.use_mov_card()
             state_handler.add_parcial_match(new_match)
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid movement")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Movimiento invalido")
 
     async def revert_mov(self, match_id: UUID, player_name: str):
         match = state_handler.get_parcial_match(match_id)
         if match is None: 
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found") 
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada") 
         new_match = copy.deepcopy(match)
         player = new_match.get_player_by_name(player_name)
         if player is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")   
         if not player.has_turn:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El jugador no tiene el turno")   
         if new_match.state == 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot go back beyond the initial state")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se puede retroceder mas del estado inicial")
         state_handler.remove_last_parcial_match(match_id)   
          
     async def discard_fig(self, match_id: UUID, player_name: str, card_index: int, x: int, y: int):
         match = state_handler.get_parcial_match(match_id)
         if match is None: 
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partida no encontrada")   
         new_match = copy.deepcopy(match)
         player = new_match.get_player_by_name(player_name)
         if player is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")   
         if not player.has_turn:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El jugador no tiene el turno")   
         if card_index < 0 or card_index >= len(player.fig_cards):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")   
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Carta de figura no encontrada")   
         fig_card = player.fig_cards[card_index]
         if not fig_card.is_visible:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not visible")   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Carta de figura no es visible")   
         if switcher.pos_in_range(x, y):
             tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
             if tile.tile_in_figure == fig_card.fig_type:
@@ -208,6 +208,6 @@ class MatchHandler:
                 state_handler.empty_parcial_states(match_id)
                 state_handler.add_parcial_match(new_match)
             else:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fig card not match with figure")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Carta de figura no empareja con la figura")
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid positions")    
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Posiciones invalidas")    

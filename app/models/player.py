@@ -15,9 +15,9 @@ class Player(BaseModel):
 
     def validate(self):
         if not (0 <= len(self.mov_cards) <= 3):
-            raise ValueError('mov_cards list must contain between 0 and 3 items')
+            raise ValueError('Lista mov_cards debe tener entre 0 y 3 items')
         if not (0 <= len(self.fig_cards) <= 25):
-            raise ValueError('fig_cards list must contain between 0 and 25 items')
+            raise ValueError('Lista fig_cards debe tener entre 0 y 25 items')
         
     def hand_mov_cards(self):
         for mov_card in self.mov_cards:

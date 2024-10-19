@@ -28,7 +28,7 @@ class MovCard(BaseModel):
 
     def validate_mov_type(self):
         if self.mov_type not in MovType:
-            raise ValueError(f"Invalid mov type, {self.mov_type} is not a MovType")
+            raise ValueError(f"Tipo de movimiento invalido, {self.mov_type} no es un MovType")
 
     def create_random_mov(self):
         self.mov_type =  random.choice(list(MovType)).value

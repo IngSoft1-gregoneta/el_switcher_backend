@@ -41,7 +41,7 @@ def generate_test_match():
         match = MatchOut(match_id=room_id)
         repo_match.create_match(match)
     except:
-        assert False, f"Creando mal match en db"
+        assert False, f"Error al crear partida en BD"
 
 def test_leave_from_match_of_4_players():
     reset()
@@ -54,7 +54,7 @@ def test_leave_from_match_of_4_players():
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -73,7 +73,7 @@ def test_leave_from_match_of_3_players():
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -92,7 +92,7 @@ def test_leave_from_match_of_2_players():
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -108,7 +108,7 @@ def test_no_player_leave_from_match():
     user_id = uuid4()
     response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Player not found"}
+    assert response.json() == {"detail": "Jugador no encontrado"}
 
 def test_leave_from_no_match():
     room_id = uuid1()
@@ -116,12 +116,12 @@ def test_leave_from_no_match():
     user_id = uuid4()
     response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Match not found"}
+    assert response.json() == {"detail": "Partida no encontrada"}
 
 def test_leave_and_destroy_match_of_a_player():
     player_name = "Facu"
     user_id = uuid4()
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         assert repo_match.get_match_by_id(room_id) is None
@@ -140,7 +140,7 @@ def test_player_turn_leave_with_parcial_state():
     for player in match.players:
         if player.player_name == player_name:
             player_deleted = player
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id,user_id)
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")    
         match = repo_match.get_match_by_id(room_id)

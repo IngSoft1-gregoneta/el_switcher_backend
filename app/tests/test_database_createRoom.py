@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -26,12 +26,12 @@ def test_create_room_1_player():
     roomIn = RoomIn(
         room_name=room_name, players_expected=players_expected, owner_name=owner_name
     )
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         response = client.post(
             f"/rooms/create_room/{user_id}", json=roomIn.model_dump()
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json() == {"detail": "Wrong amount of players"}
+        assert response.json() == {"detail": "Cantidad equivocada de jugadores"}
         assert repo.get_room_by_id(1) == None
 
 
@@ -43,12 +43,12 @@ def test_create_room_5_players():
     roomIn = RoomIn(
         room_name=room_name, players_expected=players_expected, owner_name=owner_name
     )
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         response = client.post(
             f"/rooms/create_room/{user_id}", json=roomIn.model_dump()
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json() == {"detail": "Wrong amount of players"}
+        assert response.json() == {"detail": "Cantidad equivocada de jugadores"}
         assert repo.get_room_by_id(1) == None
 
 
@@ -60,7 +60,7 @@ def test_create_room_ok():
     roomIn = RoomIn(
         room_name=room_name, players_expected=players_expected, owner_name=owner_name
     )
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         response = client.post(
             f"/rooms/create_room/{user_id}", json=roomIn.model_dump()
         )

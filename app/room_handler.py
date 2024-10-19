@@ -1,12 +1,10 @@
-from typing import Any, Union, List
+from typing import Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from manager.manager import ConnectionManager
 
-# from manager.manager import ConnectionManager
 from models.room import RoomIn, RoomOut, RoomRepository
-from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
 
@@ -29,18 +27,18 @@ class RoomHandler:
         if new_room.players_expected < 2 or new_room.players_expected > 4:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Wrong amount of players",
+                detail="Cantidad equivocada de jugadores",
             )
 
         if self.repo.check_for_names(new_room.room_name):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Room name already exists",
+                detail="Nombre de sala ya en uso",
             )
 
         return self.repo.create_room(new_room)
 
-    async def join_room(self, room_id: UUID, player_name: str, user_id: UUID):
+    async def join_room(self, room_id: UUID, player_name: str):
         try:
             room = self.repo.get_room_by_id(room_id)
             if room is None:
@@ -48,20 +46,19 @@ class RoomHandler:
 
             if len(room.players_names) == room.players_expected:
                 raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+                    status_code=status.HTTP_409_CONFLICT, detail="Sala llena"
                 )
 
             if player_name in room.players_names:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="Player name is already on the room, choose another name",
+                    detail="Jugador con dicho nombre ya existente en la sala, elija otro",
                 )
 
             self.repo.update_players(room.players_names, player_name, room_id, "add")
             return self.repo.get_room_by_id(room_id)
 
         except HTTPException as http_exc:
-            # si es una HTTPException, dejamos que pase como está
             raise http_exc
 
     async def leave_room(
@@ -85,5 +82,4 @@ class RoomHandler:
             return self.repo.get_room_by_id(room_id)
 
         except HTTPException as http_exc:
-            # si es una HTTPException, dejamos que pase como está
             raise http_exc

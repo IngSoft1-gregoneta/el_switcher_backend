@@ -28,7 +28,6 @@ class ConnectionManager:
         conn = Connection(user_id, websocket)
         await websocket.accept()
         self.active_connections[user_id] = conn
-        # print("CONN ", self.active_connections)
 
     def disconnect(self, user_id: UUID | int):
         # TODO: think another way  this should be sooo slow
@@ -54,14 +53,13 @@ class ConnectionManager:
     async def send_personal_message_id(self, user_id: UUID | int, message: str):
         try:
             await self.active_connections[user_id].get_ws().send_text(message)
-        except Exception as e:
+        except Exception:
             return
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:
-            # print(user_id, " ", message)
             try:
-                # If ws of user_id disconnect we shoulnt send a message
+                # If ws of user_id disconnect we shouldnt send a message
                 await self.send_personal_message_id(user_id, message)
             except Exception as e:
                 return
@@ -90,21 +88,21 @@ class ConnectionManager:
             return
 
     async def leave(self, room_id: UUID | int, user_id: UUID):
-        # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
+        # TODO: Mock WS asi no usamos try, o mas bien los usamos para reconectar
         try:
             self.unbind_room(room_id, user_id)
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "ROOM")
-        except Exception as e:
+        except Exception:
             return  # Esto es para propositos de evitar el error:1
 
     async def leave_match(self, room_id: UUID | int, user_id: UUID):
-        # TODO: Mock WS asi no usamos trry, o mas bien los usamos para reconectar
+        # TODO: Mock WS asi no usamos try, o mas bien los usamos para reconectar
         try:
             self.unbind_room(room_id, user_id)
             await self.broadcast_not_playing("LISTA")
             await self.broadcast_by_room(room_id, "MATCH")
-        except Exception as e:
+        except Exception:
             return
 
     async def create(self, room_id: UUID | int, user_id: UUID):

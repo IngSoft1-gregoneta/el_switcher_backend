@@ -68,7 +68,7 @@ def generate_test_match():
         repo_match.create_match(match_2)
         repo_match.create_match(match_3)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Error al crear partidas en BD"
 
 
 def verify_test_ok(match_id: UUID, player_name: str):
@@ -134,7 +134,7 @@ def test_get_visible_data_in_no_match():
     player_name = "Yamil"
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': 'Match not found'}
+    assert response.json() == {'detail': 'Partida no encontrada'}
     try:
         VisibleMatchData(match_id=match_id,player_name=player_name)
     except:
@@ -148,7 +148,7 @@ def test_get_visible_data_of_match_by_no_player():
     player_name = "Yamil"
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': f'Player {player_name} not found'}
+    assert response.json() == {'detail': f'Jugador {player_name} No encontrado'}
     try:
         VisibleMatchData(match_id=match_id,player_name=player_name)
     except:

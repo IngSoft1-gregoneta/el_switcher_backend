@@ -55,7 +55,7 @@ def generate_test_match():
         repo_match.create_match(match_1)
         repo_match.create_match(match_2)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Partidas mal creadas en BD"
 
 def test_move_ok():
     reset()
@@ -77,7 +77,7 @@ def test_move_ok():
         x2 = random.randrange(0,5)
         x2 = x1 + card.vectors[0][0]
         y2 = y1 + card.vectors[0][1]
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
         match = get_parcial_match(room_id)
@@ -94,12 +94,12 @@ def test_move_used():
     y1 = 3
     x2 = x1 + card.vectors[0][0]
     y2 = y1 + card.vectors[0][1]
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         expected_response = {
-        "detail": "Card is used"
+        "detail": "Carta de movimiento en uso"
         }
         assert response.json() == expected_response
         
@@ -117,12 +117,12 @@ def test_Bad_move():
     y1 = 3
     x2 = x1
     y2 = y1
-    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+    with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/parcial_move/{room_id}/{player.player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         expected_response = {
-        "detail": "Invalid movement"
+        "detail": "Movimiento invalido"
         }
         assert response.json() == expected_response
         
@@ -133,7 +133,7 @@ def test_match_doesnt_exist():
     response = client.put(f"/parcial_move/{uuid1()}/{'tadeo'}/{3}/{5}/{6}/{7}/{8}")
     assert(response.status_code == status.HTTP_404_NOT_FOUND)
     expected_response = {
-        "detail": "Match not found"
+        "detail": "Partida no encontrada"
     }
     assert(response.json() == expected_response)
     
@@ -147,7 +147,7 @@ def test_player_doesnt_exist():
     response = client.put(f"/parcial_move/{room2_id}/{'Jorge'}/{3}/{5}/{6}/{7}/{8}")
     assert(response.status_code == status.HTTP_404_NOT_FOUND)
     expected_response = {
-        "detail": "Player not found"
+        "detail": "Jugador no encontrado"
     }
     assert(response.json() == expected_response)
     
@@ -161,7 +161,7 @@ def test_player_doesnt_has_turn():
     response = client.put(f"/parcial_move/{room2_id}/{'Tadeo'}/{3}/{5}/{6}/{7}/{8}")
     assert(response.status_code == status.HTTP_400_BAD_REQUEST)
     expected_response = {
-        "detail": "Player has not turn"
+        "detail": "El jugador no posee el turno"
     }
     assert(response.json() == expected_response)
     
@@ -175,6 +175,6 @@ def test_player_bad_card():
     response = client.put(f"/parcial_move/{room2_id}/{'Braian'}/{7}/{5}/{6}/{7}/{8}")
     assert(response.status_code == status.HTTP_404_NOT_FOUND)
     expected_response = {
-        "detail": "Card not found"
+        "detail": "Carta de figura no encontrada"
     }
     assert(response.json() == expected_response)

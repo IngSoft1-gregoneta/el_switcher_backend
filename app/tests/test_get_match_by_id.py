@@ -69,7 +69,7 @@ def generate_test_match():
         repo_match.create_match(match_2)
         repo_match.create_match(match_3)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Error al crear partidas en BD"
 
 def test_get_match_1():
     reset()
