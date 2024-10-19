@@ -154,6 +154,7 @@ async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
 async def create_match_endpoint(match_id: UUID, owner_name: str):
     match = await match_handler.create_match(match_id, owner_name)
     await manager.broadcast_by_room(match_id, "MATCH")
+    await manager.broadcast("LISTA")
     return match
 
 

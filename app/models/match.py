@@ -35,7 +35,7 @@ class MatchOut(BaseModel):
         if rooms_whit_match_id != 1:
             raise ValueError("Debe haber exactamente 1 sala por partida")  
         if not len(room_of_match["players_names"]) in range(2, 5):
-            raise ValueError("Cantidad de jugadores invalida: Rango: 2-4") 
+            raise ValueError("Debe haber una cantidad de jugadores en el rango (2,4)") 
         if room_of_match["players_expected"] != len(room_of_match["players_names"]):
             raise ValueError("Debe haber una cantidad exacta de jugadores con respecto a la esperada")  
         return room_of_match["players_names"]

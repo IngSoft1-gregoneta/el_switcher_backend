@@ -214,5 +214,5 @@ def test_create_match_not_owner():
     owner_name = "Tadeo"
     response = client.post(f"/matchs/create_match/{room_id}/{owner_name}")
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json() == {"detail": "Solo el dueño de la sala puede crear la partida"}
+    assert response.json() == {"detail": "Solo el creador de la sala puede crear la partida"}
     reset()

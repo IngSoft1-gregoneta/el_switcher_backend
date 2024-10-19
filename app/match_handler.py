@@ -39,7 +39,7 @@ class MatchHandler:
         except ValueError as ve:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Bad request: {str(ve)}",
+                detail=f"{str(ve)}",
             )
         except Exception as e:
             if isinstance(e, HTTPException):

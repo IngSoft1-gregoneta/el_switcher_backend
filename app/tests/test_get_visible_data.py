@@ -148,7 +148,7 @@ def test_get_visible_data_of_match_by_no_player():
     player_name = "Yamil"
     response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': f'Jugador {player_name} No encontrado'}
+    assert response.json() == {'detail': f'Jugador {player_name} no encontrado'}
     try:
         VisibleMatchData(match_id=match_id,player_name=player_name)
     except:
