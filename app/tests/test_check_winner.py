@@ -90,7 +90,7 @@ def test_check_winner_ok():
 
     assert response.json() == expected_response.model_dump(mode="json")
     winner = match.get_player_by_name("Braian")
-    assert expected_response.winner != winner
+    assert expected_response.winner == winner
     reset()
 
 def test_check_winner_nobody():
@@ -113,7 +113,7 @@ def test_check_winner_nobody():
         assert response.status_code == status.HTTP_200_OK
 
     assert response.json() == expected_response.model_dump(mode="json")
-    assert expected_response != None
+    assert expected_response.winner == None
     reset()
 
 def test_check_winner_by_quitting():
@@ -125,6 +125,7 @@ def test_check_winner_by_quitting():
     player_name = "Braian"
 
     match = repo_match.get_match_by_id(match_id)
+    add_parcial_match(match)
 
     player2_name = "Tadeo"
     player3_name = "Yamil"
@@ -162,7 +163,6 @@ def test_check_winner_by_quitting():
         assert data == "LISTA"
 
     # Victoria por abandono
-    add_parcial_match(match)
     expected_response = VisibleMatchData(match_id, player_name)
 
     user_id = uuid4()
@@ -174,5 +174,5 @@ def test_check_winner_by_quitting():
 
     assert response.json() == expected_response.model_dump(mode="json")
     winner = match.get_player_by_name(player_name)
-    assert expected_response.winner != winner
+    assert expected_response.winner == winner
     reset()
