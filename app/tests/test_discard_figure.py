@@ -199,6 +199,23 @@ def test_card_not_visible():
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail' : 'Card is not visible'}
 
+def test_card_is_blocked():
+    reset()
+    generate_test_room()
+    generate_test_match()
+    match1 = repo_match.get_match_by_id(room_id)
+    add_parcial_match(match1)
+    
+    match = get_parcial_match(room_id)
+    player = match.get_player_by_name(match.players[0].player_name)
+    card_index = 2
+    x = 0
+    y = 0
+    player.fig_cards[card_index].is_blocked = True
+    response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail' : 'Card is blocked'}
+
 def test_fig_no_match():
     reset()
     generate_test_room()

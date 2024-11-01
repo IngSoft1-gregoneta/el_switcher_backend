@@ -83,7 +83,8 @@ class MatchOut(BaseModel):
             new_fig_card = FigCard(
                 card_color=CardColor.WHITE,
                 fig_type=fig_type,
-                is_visible=False
+                is_visible=False,
+                is_blocked=False
             )
             fig_cards.append(new_fig_card)
         for i in range(blue_per_player):
@@ -91,7 +92,8 @@ class MatchOut(BaseModel):
             new_fig_card = FigCard(
                 card_color=CardColor.BLUE,
                 fig_type=fig_type,
-                is_visible=False
+                is_visible=False,
+                is_blocked=False
             )
             fig_cards.append(new_fig_card)
             random.shuffle(fig_cards)
@@ -185,7 +187,10 @@ class MatchRepository:
                     fig_cards_db.append(FigCard.model_construct(
                         card_color= CardColor(fig_card["card_color"]).value,
                         fig_type = FigType(fig_card["fig_type"]).value,
-                        is_visible = fig_card["is_visible"]))
+                        is_visible = fig_card["is_visible"],
+                        is_blocked = fig_card["is_blocked"]
+                        )
+                    )
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
                     card = MovCard(
@@ -242,7 +247,12 @@ class MatchRepository:
         for i in range(len(match.players)):
             if match.players[i].player_name == player_name:
                 match.players[i].hand_mov_cards()
-                match.players[i].hand_fig_cards()
+                has_cards_blocked = False
+                for fig_card in match.players[i].fig_cards:
+                    if fig_card.is_blocked:
+                        has_cards_blocked = True
+                if not has_cards_blocked:
+                    match.players[i].hand_fig_cards()
                 match.players[i].has_turn = False # this player
                 match.players[(i+1)%len(match.players)].has_turn = True # next player
                 match.state = 0

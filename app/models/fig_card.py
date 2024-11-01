@@ -43,9 +43,9 @@ class FigCard(BaseModel):
     card_color: CardColor
     fig_type: FigType
     is_visible: bool
-
-    def __init__(self, card_color: CardColor, fig_type: FigType, is_visible: bool):
-        super().__init__(card_color=card_color, fig_type=fig_type, is_visible=is_visible)
+    is_blocked: bool
+    def __init__(self, card_color: CardColor, fig_type: FigType, is_visible: bool, is_blocked: bool):
+        super().__init__(card_color=card_color, fig_type=fig_type, is_visible=is_visible, is_blocked=is_blocked)
         self.validate_card()
 
     def validate_card(self):
