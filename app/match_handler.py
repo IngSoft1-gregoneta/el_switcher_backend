@@ -53,7 +53,7 @@ class MatchHandler:
         fig_types: List[str] = []    
         for player in match.players:
             for i in range(len(player.fig_cards)):
-                if player.fig_cards[i].is_visible:
+                if player.fig_cards[i].is_visible and player.fig_cards[i].is_blocked:
                     fig_types.append(player.fig_cards[i].fig_type)
         return fig_types
 
@@ -198,6 +198,8 @@ class MatchHandler:
         fig_card = player.fig_cards[card_index]
         if not fig_card.is_visible:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not visible")   
+        if fig_card.is_blocked:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is blocked")   
         if switcher.pos_in_range(x, y):
             tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
             if tile.tile_in_figure == fig_card.fig_type:

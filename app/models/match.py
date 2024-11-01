@@ -83,7 +83,8 @@ class MatchOut(BaseModel):
             new_fig_card = FigCard(
                 card_color=CardColor.WHITE,
                 fig_type=fig_type,
-                is_visible=False
+                is_visible=False,
+                is_blocked=False
             )
             fig_cards.append(new_fig_card)
         for i in range(blue_per_player):
@@ -91,7 +92,8 @@ class MatchOut(BaseModel):
             new_fig_card = FigCard(
                 card_color=CardColor.BLUE,
                 fig_type=fig_type,
-                is_visible=False
+                is_visible=False,
+                is_blocked=False
             )
             fig_cards.append(new_fig_card)
             random.shuffle(fig_cards)
@@ -183,7 +185,10 @@ class MatchRepository:
                     fig_cards_db.append(FigCard.model_construct(
                         card_color= CardColor(fig_card["card_color"]).value,
                         fig_type = FigType(fig_card["fig_type"]).value,
-                        is_visible = fig_card["is_visible"]))
+                        is_visible = fig_card["is_visible"],
+                        is_blocked = fig_card["is_blocked"]
+                        )
+                    )
                 mov_cards_db = []
                 for mov_card in player_data_mov_cards:
                     card = MovCard(
