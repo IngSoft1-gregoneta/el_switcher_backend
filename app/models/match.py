@@ -245,7 +245,12 @@ class MatchRepository:
         for i in range(len(match.players)):
             if match.players[i].player_name == player_name:
                 match.players[i].hand_mov_cards()
-                match.players[i].hand_fig_cards()
+                has_cards_blocked = False
+                for fig_card in match.players[i].fig_cards:
+                    if fig_card.is_blocked:
+                        has_cards_blocked = True
+                if not has_cards_blocked:
+                    match.players[i].hand_fig_cards()
                 match.players[i].has_turn = False # this player
                 match.players[(i+1)%len(match.players)].has_turn = True # next player
                 match.state = 0

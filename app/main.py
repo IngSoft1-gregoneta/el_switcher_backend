@@ -33,11 +33,8 @@ app.add_middleware(
 
 manager = ConnectionManager()
 
-# instancia de RoomHandler para manejar la lógica de los endpoints de room
 room_handler = RoomHandler()
-
 match_handler = MatchHandler()
-
 
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
@@ -261,6 +258,19 @@ async def revert_movement(match_id: UUID, player_name: str):
 async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: int, y: int):
     try:
         await match_handler.discard_fig(match_id, player_name, card_index, x, y)
+        await manager.broadcast_by_room(match_id, "MATCH")
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
+    
+@app.put("/block_figure/{match_id}/{player_name}/{other_player_name}/{card_index}/{x}/{y}")
+async def block_figure(match_id: UUID, player_name: str, other_player_name: str, card_index: int, x: int, y: int):
+    try:
+        await match_handler.block_fig(match_id, player_name, other_player_name, card_index, x, y)
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc

@@ -53,7 +53,7 @@ class MatchHandler:
         fig_types: List[str] = []    
         for player in match.players:
             for i in range(len(player.fig_cards)):
-                if player.fig_cards[i].is_visible and player.fig_cards[i].is_blocked:
+                if player.fig_cards[i].is_visible and not player.fig_cards[i].is_blocked:
                     fig_types.append(player.fig_cards[i].fig_type)
         return fig_types
 
@@ -212,4 +212,40 @@ class MatchHandler:
             else:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fig card not match with figure")
         else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid positions")  
+
+    async def block_fig(self, match_id: UUID, player_name: str, other_player_name: str, card_index: int, x: int, y: int):
+        match = state_handler.get_parcial_match(match_id)
+        if match is None: 
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")   
+        new_match = copy.deepcopy(match)
+        player = new_match.get_player_by_name(player_name)
+        if player is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")   
+        other_player = new_match.get_player_by_name(other_player_name)
+        if other_player is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Other player not found")   
+        if not player.has_turn:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player has not turn")   
+        if card_index < 0 or card_index >= len(player.fig_cards):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")   
+        other_fig_card = other_player.fig_cards[card_index]
+        if not other_fig_card.is_visible:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not visible")   
+        for fig_card in other_player.fig_cards:
+            if fig_card.is_blocked:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Other player already has blocked cards")   
+        if switcher.pos_in_range(x, y):
+            tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
+            if tile.tile_in_figure == other_fig_card.fig_type:
+                other_fig_card.is_blocked = True
+                fig_types = self.get_valid_fig_types(new_match)
+                new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
+                self.repo.update_match(new_match)
+                state_handler.empty_parcial_states(match_id)
+                state_handler.add_parcial_match(new_match)
+            else:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fig card not match with figure")
+        else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid positions")    
+        
