@@ -206,8 +206,8 @@ class MatchHandler:
             if tile.tile_in_figure == fig_card.fig_type:
                 player.fig_cards.remove(fig_card)
                 fig_types = self.get_valid_fig_types(new_match)
-                new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
                 new_match.board.blocked_color = tile.tile_color
+                new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
                 self.repo.update_match(new_match)
                 state_handler.empty_parcial_states(match_id)
                 state_handler.add_parcial_match(new_match)
@@ -242,6 +242,7 @@ class MatchHandler:
             if tile.tile_in_figure == other_fig_card.fig_type:
                 other_fig_card.is_blocked = True
                 fig_types = self.get_valid_fig_types(new_match)
+                new_match.board.blocked_color = tile.tile_color
                 new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
                 self.repo.update_match(new_match)
                 state_handler.empty_parcial_states(match_id)

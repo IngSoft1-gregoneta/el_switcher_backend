@@ -51,7 +51,7 @@ def test_initially_blocked_color_is_none():
     state_handler.add_parcial_match(match)
     assert match.board.blocked_color == TileColor.NONE.value
 
-def test_blocked_color_change():
+def test_blocked_color_change_on_discard():
     reset()
     user_id = uuid4()
     generate_test_room()
@@ -70,6 +70,34 @@ def test_blocked_color_change():
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room_id,user_id)
         response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is None
+        match_then = state_handler.get_parcial_match(room_id)
+        assert match_then.board.blocked_color == TileColor.BLUE.value
+    reset()
+
+def test_blocked_color_change_on_block():
+    reset()
+    user_id = uuid4()
+    generate_test_room()
+    generate_test_match()
+    match = repo_match.get_match_by_id(room_id)
+    board = match.board
+    card_index = x = y = 0
+    player = match.players[0]
+    other_player = match.players[1]
+    other_player.fig_cards[0].fig_type = FigType.fige06.value
+    for tile in board.tiles:
+        tile.tile_color = TileColor.RED.value
+    for i in range(4):
+        board.tiles[i].tile_color = TileColor.BLUE.value
+    match.board = figure_detector.figures_detector(board, [FigType.fige06.value])
+    state_handler.add_parcial_match(match)
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room_id,user_id)
+        response = client.put(f"/block_figure/{room_id}/{player.player_name}/{other_player.player_name}/{card_index}/{x}/{y}")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is None
         match_then = state_handler.get_parcial_match(room_id)
         assert match_then.board.blocked_color == TileColor.BLUE.value
     reset()

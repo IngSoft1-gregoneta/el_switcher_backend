@@ -1,6 +1,7 @@
 from .match import *
 from match_handler import *
 from state_handler import *
+from typing import Union
 
 match_repository = MatchRepository()
 
