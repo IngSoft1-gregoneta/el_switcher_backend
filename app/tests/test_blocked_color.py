@@ -1,13 +1,16 @@
+from fastapi.testclient import TestClient
 from fastapi import status
 from models.room import *
 from uuid import uuid4
 import state_handler
-
-repo = RoomRepository()
+from match_handler import MatchHandler
+from main import app,manager
+import figure_detector
 
 from models.match import *
 from models.room import * 
 
+client = TestClient(app)
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
@@ -23,9 +26,9 @@ def generate_test_room():
         roombd = Room(
                 room_name="Room 1",
                 room_id=str(room_id),
-                players_expected=4,
+                players_expected=2,
                 owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo","Yamil","Facu"]),
+                players_names=json.dumps(["Braian","Tadeo"]),
                 is_active=True
             )
         db.add(roombd)
@@ -46,5 +49,26 @@ def test_initially_blocked_color_is_none():
     generate_test_match()
     match = repo_match.get_match_by_id(room_id)
     state_handler.add_parcial_match(match)
+    assert match.board.blocked_color == TileColor.NONE.value
+
+def test_blocked_color_change():
     reset()
-    assert match.board.blocked_color == "None"
+    user_id = uuid4()
+    generate_test_room()
+    generate_test_match()
+    match = repo_match.get_match_by_id(room_id)
+    board = match.board
+    card_index = x = y = 0
+    player = match.players[0]
+    player.fig_cards[0].fig_type = FigType.fige06.value
+    for tile in board.tiles:
+        tile.tile_color = TileColor.RED.value
+    for i in range(4):
+        board.tiles[i].tile_color = TileColor.BLUE.value
+    match.board = figure_detector.figures_detector(board, [FigType.fige06.value])
+    state_handler.add_parcial_match(match)
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room_id,user_id)
+        response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
+        match_then = state_handler.get_parcial_match(room_id)
+        assert match_then.board.blocked_color == TileColor.BLUE.value
