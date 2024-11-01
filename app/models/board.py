@@ -1,17 +1,19 @@
 import random
 from typing import List
 from pydantic import BaseModel
-from .tile import *
+from .tile import Tile, TileColor, FigType
 from uuid import UUID 
 
 AMOUNT_OF_TILES = 36
 
 class Board(BaseModel):
+    blocked_color: TileColor
     tiles: List[Tile]
 
     def __init__(self):
+        blocked_color = TileColor.NONE
         tiles = self._create_tiles()
-        super().__init__(tiles=tiles)
+        super().__init__(tiles=tiles, blocked_color=blocked_color)
 
     def _create_tiles(self) -> List[Tile]:
         # Define colors and create list of 9 tiles for each color

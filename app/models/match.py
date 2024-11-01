@@ -142,6 +142,7 @@ class MatchRepository:
                 match_id = str(new_match.match_id),
                 board = board_db,
                 players = players_db,
+                blocked_color = new_match.board.blocked_color.value
                 )
             db.add(matchdb)
             db.commit()
@@ -156,6 +157,7 @@ class MatchRepository:
             if not matchdb:
                 return None
             # Deserializar el tablero
+            blocked_color_data = matchdb.blocked_color
             board_data = matchdb.board
             tiles_db = board_data
             tileslist = []
@@ -167,7 +169,7 @@ class MatchRepository:
                     tile_pos_y=tile["tile_pos_y"]
                 )) 
 
-            board_db = Board.model_construct(tiles = tileslist)
+            board_db = Board.model_construct(blocked_color=blocked_color_data, tiles=tileslist)
 
             # Deserializar jugadores
             players_db = []
@@ -265,6 +267,7 @@ class MatchRepository:
                     match_id = str(match.match_id),
                     board = board_db,
                     players = players_db,
+                    blocked_color = match.board.blocked_color
                     )
                 self.delete(match.match_id)
                 db.add(matchdb)

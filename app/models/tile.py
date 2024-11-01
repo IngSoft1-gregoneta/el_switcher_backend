@@ -7,7 +7,7 @@ class TileColor(Enum):
     YELLOW = 'Yellow'
     GREEN = 'Green'
     BLUE = 'Blue'
-
+    NONE = 'None'
 class Tile(BaseModel):
 
     tile_color: TileColor
