@@ -185,9 +185,7 @@ class MatchHandler:
         state_handler.remove_last_parcial_match(match_id)   
          
     async def discard_fig(self, match_id: UUID, player_name: str, card_index: int, x: int, y: int):
-        print("\nobteniendo match parcial en discard fig")
         match = state_handler.get_parcial_match(match_id)
-        print("realizando validaciones")
         if match is None: 
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")   
         new_match = copy.deepcopy(match)
@@ -202,20 +200,13 @@ class MatchHandler:
         if not fig_card.is_visible:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not visible")   
         if switcher.pos_in_range(x, y):
-            print("obteniendo tile")
             tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
-            print("verificando que la tile sea del tipo de la figura")
             if tile.tile_in_figure == fig_card.fig_type:
-                print("eliminando carta")
                 player.fig_cards.remove(fig_card)
-                print("pasando detector de figuras")
                 fig_types = self.get_valid_fig_types(new_match)
                 new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
-                print("bloqueando color")
                 new_match.board.blocked_color = tile.tile_color
-                print("actualizando match de db")
                 self.repo.update_match(new_match)
-                print("reiniciando estados parciales")
                 state_handler.empty_parcial_states(match_id)
                 state_handler.add_parcial_match(new_match)
             else:

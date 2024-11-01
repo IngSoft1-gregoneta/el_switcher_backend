@@ -72,3 +72,24 @@ def test_blocked_color_change():
         response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
         match_then = state_handler.get_parcial_match(room_id)
         assert match_then.board.blocked_color == TileColor.BLUE.value
+    reset()
+
+def test_figure_detector_no_detect_fig_of_blocked_color():
+    reset()
+    generate_test_room()
+    generate_test_match()
+    match = repo_match.get_match_by_id(room_id)
+    board = match.board
+    board.blocked_color = TileColor.BLUE.value
+    player = match.players[0]
+    player.fig_cards[0].fig_type = FigType.fige06.value
+    for tile in board.tiles:
+        tile.tile_color = TileColor.RED.value
+    for i in range(4):
+        board.tiles[i].tile_color = TileColor.BLUE.value
+    match.board = figure_detector.figures_detector(board, [FigType.fige06.value])
+    state_handler.add_parcial_match(match)
+    match_then = state_handler.get_parcial_match(room_id)
+    for x in range(4):
+        assert match_then.board.tiles[figure_detector.coordinates_to_index(x, 0)].tile_in_figure == FigType.none.value
+    reset()
