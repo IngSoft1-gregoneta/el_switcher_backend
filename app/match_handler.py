@@ -4,6 +4,7 @@ import copy
 from fastapi import HTTPException, status
 from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
+from models.board import *
 from models.visible_match import *
 import figure_detector
 import state_handler
