@@ -205,6 +205,9 @@ class MatchHandler:
             tile = new_match.board.tiles[switcher.coordinates_to_index(x, y)]
             if tile.tile_in_figure == fig_card.fig_type:
                 player.fig_cards.remove(fig_card)
+                visible_fig_cards = self.get_visible_fig_cards(player)
+                if len(visible_fig_cards) == 1 and visible_fig_cards[0].is_blocked: 
+                    player.fig_cards[0].is_blocked = False
                 fig_types = self.get_valid_fig_types(new_match)
                 new_match.board.blocked_color = tile.tile_color
                 new_match.board = figure_detector.figures_detector(new_match.board, fig_types)
@@ -216,6 +219,13 @@ class MatchHandler:
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid positions")  
 
+    def get_visible_fig_cards(self, player: Player) -> List[FigCard]:
+        visible_fig_cards = []
+        for fig_card in player.fig_cards:
+            if fig_card.is_visible:
+                visible_fig_cards.append(fig_card)
+        return visible_fig_cards
+    
     async def block_fig(self, match_id: UUID, player_name: str, other_player_name: str, card_index: int, x: int, y: int):
         match = state_handler.get_parcial_match(match_id)
         if match is None: 
