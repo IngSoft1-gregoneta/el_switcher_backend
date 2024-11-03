@@ -70,7 +70,7 @@ def test_block_figure():
     with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
         response = client.put(f"/block_figure/{room_id}/{player.player_name}/{other_player.player_name}/{card_index}/{x}/{y}")
-        # assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == None
         # check db update
         after_discard_db_match = repo_match.get_match_by_id(room_id)
