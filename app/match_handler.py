@@ -6,6 +6,7 @@ from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.board import *
 from models.visible_match import *
+from models.timer import *
 import figure_detector
 import state_handler
 import switcher
@@ -34,6 +35,7 @@ class MatchHandler:
             fig_types = self.get_valid_fig_types(match)
             match.board = figure_detector.figures_detector(match.board, fig_types)
             state_handler.add_parcial_match(match)
+            await init_timer(match_id)
             self.repo.update_match(match)
             return match.model_dump(mode="json")
 
@@ -127,6 +129,7 @@ class MatchHandler:
     async def end_turn(self, match_id: UUID, player_name: str):
         try:
             state_handler.empty_parcial_states(match_id)
+            await reset_timer(match_id)
             match = self.repo.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
