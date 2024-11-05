@@ -157,7 +157,7 @@ async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
 # endopint to create a match
 @app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
 async def create_match_endpoint(match_id: UUID, owner_name: str):
-    match = await match_handler.create_match(match_id, owner_name)
+    match = await match_handler.create_match(match_id, owner_name,manager)
     await manager.broadcast_by_room(match_id, "MATCH")
     await manager.broadcast("LISTA")
     return match
@@ -216,7 +216,7 @@ async def get_match_data_by_player(
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
 async def end_turn(match_id: UUID, player_name: str):
     try:
-        match = await match_handler.end_turn(match_id, player_name)
+        match = await match_handler.end_turn(match_id, player_name, manager)
         await manager.broadcast_by_room(match_id, "MATCH")
         return match
     except HTTPException as http_exc:
