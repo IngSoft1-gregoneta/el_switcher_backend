@@ -18,7 +18,6 @@ from models.room import *
 from models.visible_match import *
 from room_handler import RoomHandler
 
-
 app = FastAPI()
 
 origins = ["http://localhost:5173", "localhost:5173"]
@@ -35,6 +34,7 @@ manager = ConnectionManager()
 
 room_handler = RoomHandler()
 match_handler = MatchHandler()
+
 
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
@@ -104,13 +104,20 @@ async def create_room_endpoint(new_room: RoomIn, user_id: UUID) -> RoomOut:
 
 
 @app.put(
-    "/rooms/join/{room_id}/{player_name}/{user_id}",
-    response_model=Union[RoomOut, dict],
+    "/rooms/join/{room_id}/{user_id}",
+    response_model=bool,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def join_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
+async def join_room_endpoint(
+    room_id: UUID,
+    user_id: UUID,
+    room_join: RoomJoin,
+) -> bool:
+    password = room_join.password
+    player_name = room_join.player_name
+    print(player_name)
     try:
-        result = await room_handler.join_room(room_id, player_name, user_id)
+        result = await room_handler.join_room(room_id, player_name, user_id, password)
         try:
             await manager.join(room_id, user_id)
         except Exception as e:
@@ -129,10 +136,10 @@ async def join_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
 # endpoint for room leave request
 @app.put(
     "/rooms/leave/{room_id}/{player_name}/{user_id}",
-    response_model=RoomOut | dict | None,
+    response_model=bool,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
+async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID) -> bool:
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
         # Si es none es porq se destruyo la room
@@ -155,7 +162,9 @@ async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID):
 
 
 # endopint to create a match
-@app.post("/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED
+)
 async def create_match_endpoint(match_id: UUID, owner_name: str):
     match = await match_handler.create_match(match_id, owner_name)
     await manager.broadcast_by_room(match_id, "MATCH")
@@ -166,7 +175,7 @@ async def create_match_endpoint(match_id: UUID, owner_name: str):
 @app.get("/matchs/{match_id}")
 async def get_match_data(
     match_id: UUID,
-) -> Union[MatchOut, dict]: 
+) -> Union[MatchOut, dict]:
     return await match_handler.get_match_by_id(match_id)
 
 
@@ -212,7 +221,8 @@ async def get_match_data_by_player(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-    
+
+
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
 async def end_turn(match_id: UUID, player_name: str):
     try:
@@ -225,12 +235,23 @@ async def end_turn(match_id: UUID, player_name: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
-        )     
-    
+        )
+
+
 @app.put("/parcial_move/{match_id}/{player_name}/{card_index}/{x1}/{y1}/{x2}/{y2}")
-async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int, y1: int, x2: int, y2:int):
+async def parcial_mov(
+    match_id: UUID,
+    player_name: str,
+    card_index: int,
+    x1: int,
+    y1: int,
+    x2: int,
+    y2: int,
+):
     try:
-        await match_handler.do_parcial_mov(match_id, player_name, card_index, x1, y1, x2, y2)
+        await match_handler.do_parcial_mov(
+            match_id, player_name, card_index, x1, y1, x2, y2
+        )
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
@@ -239,7 +260,7 @@ async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-    
+
 
 @app.put("/revert_movement/{match_id}/{player_name}")
 async def revert_movement(match_id: UUID, player_name: str):
@@ -253,9 +274,12 @@ async def revert_movement(match_id: UUID, player_name: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-    
+
+
 @app.put("/discard_figure/{match_id}/{player_name}/{card_index}/{x}/{y}")
-async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: int, y: int):
+async def discard_figure(
+    match_id: UUID, player_name: str, card_index: int, x: int, y: int
+):
     try:
         await match_handler.discard_fig(match_id, player_name, card_index, x, y)
         await manager.broadcast_by_room(match_id, "MATCH")
@@ -266,11 +290,23 @@ async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: i
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-    
-@app.put("/block_figure/{match_id}/{player_name}/{other_player_name}/{card_index}/{x}/{y}")
-async def block_figure(match_id: UUID, player_name: str, other_player_name: str, card_index: int, x: int, y: int):
+
+
+@app.put(
+    "/block_figure/{match_id}/{player_name}/{other_player_name}/{card_index}/{x}/{y}"
+)
+async def block_figure(
+    match_id: UUID,
+    player_name: str,
+    other_player_name: str,
+    card_index: int,
+    x: int,
+    y: int,
+):
     try:
-        await match_handler.block_fig(match_id, player_name, other_player_name, card_index, x, y)
+        await match_handler.block_fig(
+            match_id, player_name, other_player_name, card_index, x, y
+        )
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
