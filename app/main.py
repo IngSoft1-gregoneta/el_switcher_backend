@@ -202,7 +202,7 @@ async def get_match_data_by_player(
 ) -> VisibleMatchData:
     try:
         visible_match = await match_handler.get_visible_data_by_player(
-            match_id, player_name
+            match_id, player_name,manager
         )
         return visible_match
     except HTTPException as http_exc:

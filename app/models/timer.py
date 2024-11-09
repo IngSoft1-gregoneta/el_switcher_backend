@@ -35,4 +35,7 @@ async def end_turn_due_to_timer(match_id: UUID,match_handler,manager):
 async def stop_timer(match_id: UUID):
     if match_id in timers:
         del timers[match_id]  # Elimina el temporizador del diccionario
+        
+async def send_timer_message(match_id: UUID, manager):
+    await manager.broadcast_by_room(match_id, f"TIMER: STARTS {str(timers[match_id])}")
             
