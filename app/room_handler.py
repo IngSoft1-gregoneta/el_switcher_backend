@@ -1,4 +1,5 @@
-from typing import Any, Union, List
+from enum import Enum
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -9,6 +10,12 @@ from models.room import RoomIn, RoomOut, RoomRepository
 from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
+
+
+class LeaveResult(Enum):
+    ERROR = -1
+    LEFT = 0
+    DESTROYED = 1
 
 
 class RoomHandler:
@@ -40,50 +47,55 @@ class RoomHandler:
 
         return self.repo.create_room(new_room)
 
-    async def join_room(self, room_id: UUID, player_name: str, user_id: UUID):
-        try:
-            room = self.repo.get_room_by_id(room_id)
-            if room is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    async def join_room(
+        self, room_id: UUID, player_name: str, user_id: UUID, password: Optional[str]
+    ) -> bool:
+        room = self.repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-            if len(room.players_names) == room.players_expected:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT, detail="Room is full"
-                )
+        if len(room.players_names) == room.players_expected:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Room is full"
+            )
 
-            if player_name in room.players_names:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Player name is already on the room, choose another name",
-                )
+        if player_name in room.players_names:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player name is already on the room, choose another name",
+            )
 
-            self.repo.update_players(room.players_names, player_name, room_id, "add")
-            return self.repo.get_room_by_id(room_id)
+        if room.private and not self.repo.verify_password(password, room_id):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Bad password",
+            )
 
-        except HTTPException as http_exc:
-            # si es una HTTPException, dejamos que pase como está
-            raise http_exc
+        result = self.repo.update_players(
+            room.players_names, player_name, room_id, "add"
+        )
+        return result
 
     async def leave_room(
         self, room_id: UUID, player_name: str, user_id: UUID
-    ) -> RoomOut | None:
-        try:
-            room = self.repo.get_room_by_id(room_id)
-            if room is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    ) -> LeaveResult:
+        room = self.repo.get_room_by_id(room_id)
+        if room is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-            if not (player_name in room.players_names):
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if not (player_name in room.players_names):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-            if (
-                player_name == room.owner_name
-            ):  # si el owner abandona la sala, eliminar la sala
-                self.repo.delete(room_id)
-                return None
+        # si el owner abandona la sala, eliminar la sala
+        if player_name == room.owner_name:
+            result = self.repo.delete(room_id)
+            if result:
+                return LeaveResult.DESTROYED
+            return LeaveResult.ERROR
 
-            self.repo.update_players(room.players_names, player_name, room_id, "remove")
-            return self.repo.get_room_by_id(room_id)
-
-        except HTTPException as http_exc:
-            # si es una HTTPException, dejamos que pase como está
-            raise http_exc
+        result = self.repo.update_players(
+            room.players_names, player_name, room_id, "remove"
+        )
+        if result:
+            return LeaveResult.LEFT
+        return LeaveResult.ERROR

@@ -1,11 +1,12 @@
-from uuid import uuid4
 import copy
+from uuid import uuid4
+
+import figure_detector
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app, manager
 from models.match import *
 from models.room import *
-import figure_detector
 
 client = TestClient(app)
 
@@ -29,6 +30,8 @@ def generate_test_room():
             room_id=str(room_id),
             players_expected=2,
             owner_name="Braian",
+            private=False,
+            password=None,
             players_names=json.dumps(["Braian", "Tadeo"]),
             is_active=True,
         )

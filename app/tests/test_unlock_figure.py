@@ -1,12 +1,10 @@
 from fastapi.testclient import TestClient
 from figure_detector import figures_detector
-from models.room import *
-from state_handler import *
 from main import app, manager
-
 from models.match import *
-from models.room import * 
+from models.room import *
 from models.visible_match import *
+from state_handler import *
 
 client = TestClient(app)
 repo_room = RoomRepository()
@@ -15,25 +13,30 @@ repo_match = MatchRepository()
 room_id = uuid1()
 not_room_id = uuid1()
 
+
 def reset():
     repo_room.delete_rooms()
     repo_match.delete_matchs()
+
 
 def generate_test_room():
     db = Session()
     try:
         roombd = Room(
-                room_name="Room 1",
-                room_id=str(room_id),
-                players_expected=2,
-                owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo"]),
-                is_active=True
-            )
+            room_name="Room 1",
+            room_id=str(room_id),
+            players_expected=2,
+            owner_name="Braian",
+            private=False,
+            password=None,
+            players_names=json.dumps(["Braian", "Tadeo"]),
+            is_active=True,
+        )
         db.add(roombd)
         db.commit()
     finally:
-        db.close()    
+        db.close()
+
 
 def generate_test_match():
     try:
@@ -42,13 +45,14 @@ def generate_test_match():
     except:
         assert False, f"Creando mal match en db"
 
+
 def test_discard_fig():
     reset()
     generate_test_room()
     generate_test_match()
     match1 = repo_match.get_match_by_id(room_id)
     add_parcial_match(match1)
-    
+
     user_id = uuid1()
     match = get_parcial_match(room_id)
     for tile in match.board.tiles:
@@ -68,7 +72,9 @@ def test_discard_fig():
     y = 0
     with client.websocket_connect(f"/ws/{user_id}"):
         manager.bind_room(room_id, user_id)
-        response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
+        response = client.put(
+            f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}"
+        )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == None
         # check db update
@@ -78,7 +84,7 @@ def test_discard_fig():
         assert len(db_player.fig_cards) == 23
         visible_fig_cards_count = 0
         for card in db_player.fig_cards:
-            if card.is_visible: 
+            if card.is_visible:
                 visible_fig_cards_count += 1
         assert visible_fig_cards_count == 1
         # check reinit parcial states
@@ -97,10 +103,14 @@ def test_discard_fig():
         assert after_end_turn_match.state == 0
         visible_fig_cards_count = 0
         for card in player.fig_cards:
-            if card.is_visible: 
+            if card.is_visible:
                 visible_fig_cards_count += 1
         assert visible_fig_cards_count == 3
         assert len(player.fig_cards) == 23
         # check tiles after discard fig are the same color
         for i in range(36):
-            assert init_board.tiles[i].tile_color == after_end_turn_match.board.tiles[i].tile_color
+            assert (
+                init_board.tiles[i].tile_color
+                == after_end_turn_match.board.tiles[i].tile_color
+            )
+
