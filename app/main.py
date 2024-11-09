@@ -5,7 +5,14 @@ from typing import Annotated, Any, Optional, Union
 # Unique id
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 
 # Middleware to allow methods from react
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +23,7 @@ from match_handler import MatchHandler
 from models.match import *
 from models.room import *
 from models.visible_match import *
-from room_handler import RoomHandler
+from room_handler import LeaveResult, RoomHandler
 
 app = FastAPI()
 
@@ -139,25 +146,30 @@ async def join_room_endpoint(
     response_model=bool,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def leave_room_endpoint(room_id: UUID, player_name: str, user_id: UUID) -> bool:
+async def leave_room_endpoint(
+    room_id: UUID, player_name: str, user_id: UUID, response: Response
+) -> bool:
     try:
         result = await room_handler.leave_room(room_id, player_name, user_id)
-        # Si es none es porq se destruyo la room
         try:
-            if result == None:
+            if result == LeaveResult.DESTROYED:
                 await manager.destroy_room(room_id)
-            else:
+            if result == LeaveResult.LEFT:
                 await manager.leave(room_id, user_id)
+            if result == LeaveResult.ERROR:
+                response.status_code = status.HTTP_405_METHOD_NOT_ALLOWED
+                return False
         except Exception as e:
             print(e)
-        return result
+            response.status_code = status.HTTP_405_METHOD_NOT_ALLOWED
+            return False
+        return True
     except HTTPException as http_exc:
-        # si es una HTTPException, dejamos que pase como está
         raise http_exc
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail=e,
         )
 
 

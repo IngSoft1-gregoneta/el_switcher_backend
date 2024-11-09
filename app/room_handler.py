@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
@@ -9,6 +10,12 @@ from models.room import RoomIn, RoomOut, RoomRepository
 from starlette.status import HTTP_202_ACCEPTED
 
 manager = ConnectionManager()
+
+
+class LeaveResult(Enum):
+    ERROR = -1
+    LEFT = 0
+    DESTROYED = 1
 
 
 class RoomHandler:
@@ -69,7 +76,9 @@ class RoomHandler:
         )
         return result
 
-    async def leave_room(self, room_id: UUID, player_name: str, user_id: UUID) -> bool:
+    async def leave_room(
+        self, room_id: UUID, player_name: str, user_id: UUID
+    ) -> LeaveResult:
         room = self.repo.get_room_by_id(room_id)
         if room is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -80,9 +89,13 @@ class RoomHandler:
         # si el owner abandona la sala, eliminar la sala
         if player_name == room.owner_name:
             result = self.repo.delete(room_id)
-            return result
+            if result:
+                return LeaveResult.DESTROYED
+            return LeaveResult.ERROR
 
         result = self.repo.update_players(
             room.players_names, player_name, room_id, "remove"
         )
-        return result
+        if result:
+            return LeaveResult.LEFT
+        return LeaveResult.ERROR

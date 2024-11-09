@@ -24,7 +24,10 @@ def test_create_room_1_player():
     players_expected = 1
     owner_name = "Pepito"
     roomIn = RoomIn(
-        room_name=room_name, players_expected=players_expected, owner_name=owner_name
+        room_name=room_name,
+        players_expected=players_expected,
+        owner_name=owner_name,
+        password=None,
     )
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         response = client.post(
@@ -41,7 +44,10 @@ def test_create_room_5_players():
     players_expected = 5
     owner_name = "Pepito"
     roomIn = RoomIn(
-        room_name=room_name, players_expected=players_expected, owner_name=owner_name
+        room_name=room_name,
+        players_expected=players_expected,
+        owner_name=owner_name,
+        password=None,
     )
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         response = client.post(
@@ -58,7 +64,10 @@ def test_create_room_ok():
     players_expected = 2
     owner_name = "Pepito"
     roomIn = RoomIn(
-        room_name=room_name, players_expected=players_expected, owner_name=owner_name
+        room_name=room_name,
+        players_expected=players_expected,
+        owner_name=owner_name,
+        password=None,
     )
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         response = client.post(
@@ -75,7 +84,10 @@ def test_create_dup_room():
     players_expected = 2
     owner_name = "Pepito"
     roomIn = RoomIn(
-        room_name=room_name, players_expected=players_expected, owner_name=owner_name
+        room_name=room_name,
+        players_expected=players_expected,
+        owner_name=owner_name,
+        password=None,
     )
     response = client.post(f"/rooms/create_room/{user_id}", json=roomIn.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -87,6 +87,8 @@ class RoomRepository:
             db_room.players_names = json.dumps(players)
             db.commit()
             return True
+        except Exception as e:
+            return False
         finally:
             db.close()
 
@@ -96,7 +98,6 @@ class RoomRepository:
             rooms = db.query(Room).all()
             rooms_out = []
             for room in rooms:
-                print(room.password)
                 rooms_out.append(db_to_roomout(room).model_dump())
             return rooms_out
         finally:
@@ -119,12 +120,13 @@ class RoomRepository:
 
     def delete(self, room_id: UUID) -> bool:
         db = Session()
-
         try:
             todelete = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
             db.delete(todelete)
             db.commit()
             return True
+        except Exception as e:
+            return False
         finally:
             db.close()
 

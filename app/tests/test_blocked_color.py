@@ -1,14 +1,13 @@
-from fastapi.testclient import TestClient
-from fastapi import status
-from models.room import *
 from uuid import uuid4
-import state_handler
-from match_handler import MatchHandler
-from main import app,manager
-import figure_detector
 
+import figure_detector
+import state_handler
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app, manager
+from match_handler import MatchHandler
 from models.match import *
-from models.room import * 
+from models.room import *
 
 client = TestClient(app)
 repo_room = RoomRepository()
@@ -16,25 +15,30 @@ repo_match = MatchRepository()
 
 room_id = uuid1()
 
+
 def reset():
     repo_room.delete_rooms()
     repo_match.delete_matchs()
+
 
 def generate_test_room():
     db = Session()
     try:
         roombd = Room(
-                room_name="Room 1",
-                room_id=str(room_id),
-                players_expected=2,
-                owner_name="Braian",
-                players_names=json.dumps(["Braian","Tadeo"]),
-                is_active=True
-            )
+            room_name="Room 1",
+            room_id=str(room_id),
+            players_expected=2,
+            owner_name="Braian",
+            private=False,
+            password=None,
+            players_names=json.dumps(["Braian", "Tadeo"]),
+            is_active=True,
+        )
         db.add(roombd)
         db.commit()
     finally:
-        db.close()    
+        db.close()
+
 
 def generate_test_match():
     try:
@@ -43,6 +47,7 @@ def generate_test_match():
     except:
         assert False, f"Creando mal match en db"
 
+
 def test_initially_blocked_color_is_none():
     reset()
     generate_test_room()
@@ -50,6 +55,7 @@ def test_initially_blocked_color_is_none():
     match = repo_match.get_match_by_id(room_id)
     state_handler.add_parcial_match(match)
     assert match.board.blocked_color == TileColor.NONE.value
+
 
 def test_blocked_color_change_on_discard():
     reset()
@@ -68,13 +74,16 @@ def test_blocked_color_change_on_discard():
     match.board = figure_detector.figures_detector(board, [FigType.fige06.value])
     state_handler.add_parcial_match(match)
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
-        manager.bind_room(room_id,user_id)
-        response = client.put(f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}")
+        manager.bind_room(room_id, user_id)
+        response = client.put(
+            f"/discard_figure/{room_id}/{player.player_name}/{card_index}/{x}/{y}"
+        )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() is None
         match_then = state_handler.get_parcial_match(room_id)
         assert match_then.board.blocked_color == TileColor.BLUE.value
     reset()
+
 
 def test_blocked_color_change_on_block():
     reset()
@@ -94,13 +103,16 @@ def test_blocked_color_change_on_block():
     match.board = figure_detector.figures_detector(board, [FigType.fige06.value])
     state_handler.add_parcial_match(match)
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
-        manager.bind_room(room_id,user_id)
-        response = client.put(f"/block_figure/{room_id}/{player.player_name}/{other_player.player_name}/{card_index}/{x}/{y}")
+        manager.bind_room(room_id, user_id)
+        response = client.put(
+            f"/block_figure/{room_id}/{player.player_name}/{other_player.player_name}/{card_index}/{x}/{y}"
+        )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() is None
         match_then = state_handler.get_parcial_match(room_id)
         assert match_then.board.blocked_color == TileColor.BLUE.value
     reset()
+
 
 def test_figure_detector_no_detect_fig_of_blocked_color():
     reset()
@@ -119,5 +131,11 @@ def test_figure_detector_no_detect_fig_of_blocked_color():
     state_handler.add_parcial_match(match)
     match_then = state_handler.get_parcial_match(room_id)
     for x in range(4):
-        assert match_then.board.tiles[figure_detector.coordinates_to_index(x, 0)].tile_in_figure == FigType.none.value
+        assert (
+            match_then.board.tiles[
+                figure_detector.coordinates_to_index(x, 0)
+            ].tile_in_figure
+            == FigType.none.value
+        )
     reset()
+
