@@ -1,9 +1,14 @@
+from uuid import uuid4
 from fastapi.testclient import TestClient
 from fastapi import status
 from main import app, manager,match_handler
 from models.match import *
 from models.room import * 
 from models.timer import *
+import asyncio
+import pytest
+
+pytest_plugins = ('pytest_asyncio',)
 
 repo_room = RoomRepository()
 repo_match = MatchRepository()
@@ -32,35 +37,30 @@ def generate_test_room():
     finally:
         db.close()    
 
-async def generate_test_match():
+def generate_test_match():
     try:
-        await match_handler.create_match(room_id,"Braian",manager)
+        match = MatchOut(match_id=room_id)
+        repo_match.create_match(match)
     except:
-        assert False, f"Creando mal matchs en db"
+        assert False, f"Creando mal match en db"
 
-def get_match(room_id):
-    match = repo_match.get_match_by_id(room_id)
-    return match
-        
+@pytest.mark.asyncio
 async def test_timer():
-    # Resetea la base de datos antes de iniciar el test
     reset()
-    
-    # Genera la sala y partida de prueba
-    generate_test_room()
-    await generate_test_match()
-    
-    # Configura el temporizador y llama a init_timer
-    await set_timer(room_id,1)
-    # Espera a que el temporizador termine
-    await asyncio.sleep(1.5)  # Tiempo suficiente para que el temporizador llegue a 0
-    
-    match = await match_handler.get_match_by_id(room_id)
-    # Verifica el estado del turno después de que el temporizador llegue a 0
-    assert not match.players[0].has_turn, "El turno no cambió correctamente después de que el temporizador llegó a cero"
-    assert match.players[1].has_turn, "El turno debería haber pasado al siguiente jugador"
-    
-    # Detiene el temporizador por si aún queda alguna tarea activa
 
+    generate_test_room()
+    generate_test_match()
+    
+    user_id = uuid4()
+    with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
+        manager.bind_room(room_id, user_id)
+        await asyncio.create_task(init_timer(room_id,1,manager,match_handler))
+        data = Clientwebsocket.receive_text()
+        assert data == "TIMER: STARTS 1"
+        asyncio.sleep(2)
+        data = Clientwebsocket.receive_text()
+        assert data == "TIMER: FINISHED"
+        data = Clientwebsocket.receive_text()
+        assert data == "MATCH"
+        await stop_timer(room_id)
 # Ejecuta el test
-asyncio.run(test_timer())

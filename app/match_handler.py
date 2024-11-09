@@ -36,7 +36,7 @@ class MatchHandler:
             fig_types = self.get_valid_fig_types(match)
             match.board = figure_detector.figures_detector(match.board, fig_types)
             state_handler.add_parcial_match(match)
-            asyncio.create_task(init_timer(match_id,manager,self))
+            asyncio.create_task(init_timer(match_id,120,manager,self))
             self.repo.update_match(match)
             return match.model_dump(mode="json")
 
@@ -135,7 +135,7 @@ class MatchHandler:
             match = self.repo.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
-            asyncio.create_task(init_timer(match_id,manager,self))
+            asyncio.create_task(init_timer(match_id,120,manager,self))
             target_player = match.get_player_by_name(player_name)
             if target_player is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
