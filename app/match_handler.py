@@ -9,6 +9,9 @@ from models.visible_match import *
 import figure_detector
 import state_handler
 import switcher
+from manager.chatmanager import ChatManager
+
+chat_manager = ChatManager()
 
 class MatchHandler:
     def __init__(self):

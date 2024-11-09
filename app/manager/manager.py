@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from uuid import UUID
 
 from fastapi import WebSocket, WebSocketDisconnect
@@ -55,7 +55,7 @@ class ConnectionManager:
         try:
             await self.active_connections[user_id].get_ws().send_text(message)
         except Exception as e:
-            return
+            return 
 
     async def broadcast_by_room(self, room_id: UUID | int, message: str):
         for user_id in self.rooms[room_id]:

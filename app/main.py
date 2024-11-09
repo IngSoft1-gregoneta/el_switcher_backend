@@ -17,7 +17,7 @@ from models.match import *
 from models.room import *
 from models.visible_match import *
 from room_handler import RoomHandler
-
+from manager.chatmanager import ChatManager
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 manager = ConnectionManager()
-
+chat_manager = ChatManager()
 room_handler = RoomHandler()
 match_handler = MatchHandler()
 
@@ -51,6 +51,20 @@ async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
 def get_id():
     return str(uuid4())
 
+@app.websocket("/websocket/chat/{user_id}")
+async def websocket_chat(websocket: WebSocket, user_id: UUID):
+    await websocket.accept()
+    await chat_manager.add_connection(user_id, websocket)
+
+    try: 
+        while True:
+            data = await websocket.receive_text()
+            await chat_manager.send_chat_message(user_id, message=data)
+    except WebSocketDisconnect:
+        await chat_manager.disconnect_chat(user_id)
+        await websocket.close()
+            
+
 
 @app.get("/room/{room_id}")
 async def get_room_data(
@@ -66,7 +80,6 @@ async def get_room_data(
             detail="Internal Server Error",
         )
 
-
 # Define endpoint to get rooms list
 @app.get("/rooms")
 async def get_rooms():
@@ -77,7 +90,6 @@ async def get_rooms():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
         )
-
 
 # endpoint for create room
 @app.post(
@@ -184,6 +196,7 @@ async def leave_match(
         result = await match_handler.leave_match(player_name, match_id)
         try:
             await manager.leave_match(match_id, user_id)
+            await chat_manager.send_log_event("leave_match", f"El jugador {player_name} abandonó la partida")
         except Exception as e:
             print(e)
         return result
@@ -217,6 +230,7 @@ async def get_match_data_by_player(
 async def end_turn(match_id: UUID, player_name: str):
     try:
         match = await match_handler.end_turn(match_id, player_name)
+        await chat_manager.send_log_event("end_turn", f"El jugador {player_name} pasó de turno")
         await manager.broadcast_by_room(match_id, "MATCH")
         return match
     except HTTPException as http_exc:
@@ -231,6 +245,7 @@ async def end_turn(match_id: UUID, player_name: str):
 async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int, y1: int, x2: int, y2:int):
     try:
         await match_handler.do_parcial_mov(match_id, player_name, card_index, x1, y1, x2, y2)
+        await chat_manager.send_log_event("parcial_move", f"El jugador {player_name} realizó un movimiento")
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
@@ -245,6 +260,7 @@ async def parcial_mov(match_id: UUID, player_name: str, card_index: int, x1: int
 async def revert_movement(match_id: UUID, player_name: str):
     try:
         await match_handler.revert_mov(match_id, player_name)
+        await chat_manager.send_log_event("revert_move", f"El jugador {player_name} revirtió un movimiento")
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
@@ -258,6 +274,7 @@ async def revert_movement(match_id: UUID, player_name: str):
 async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: int, y: int):
     try:
         await match_handler.discard_fig(match_id, player_name, card_index, x, y)
+        await chat_manager.send_log_event("discard_fig", f"El jugador {player_name} descartó una figura")
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
@@ -271,6 +288,7 @@ async def discard_figure(match_id: UUID, player_name: str, card_index: int, x: i
 async def block_figure(match_id: UUID, player_name: str, other_player_name: str, card_index: int, x: int, y: int):
     try:
         await match_handler.block_fig(match_id, player_name, other_player_name, card_index, x, y)
+        await chat_manager.send_log_event("block_fig", f"El jugador {player_name} bloqueó una figura")
         await manager.broadcast_by_room(match_id, "MATCH")
     except HTTPException as http_exc:
         raise http_exc
