@@ -116,8 +116,9 @@ class MatchHandler:
         self, match_id: UUID, player_name: str, manager
     ) -> VisibleMatchData:
         try:
-            visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
             send_timer_message(match_id, manager)
+            visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
+            
             if visible_match.winner:
                 await stop_timer(match_id)
             return visible_match
