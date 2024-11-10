@@ -1,15 +1,21 @@
 import json
-from typing import List
+from typing import List, Optional
 from uuid import UUID, uuid1
 
 from config.repositorymanager import Room, Session
 from pydantic import BaseModel, Field
 
 
+class RoomJoin(BaseModel):
+    password: Optional[str]
+    player_name: str
+
+
 class RoomIn(BaseModel):
     room_name: str
     players_expected: int
     owner_name: str
+    password: Optional[str]
 
 
 class RoomOut(BaseModel):
@@ -19,6 +25,7 @@ class RoomOut(BaseModel):
     players_names: List[str] = []
     owner_name: str
     is_active: bool = True
+    private: bool
 
 
 class RoomRepository:
@@ -33,6 +40,8 @@ class RoomRepository:
                 players_expected=new_room.players_expected,
                 players_names=[new_room.owner_name],
                 owner_name=new_room.owner_name,
+                password=new_room.password,
+                private=(new_room.password != None),
                 is_active=True,
             )
 
@@ -42,6 +51,8 @@ class RoomRepository:
                 players_expected=new_room.players_expected,
                 owner_name=new_room.owner_name,
                 players_names=json.dumps(roomOut.players_names),
+                password=new_room.password,
+                private=(new_room.password != None),
                 is_active=True,
             )
             db.add(roombd)
@@ -51,20 +62,12 @@ class RoomRepository:
             db.close()
 
     # Fetch room by id or return None if the room was not found
-    def get_room_by_id(self, room_id: UUID) -> RoomOut | None:
+    def get_room_by_id(self, room_id: UUID) -> Optional[RoomOut]:
         db = Session()
         try:
             result = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
             if result:
-                room = RoomOut(
-                    room_id=result.room_id,
-                    room_name=result.room_name,
-                    players_expected=result.players_expected,
-                    players_names=json.loads(result.players_names) or [],
-                    owner_name=result.owner_name,
-                    is_active=result.is_active,
-                )
-                return room
+                return db_to_roomout(result)
             return None
         finally:
             db.close()
@@ -72,7 +75,7 @@ class RoomRepository:
     # Methods are: add, remove
     def update_players(
         self, players: List[str], player_name: str, room_id: UUID, method: str
-    ):
+    ) -> bool:
         if method == "add":
             players.append(player_name)
         elif method == "remove" and player_name in players:
@@ -83,6 +86,9 @@ class RoomRepository:
             db_room = db.query(Room).filter(Room.room_id == str(room_id)).one()
             db_room.players_names = json.dumps(players)
             db.commit()
+            return True
+        except Exception as e:
+            return False
         finally:
             db.close()
 
@@ -92,15 +98,16 @@ class RoomRepository:
             rooms = db.query(Room).all()
             rooms_out = []
             for room in rooms:
-                rooms_out.append(RoomOut(
-                    room_id=room.room_id,
-                    room_name=room.room_name,
-                    players_expected=room.players_expected,
-                    players_names=json.loads(room.players_names) or [],
-                    owner_name=room.owner_name,
-                    is_active=room.is_active,
-                ).model_dump())
+                rooms_out.append(db_to_roomout(room).model_dump())
             return rooms_out
+        finally:
+            db.close()
+
+    def verify_password(self, password: Optional[str], room_id: UUID) -> bool:
+        db = Session()
+        try:
+            result = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
+            return result.password == password
         finally:
             db.close()
 
@@ -111,13 +118,15 @@ class RoomRepository:
         finally:
             db.close()
 
-    def delete(self, room_id: UUID):
+    def delete(self, room_id: UUID) -> bool:
         db = Session()
-
         try:
             todelete = db.query(Room).filter(Room.room_id == str(room_id)).one_or_none()
             db.delete(todelete)
             db.commit()
+            return True
+        except Exception as e:
+            return False
         finally:
             db.close()
 
@@ -128,3 +137,15 @@ class RoomRepository:
             db.commit()
         finally:
             db.close()
+
+
+def db_to_roomout(room) -> RoomOut:
+    return RoomOut(
+        room_id=room.room_id,
+        room_name=room.room_name,
+        players_expected=room.players_expected,
+        players_names=json.loads(room.players_names) or [],
+        owner_name=room.owner_name,
+        private=room.private,
+        is_active=room.is_active,
+    )

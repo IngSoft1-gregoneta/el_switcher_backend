@@ -34,6 +34,7 @@ class Match(Base):
     players = Column(JSON)
     blocked_color = Column(String(6))
 
+
 class Room(Base):
     __tablename__ = "Rooms"
     room_id = Column(String(36), primary_key=True, index=True)
@@ -41,7 +42,10 @@ class Room(Base):
     players_expected = Column(Integer)
     owner_name = Column(String(255))
     players_names = Column(JSON)
+    password = Column(String(255))
+    private = Column(Boolean)
     is_active = Column(Boolean)
 
 
 Base.metadata.create_all(bind=engine)
+

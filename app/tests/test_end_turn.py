@@ -11,12 +11,14 @@ client = TestClient(app)
 
 from models.match import *
 from models.room import *
+
 repo_room = RoomRepository()
 repo_match = MatchRepository()
 
 room1_id = uuid1()
 room2_id = uuid1()
 room3_id = uuid1()
+
 
 def reset():
     repo_room.delete_rooms()
@@ -34,6 +36,8 @@ def generate_test_room():
             players_expected=2,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo"]),
+            private=False,
+            password=None,
             is_active=True,
         )
         roombd2 = Room(
@@ -42,6 +46,8 @@ def generate_test_room():
             players_expected=3,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
+            private=False,
+            password=None,
             is_active=True,
         )
         roombd3 = Room(
@@ -50,6 +56,8 @@ def generate_test_room():
             players_expected=4,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Grego"]),
+            private=False,
+            password=None,
             is_active=True,
         )
         db.add(roombd1)
@@ -97,7 +105,6 @@ def verify_test_ok(match_id):
             assert match.players[index].has_turn
         data = Clientwebsocket.receive_text()
         assert data == "MATCH"
-
 
 
 def test_endturn_in_match_of_2_players():
@@ -162,6 +169,7 @@ def test_end_turn_player_has_no_turn():
     assert response.json() == {"detail": "Player has not the turn"}
     reset()
 
+
 # Si un jugador abandona la partida con turno, no deberia perderse
 def test_end_turn_rotation_at_leaving_match():
     reset()
@@ -187,4 +195,3 @@ def test_end_turn_rotation_at_leaving_match():
     player_with_turn = match.get_player_by_name("Tadeo")
     assert player_with_turn.has_turn
     reset()
-

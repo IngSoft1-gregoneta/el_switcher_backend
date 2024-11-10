@@ -10,6 +10,7 @@ repo = RoomRepository()
 
 room_id = uuid1()
 
+
 def reset():
     repo.delete_rooms()
     manager.active_connections.clear()
@@ -28,6 +29,7 @@ def generate_test_room():
             players_expected=players_expected,
             players_names=["Braian", "Yamil"],
             owner_name=owner_name,
+            private=False,
             is_active=True,
         )
         roombd = Room(
@@ -36,6 +38,7 @@ def generate_test_room():
             players_expected=roomOut.players_expected,
             owner_name=roomOut.owner_name,
             players_names=json.dumps(roomOut.players_names),
+            private=roomOut.private,
             is_active=True,
         )
         db.add(roombd)
@@ -53,14 +56,7 @@ def test_leave_room1():
     generate_test_room()
     player_name = "Yamil"
     user_id = uuid4()
-    expected_response = {
-        "room_id": str(room_id),
-        "room_name": "Room 1",
-        "players_expected": 2,
-        "players_names": ["Braian"],
-        "owner_name": "Braian",
-        "is_active": True,
-    }
+    expected_response = True
     with client.websocket_connect(f"/ws/{user_id}") as Clientwebsocket:
         manager.bind_room(room_id, user_id)
         response = client.put(f"/rooms/leave/{room_id}/{player_name}/{user_id}")
@@ -111,7 +107,6 @@ def test_owner_leave():
         assert response.status_code == status.HTTP_202_ACCEPTED
         data = Clientwebsocket.receive_text()
         assert data == "ROOM"
-
     reset()
 
 

@@ -1,15 +1,14 @@
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 from models.room import *
 from models.visible_match import *
-from main import app
-
 
 client = TestClient(app)
 repo = RoomRepository()
 
 from models.match import *
-from models.room import * 
+from models.room import *
 from state_handler import *
 
 repo_room = RoomRepository()
@@ -18,6 +17,7 @@ repo_match = MatchRepository()
 room1_id = uuid1()
 room2_id = uuid1()
 room3_id = uuid1()
+
 
 def reset():
     repo_room.delete_rooms()
@@ -33,6 +33,7 @@ def generate_test_room():
             players_expected=2,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo"]),
+            private=False,
             is_active=True,
         )
         roombd2 = Room(
@@ -41,6 +42,7 @@ def generate_test_room():
             players_expected=3,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil"]),
+            private=False,
             is_active=True,
         )
         roombd3 = Room(
@@ -49,6 +51,7 @@ def generate_test_room():
             players_expected=4,
             owner_name="Braian",
             players_names=json.dumps(["Braian", "Tadeo", "Yamil", "Grego"]),
+            private=False,
             is_active=True,
         )
         db.add(roombd1)
@@ -74,14 +77,15 @@ def generate_test_match():
 def verify_test_ok(match_id: UUID, player_name: str):
     match = repo_match.get_match_by_id(match_id)
     add_parcial_match(match)
-    expected_response = VisibleMatchData(match_id,player_name)
-    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
+    expected_response = VisibleMatchData(match_id, player_name)
+    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_response.model_dump(mode="json")
     assert expected_response.match_id == str(match_id)
     has_turn_count = 0
     for player in match.players:
-        if player.has_turn: has_turn_count = has_turn_count + 1
+        if player.has_turn:
+            has_turn_count = has_turn_count + 1
         for other_player in expected_response.other_players:
             for fig_card in player.fig_cards:
                 if other_player.player_name == player.player_name:
@@ -102,6 +106,7 @@ def verify_test_ok(match_id: UUID, player_name: str):
     assert has_turn_count == 1
     assert expected_response.board == match.board
 
+
 def test_get_visible_data_in_match_of_2_players():
     reset()
     generate_test_room()
@@ -111,6 +116,7 @@ def test_get_visible_data_in_match_of_2_players():
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
 
+
 def test_get_visible_data_in_match_of_3_players():
     generate_test_room()
     generate_test_match()
@@ -118,6 +124,7 @@ def test_get_visible_data_in_match_of_3_players():
     player_name = "Tadeo"
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
+
 
 def test_get_visible_data_in_match_of_4_players():
     generate_test_room()
@@ -127,30 +134,33 @@ def test_get_visible_data_in_match_of_4_players():
     verify_test_ok(match_id=match_id, player_name=player_name)
     reset()
 
+
 def test_get_visible_data_in_no_match():
     generate_test_room()
     generate_test_match()
     match_id = uuid1()
     player_name = "Yamil"
-    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
+    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': 'Match not found'}
+    assert response.json() == {"detail": "Match not found"}
     try:
-        VisibleMatchData(match_id=match_id,player_name=player_name)
+        VisibleMatchData(match_id=match_id, player_name=player_name)
     except:
         assert True
     reset()
+
 
 def test_get_visible_data_of_match_by_no_player():
     generate_test_room()
     generate_test_match()
     match_id = room1_id
     player_name = "Yamil"
-    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")    
+    response = client.get(f"/matchs/visible_match/{match_id}/{player_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': f'Player {player_name} not found'}
+    assert response.json() == {"detail": f"Player {player_name} not found"}
     try:
-        VisibleMatchData(match_id=match_id,player_name=player_name)
+        VisibleMatchData(match_id=match_id, player_name=player_name)
     except:
         assert True
     reset()
+

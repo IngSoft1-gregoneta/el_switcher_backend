@@ -1,4 +1,5 @@
 from typing import Any, Union, Dict, List
+import asyncio
 from uuid import UUID
 import copy
 from fastapi import HTTPException, status
@@ -6,6 +7,7 @@ from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.board import *
 from models.visible_match import *
+from models.timer import *
 import figure_detector
 import state_handler
 import switcher
@@ -17,7 +19,7 @@ class MatchHandler:
     def __init__(self):
         self.repo = MatchRepository()
 
-    async def create_match(self, match_id: UUID, owner_name: str):
+    async def create_match(self, match_id: UUID, owner_name: str,manager):
         repo_room = RoomRepository()
         try:
             room = repo_room.get_room_by_id(match_id)
@@ -37,6 +39,7 @@ class MatchHandler:
             fig_types = self.get_valid_fig_types(match)
             match.board = figure_detector.figures_detector(match.board, fig_types)
             state_handler.add_parcial_match(match)
+            asyncio.create_task(init_timer(match_id,120,manager,self))
             self.repo.update_match(match)
             return match.model_dump(mode="json")
 
@@ -113,11 +116,14 @@ class MatchHandler:
         )
 
     async def get_visible_data_by_player(
-        self, match_id: UUID, player_name: str
+        self, match_id: UUID, player_name: str, manager
     ) -> VisibleMatchData:
         try:
+            send_timer_message(match_id, manager)
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
-
+            
+            if visible_match.winner:
+                await stop_timer(match_id)
             return visible_match
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -127,12 +133,14 @@ class MatchHandler:
             detail="Internal Server Error",
         )
 
-    async def end_turn(self, match_id: UUID, player_name: str):
+    async def end_turn(self, match_id: UUID, player_name: str, manager):
         try:
+            
             state_handler.empty_parcial_states(match_id)
             match = self.repo.get_match_by_id(match_id)
             if match is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match not found")
+            asyncio.create_task(init_timer(match_id,120,manager,self))
             target_player = match.get_player_by_name(player_name)
             if target_player is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
