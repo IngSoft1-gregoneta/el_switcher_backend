@@ -92,7 +92,7 @@ class MatchHandler:
         )
 
     async def leave_match(
-        self, player_name: str, match_id: UUID
+        self, player_name: str, match_id: UUID, manager
     ) -> Union[MatchOut, str]:
         try:
             match = self.repo.get_match_by_id(match_id)
@@ -109,6 +109,9 @@ class MatchHandler:
                 self.repo.delete_player(match_id, player_name)
                 match = self.repo.get_match_by_id(match_id)
                 state_handler.empty_parcial_states(match_id)
+                self.turn_timers_task[match_id] = asyncio.create_task(
+                    init_timer(match_id, manager, self)
+                )
                 if match:
                     state_handler.add_parcial_match(match)
             else:  # the turned player continue playing
