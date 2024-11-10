@@ -202,7 +202,7 @@ async def leave_match(
     user_id: UUID,
 ) -> Union[MatchOut, str]:
     try:
-        result = await match_handler.leave_match(player_name, match_id)
+        result = await match_handler.leave_match(player_name, match_id, manager)
         try:
             await manager.leave_match(match_id, user_id)
         except Exception as e:

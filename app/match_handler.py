@@ -77,7 +77,7 @@ class MatchHandler:
         )
 
     async def leave_match(
-        self, player_name: str, match_id: UUID
+        self, player_name: str, match_id: UUID, manager
     ) -> Union[MatchOut, str]:
         try:
             match = self.repo.get_match_by_id(match_id)
@@ -87,6 +87,7 @@ class MatchHandler:
             if player is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Player not found')
             if player.has_turn: # parcial match must be reinit
+                asyncio.create_task(init_timer(match_id,120,manager,self))
                 self.repo.delete_player(match_id, player_name)
                 match = self.repo.get_match_by_id(match_id)
                 state_handler.empty_parcial_states(match_id)
