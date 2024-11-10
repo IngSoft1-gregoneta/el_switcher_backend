@@ -1,5 +1,8 @@
+from models.board import Board
+from models.tile import TileColor
 import figure_detector
 from match_handler import *
+
 
 def fig01_detector(board: Board, x: int, y: int) -> Board:
     board_out = board
