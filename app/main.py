@@ -1,6 +1,6 @@
 # FastApi
 # Default query parameters
-from typing import Annotated, Any, Optional, Union
+from typing import Union
 
 # Unique id
 from uuid import UUID, uuid4
@@ -178,7 +178,7 @@ async def leave_room_endpoint(
     "/matchs/create_match/{match_id}/{owner_name}", status_code=status.HTTP_201_CREATED
 )
 async def create_match_endpoint(match_id: UUID, owner_name: str):
-    match = await match_handler.create_match(match_id, owner_name,manager)
+    match = await match_handler.create_match(match_id, owner_name, manager)
     await manager.broadcast_by_room(match_id, "MATCH")
     await manager.broadcast("LISTA")
     return match
@@ -223,7 +223,7 @@ async def get_match_data_by_player(
 ) -> VisibleMatchData:
     try:
         visible_match = await match_handler.get_visible_data_by_player(
-            match_id, player_name,manager
+            match_id, player_name, manager
         )
         return visible_match
     except HTTPException as http_exc:
