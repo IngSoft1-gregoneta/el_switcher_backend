@@ -46,7 +46,7 @@ def figures_detector(board: Board, fig_types: List[str]) -> Board:
                 detect_fig16(board_out, fig_types, x, y)
                 detect_fig17(board_out, fig_types, x, y)
                 detect_fig18(board_out, fig_types, x, y)
-    return copy.deepcopy(board_out)
+    return board_out
 
 
 def disarm_figs(board: Board):
