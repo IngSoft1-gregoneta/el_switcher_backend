@@ -253,13 +253,14 @@ async def get_match_data_by_player(
 @app.put("/matchs/end_turn/{match_id}/{player_name}")
 async def end_turn(match_id: UUID, player_name: str):
     try:
-        match = await match_handler.end_turn(match_id, player_name)
+        match = await match_handler.end_turn(match_id, player_name, manager)
         await chat_manager.send_log_event("end_turn", f"El jugador {player_name} pasó de turno")
         await manager.broadcast_by_room(match_id, "MATCH")
         return match
     except HTTPException as http_exc:
         raise http_exc
-    except Exception:
+    except Exception as e:
+        print(f"Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",

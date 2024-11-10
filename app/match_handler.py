@@ -135,7 +135,6 @@ class MatchHandler:
 
     async def end_turn(self, match_id: UUID, player_name: str, manager):
         try:
-            
             state_handler.empty_parcial_states(match_id)
             match = self.repo.get_match_by_id(match_id)
             if match is None:

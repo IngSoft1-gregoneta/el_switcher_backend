@@ -183,13 +183,13 @@ def test_sends_revert_move_message():
             
             assert response.status_code == status.HTTP_200_OK
         
-        revert_response = client.put(f"/revert_movement/{room_id}/{player.player_name}")
+            revert_response = client.put(f"/revert_movement/{room_id}/{player.player_name}")
     
-        assert revert_response.status_code == status.HTTP_200_OK
-        websocket_response = ws1.receive_text()
-        data = json.loads(websocket_response)
-        assert data["event_type"] == "revert_move"
-        assert data["content"] == f"El jugador {player.player_name} revirtió un movimiento"
+            assert revert_response.status_code == status.HTTP_200_OK
+            websocket_response = ws1.receive_text()
+            data = json.loads(websocket_response)
+            assert data["event_type"] == "revert_move"
+            assert data["content"] == f"El jugador {player.player_name} revirtió un movimiento"
 
 
 def test_sends_discard_fig_message():
