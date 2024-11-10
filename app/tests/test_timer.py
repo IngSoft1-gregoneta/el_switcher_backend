@@ -30,6 +30,7 @@ def generate_test_room():
                 players_expected=2,
                 owner_name="Braian",
                 players_names=json.dumps(["Braian","Tadeo"]),
+                private=False,
                 is_active=True
             )
         db.add(roombd1)
@@ -63,4 +64,5 @@ async def test_timer():
         data = Clientwebsocket.receive_text()
         assert data == "MATCH"
         await stop_timer(room_id)
+        reset()
 # Ejecuta el test
