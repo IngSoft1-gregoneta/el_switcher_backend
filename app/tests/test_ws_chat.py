@@ -33,6 +33,8 @@ def generate_test_room():
                 players_expected=4,
                 owner_name="Braian",
                 players_names=json.dumps(["Braian","Tadeo","Yamil","Facu"]),
+                private = False,
+                password = None,
                 is_active=True
             )
         db.add(roombd)
