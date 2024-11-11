@@ -11,9 +11,22 @@ async def init_timer(match_id: UUID, manager, match_handler):
     await asyncio.sleep(120)
     if match_id in match_handler.turn_timers_task:
         del match_handler.turn_timers_task[match_id]
-    print("task complete")
-    await manager.broadcast_by_room(match_id, "MATCH")
-    await end_turn_due_to_timer(match_id, match_handler, manager)
+        print("task complete: ", match_id)
+        await end_turn_due_to_timer(match_id, match_handler, manager)
+        await manager.broadcast_by_room(match_id, "MATCH")
+
+
+def stop_timer(match_id: UUID, match_handler):
+    if match_id in match_handler.timers:
+        del match_handler.timers[match_id]
+    if match_id in match_handler.turn_timers_task:
+        res = match_handler.turn_timers_task[match_id].cancel()
+        del match_handler.turn_timers_task[match_id]
+
+
+async def send_timer_message(match_id: UUID, manager, match_handler):
+    if match_id in match_handler.timers:
+        await manager.broadcast_by_room(match_id, str(match_handler.timers[match_id]))
 
 
 async def end_turn_due_to_timer(match_id: UUID, match_handler, manager):
@@ -31,15 +44,3 @@ async def end_turn_due_to_timer(match_id: UUID, match_handler, manager):
                 player_name=current_player.player_name,
                 manager=manager,
             )
-
-
-async def stop_timer(match_id: UUID, match_handler):
-    if match_id in match_handler.timers:
-        del match_handler.timers[match_id]
-    if match_id in match_handler.turn_timers_task:
-        del match_handler.turn_timers_task[match_id]
-
-
-async def send_timer_message(match_id: UUID, manager, match_handler):
-    if match_id in match_handler.timers:
-        await manager.broadcast_by_room(match_id, str(match_handler.timers[match_id]))

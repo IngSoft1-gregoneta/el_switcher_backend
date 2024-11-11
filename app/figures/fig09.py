@@ -1,3 +1,4 @@
+from models.fig_card import FigType, FigCard
 from models.board import Board
 from models.tile import TileColor
 import figure_detector
@@ -40,7 +41,7 @@ def fig09_rot1_borders_verifications(center_x: int, center_y: int, board: Board,
     border1 = (center_x, center_y-2)
     border2 = (center_x+1, center_y-1)
     border3 = (center_x+2, center_y)
-    border4 = (center_x+2, center_y+1)
+    border4 = (center_x+1, center_y+1)
     border5 = (center_x, center_y+1)
     border6 = (center_x-1, center_y+2)
     border7 = (center_x-2, center_y+1)

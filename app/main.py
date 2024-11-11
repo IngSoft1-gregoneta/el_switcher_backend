@@ -277,10 +277,16 @@ async def parcial_mov(
     x2: int,
     y2: int,
 ):
+    print("0")
     try:
-        await match_handler.do_parcial_mov(match_id, player_name, card_index, x1, y1, x2, y2)
+        print("1")
+        await match_handler.do_parcial_mov(
+            match_id, player_name, card_index, x1, y1, x2, y2
+        )
         await chat_manager.send_log_event("parcial_move", f"El jugador {player_name} realizó un movimiento")
+        print("2")
         await manager.broadcast_by_room(match_id, "MATCH")
+        print("3")
     except HTTPException as http_exc:
         raise http_exc
     except Exception:
