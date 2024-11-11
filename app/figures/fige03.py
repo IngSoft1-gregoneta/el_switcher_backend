@@ -1,3 +1,4 @@
+from models.fig_card import FigType, FigCard
 from models.board import Board
 from models.tile import TileColor
 import figure_detector

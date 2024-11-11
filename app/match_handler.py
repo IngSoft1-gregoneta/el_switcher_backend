@@ -1,6 +1,5 @@
 import asyncio
 import copy
-from datetime import datetime
 from typing import Any, Dict, List, Union
 from uuid import UUID
 
@@ -12,9 +11,7 @@ from models.board import *
 from models.match import MatchOut, MatchRepository
 from models.room import RoomRepository
 from models.timer import *
-from models.timer import end_turn_due_to_timer, init_timer, send_timer_message
 from models.visible_match import *
-from models.visible_match import VisibleMatchData
 
 
 class MatchHandler:
@@ -140,12 +137,9 @@ class MatchHandler:
     ) -> VisibleMatchData:
         try:
             await send_timer_message(match_id, manager, self)
-            print("quepaso")
             visible_match = VisibleMatchData(match_id=match_id, player_name=player_name)
-            print("chau")
-
             if visible_match.winner:
-                await stop_timer(match_id, self)
+                stop_timer(match_id, self)
             return visible_match
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -157,7 +151,6 @@ class MatchHandler:
 
     async def end_turn(self, match_id: UUID, player_name: str, manager):
         try:
-
             state_handler.empty_parcial_states(match_id)
             match = self.repo.get_match_by_id(match_id)
             if match is None:
@@ -165,6 +158,7 @@ class MatchHandler:
                     status_code=status.HTTP_404_NOT_FOUND, detail="Match not found"
                 )
 
+            stop_timer(match_id, self)
             self.turn_timers_task[match_id] = asyncio.create_task(
                 init_timer(match_id, manager, self)
             )
@@ -227,9 +221,12 @@ class MatchHandler:
         if switcher.is_valid_movement(mov_card.mov_type, x1, y1, x2, y2):
             switcher.switch(new_match.board, mov_card.mov_type, x1, y1, x2, y2)
             fig_types = self.get_valid_fig_types(new_match)
-            new_match.board = figure_detector.figures_detector(
-                new_match.board, fig_types
-            )
+            try:
+                new_match.board = figure_detector.figures_detector(
+                    new_match.board, fig_types
+                )
+            except Exception as e:
+                print("ERROR: ", e)
             mov_card.use_mov_card()
             state_handler.add_parcial_match(new_match)
         else:
