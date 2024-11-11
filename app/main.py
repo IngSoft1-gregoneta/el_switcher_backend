@@ -60,15 +60,15 @@ async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
 def get_id():
     return str(uuid4())
 
-@app.websocket("/websocket/chat/{user_id}")
-async def websocket_chat(websocket: WebSocket, user_id: UUID):
+@app.websocket("/websocket/chat/{user_id}/{user_name}")
+async def websocket_chat(websocket: WebSocket, user_id: UUID, user_name: str):
     await websocket.accept()
-    await chat_manager.add_connection(user_id, websocket)
+    await chat_manager.add_connection(user_id, websocket, user_name=user_name)
 
     try: 
         while True:
             data = await websocket.receive_text()
-            await chat_manager.send_chat_message(user_id, message=data)
+            await chat_manager.send_chat_message(user_id, message=data, user_name=user_name)
     except WebSocketDisconnect:
         await chat_manager.disconnect_chat(user_id)
         await websocket.close()
