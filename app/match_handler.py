@@ -65,11 +65,14 @@ class MatchHandler:
     def get_valid_fig_types(self, match: MatchOut) -> List[str]:
         fig_types: List[str] = []
         for player in match.players:
+            take_fig_types = True
+            if not player.has_turn:
+                for i in range(len(player.fig_cards)):
+                    if player.fig_cards[i].is_blocked:
+                        take_fig_types = False
             for i in range(len(player.fig_cards)):
-                if (
-                    player.fig_cards[i].is_visible
-                    and not player.fig_cards[i].is_blocked
-                ):
+                if player.fig_cards[i].is_visible and take_fig_types \
+                and not player.fig_cards[i].is_blocked:
                     fig_types.append(player.fig_cards[i].fig_type)
         return fig_types
 
