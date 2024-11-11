@@ -113,4 +113,5 @@ def test_discard_fig():
                 init_board.tiles[i].tile_color
                 == after_end_turn_match.board.tiles[i].tile_color
             )
+        reset()
 
