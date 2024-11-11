@@ -54,13 +54,14 @@ def test_chat_connection_and_message():
     generate_test_room()
     generate_test_match()
     user_id = uuid4()
-    with client.websocket_connect(f"/websocket/chat/{user_id}") as websocket:
+    with client.websocket_connect(f"/websocket/chat/{user_id}/Braian") as websocket:
         test_message = "Hola, este es un mensaje de prueba"
         websocket.send_text(test_message)
 
         response = websocket.receive_text()
         data = json.loads(response)
         
+        assert data["user_name"] == "Braian"
         assert data["user_id"] == str(user_id)
         assert data["content"] == test_message
 
@@ -69,7 +70,7 @@ def test_websocket_chat_user_disconnect():
     generate_test_room()
     generate_test_match()
     user_id = uuid4()
-    with client.websocket_connect(f"/websocket/chat/{user_id}") as websocket:
+    with client.websocket_connect(f"/websocket/chat/{user_id}/braian") as websocket:
         websocket.close()
     
     assert user_id not in chat_manager.active_connections
@@ -81,8 +82,8 @@ def test_websocket_chat_broadcast_message():
     user_id_1 = uuid4()
     user_id_2 = uuid4()
     
-    with client.websocket_connect(f"/websocket/chat/{user_id_1}") as ws1, \
-               client.websocket_connect(f"/websocket/chat/{user_id_2}") as ws2:
+    with client.websocket_connect(f"/websocket/chat/{user_id_1}/tadeo") as ws1, \
+               client.websocket_connect(f"/websocket/chat/{user_id_2}/braian") as ws2:
         
         test_message = "Mensaje de usuario 1"
         ws1.send_text(test_message)
@@ -97,6 +98,8 @@ def test_websocket_chat_broadcast_message():
         assert data_2["content"] == test_message
         assert data_1["user_id"] == str(user_id_1)
         assert data_2["user_id"] == str(user_id_1)
+        assert data_1["user_name"] == "tadeo"
+        assert data_2["user_name"] == "tadeo"
 
 def test_leave_match_sends_leave_message():
     reset()
@@ -104,7 +107,7 @@ def test_leave_match_sends_leave_message():
     generate_test_match()
     user_id = uuid4()
     player_name = "Braian"
-    with client.websocket_connect(f"/websocket/chat/{user_id}") as websocket:
+    with client.websocket_connect(f"/websocket/chat/{user_id}/{player_name}") as websocket:
 
         response = client.put(f"/matchs/leave_match/{room_id}/{player_name}/{user_id}")
         
@@ -138,7 +141,7 @@ def test_sends_parcial_move_message():
         x2 = x1 + card.vectors[0][0]
         y2 = y1 + card.vectors[0][1]
 
-        with client.websocket_connect(f"/websocket/chat/{user_id}") as ws1, \
+        with client.websocket_connect(f"/websocket/chat/{user_id}/Braian") as ws1, \
                client.websocket_connect(f"/ws/{user_id}") as ws2:
             
             manager.bind_room(room_id, user_id)
@@ -174,7 +177,7 @@ def test_sends_revert_move_message():
         x2 = x1 + card.vectors[0][0]
         y2 = y1 + card.vectors[0][1]
 
-        with client.websocket_connect(f"/websocket/chat/{user_id}") as ws1, \
+        with client.websocket_connect(f"/websocket/chat/{user_id}/Braian") as ws1, \
                client.websocket_connect(f"/ws/{user_id}") as ws2:
             
             manager.bind_room(room_id, user_id)
@@ -214,7 +217,7 @@ def test_sends_discard_fig_message():
     x = 0
     y = 0
 
-    with client.websocket_connect(f"/websocket/chat/{user_id}") as ws1, \
+    with client.websocket_connect(f"/websocket/chat/{user_id}/Braian") as ws1, \
                client.websocket_connect(f"/ws/{user_id}") as ws2:
         
         manager.bind_room(room_id, user_id)
@@ -252,7 +255,7 @@ def test_sends_block_fig_message():
     x = 0
     y = 0
 
-    with client.websocket_connect(f"/websocket/chat/{user_id}") as ws1, \
+    with client.websocket_connect(f"/websocket/chat/{user_id}/Braian") as ws1, \
                client.websocket_connect(f"/ws/{user_id}") as ws2:
         
         manager.bind_room(room_id, user_id)
